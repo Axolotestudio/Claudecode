@@ -1,0 +1,17 @@
+.d-app { box-sizing: border-box; max-width: 1100px; margin: 0 auto; padding: var(--space-6); font-family: var(--font-family); color: var(--color-neutral-700); }
+.d-app *, .d-app *::before, .d-app *::after { box-sizing: border-box; }
+.d-app :is(h1, h2, p, li, td, th) { font-family: var(--font-family); }
+.d-app h1 { margin: 0 0 var(--space-2); font-size: var(--font-size-2xl); font-weight: var(--font-weight-semibold); line-height: 1.25; color: var(--color-neutral-800); }
+.d-meta { margin: 0 0 var(--space-6); font-size: var(--font-size-sm); color: var(--color-neutral-600); }
+.d-card { margin-bottom: var(--space-4); padding: var(--space-5) var(--space-6); background: var(--color-surface); border-radius: var(--radius-lg); box-shadow: var(--shadow-sm); }
+.d-card h2 { margin: 0 0 var(--space-3); font-size: var(--font-size-lg); font-weight: var(--font-weight-semibold); line-height: 1.3; color: var(--color-neutral-800); }
+.d-lista { margin: 0; padding-left: var(--space-5); font-size: var(--font-size-sm); line-height: 1.5; }
+.d-lista li + li { margin-top: var(--space-2); }
+.d-tabla { overflow-x: auto; }
+.d-tabla table { width: 100%; border-collapse: collapse; font-size: var(--font-size-sm); line-height: 1.4; }
+.d-tabla th, .d-tabla td { padding: 10px; text-align: left; vertical-align: top; border-bottom: 1px solid var(--color-neutral-100); }
+.d-tabla thead th { background: var(--color-surface-alt); font-weight: var(--font-weight-semibold); }
+.d-tabla tbody th { font-weight: var(--font-weight-semibold); }
+.d-nota { margin: var(--space-3) 0 0; font-size: var(--font-size-sm); color: var(--color-neutral-600); }
+.d-sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+@media (max-width: 640px) { .d-app { padding: var(--space-3); } .d-card { padding: var(--space-4); } }

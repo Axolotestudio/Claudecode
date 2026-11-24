@@ -1,0 +1,77 @@
+<div class="d-app">
+  <h1>Propuesta de integración EDT + SIH</h1>
+  <p class="d-meta">Usuario: Director(a) de Nivel Central · Tarea: revisar productividad de OOAD, unidades, servicios y personal frente a la capacidad instalada</p>
+
+  <section class="d-card" aria-labelledby="h-dec">
+    <h2 id="h-dec">Decisiones de integración</h2>
+    <ol class="d-lista">
+      <li><strong>La jerarquía del EDT es la columna vertebral.</strong> Nacional → OOAD / UMAE → Unidad → Servicio → Médico. El Director baja de lo general a lo particular sin volver a filtrar.</li>
+      <li><strong>Cada nivel tiene tres temas:</strong> Productividad (EDT), Infraestructura (SIH) y Plantilla (SIH). Se cambian con pestañas secundarias debajo del título; la semana, la ruta y los filtros se conservan.</li>
+      <li><strong>El expediente del médico queda igual que en el EDT</strong> (Productividad, Datos laborales, Ausentismo y horas extras, Trayectoria).</li>
+      <li><strong>Plantilla completa, productividad solo de médicos.</strong> Se muestran las 9 categorías del SIH; la meta y el cumplimiento solo aplican a médicos familiares, especialistas y otros médicos. Al resto se le marca «Sin productividad medida»; no se inventan metas.</li>
+      <li><strong>Indicadores cruzados nuevos</strong> (propuesta): consultas por consultorio al día, cirugías por quirófano al día y atenciones de hospitalización por cama en la semana; además, atenciones por médico en la semana.</li>
+    </ol>
+  </section>
+
+  <section class="d-card" aria-labelledby="h-mapa">
+    <h2 id="h-mapa">Mapa de navegación</h2>
+    <div class="d-tabla"><table>
+      <caption class="d-sr">Contenido por nivel y tema</caption>
+      <thead><tr><th scope="col">Nivel</th><th scope="col">Productividad</th><th scope="col">Infraestructura</th><th scope="col">Plantilla</th></tr></thead>
+      <tbody>
+        <tr><th scope="row">Nacional (Todo el país, OOAD, UMAE)</th><td>Acumulado y lista de OOAD/UMAE por cumplimiento</td><td>Camas, quirófanos, consultorios y uso por OOAD/UMAE</td><td>Plantilla por categoría y por OOAD/UMAE</td></tr>
+        <tr><th scope="row">OOAD</th><td>Unidades médicas por cumplimiento</td><td>Capacidad y uso por unidad</td><td>Plantilla por unidad</td></tr>
+        <tr><th scope="row">Unidad / UMAE</th><td>Servicios o médicos por cumplimiento</td><td>Capacidad y uso por servicio</td><td>Plantilla por servicio</td></tr>
+        <tr><th scope="row">Servicio</th><td>Médicos por cumplimiento</td><td>Capacidad y uso del servicio</td><td>Personas del servicio (9 categorías); los médicos abren su expediente</td></tr>
+        <tr><th scope="row">Médico</th><td colspan="3">Expediente digital del trabajador (sin cambios)</td></tr>
+      </tbody>
+    </table></div>
+    <p class="d-nota">La sección global «Personal» del EDT (búsqueda de médicos por estado) se conserva.</p>
+  </section>
+
+  <section class="d-card" aria-labelledby="h-origen">
+    <h2 id="h-origen">Qué viene de cada sistema</h2>
+    <div class="d-tabla"><table>
+      <caption class="d-sr">Origen de cada elemento</caption>
+      <thead><tr><th scope="col">Elemento</th><th scope="col">Origen</th><th scope="col">Tratamiento</th></tr></thead>
+      <tbody>
+        <tr><td>Jerarquía, ruta de navegación, selector de semana, URL con filtros</td><td>EDT</td><td>Se conserva</td></tr>
+        <tr><td>Productividad acumulada, listas con cumplimiento, panel lateral de detalle</td><td>EDT</td><td>Se conserva en el tema Productividad</td></tr>
+        <tr><td>Expediente del médico</td><td>EDT</td><td>Se conserva</td></tr>
+        <tr><td>Tarjetas de camas censables, quirófanos y consultorios</td><td>SIH (Resumen)</td><td>Pasan al tema Infraestructura de cada nivel, con su indicador de uso</td></tr>
+        <tr><td>Infraestructura registrada</td><td>SIH</td><td>Se convierte en tabla por OOAD, unidad o servicio, ordenable</td></tr>
+        <tr><td>Personal por categorías (gráfica) y Personal y responsabilidades (tabla)</td><td>SIH</td><td>Pasan al tema Plantilla; la tabla de personas aparece a nivel servicio</td></tr>
+        <tr><td>Filtros OOAD / Unidad con botón Buscar</td><td>SIH</td><td>Se sustituyen por la jerarquía: entrar a la OOAD o unidad equivale a filtrar</td></tr>
+        <tr><td>Menú lateral (Resumen, Infraestructura, Personal)</td><td>SIH</td><td>Se retira: lo cubren las pestañas de sección y los temas por nivel</td></tr>
+        <tr><td>Equipos, registro, asignación y edición de equipos; gráficas de equipos</td><td>SIH</td><td><strong>Se elimina</strong></td></tr>
+        <tr><td>Carga inicial (perfil técnico)</td><td>SIH</td><td>Fuera de alcance: no es tarea del Director</td></tr>
+      </tbody>
+    </table></div>
+  </section>
+
+  <section class="d-card" aria-labelledby="h-ind">
+    <h2 id="h-ind">Indicadores cruzados propuestos</h2>
+    <div class="d-tabla"><table>
+      <caption class="d-sr">Fórmulas de los indicadores cruzados</caption>
+      <thead><tr><th scope="col">Indicador</th><th scope="col">Fórmula</th><th scope="col">Pregunta que responde</th></tr></thead>
+      <tbody>
+        <tr><td>Consultas por consultorio al día</td><td>Consultas reales de la semana ÷ consultorios ÷ 5 días</td><td>¿Se usan los consultorios?</td></tr>
+        <tr><td>Cirugías por quirófano al día</td><td>Cirugías reales de la semana ÷ quirófanos ÷ 5 días</td><td>¿Se usan los quirófanos?</td></tr>
+        <tr><td>Hospitalización por cama</td><td>Atenciones de hospitalización de la semana ÷ camas censables</td><td>¿Cuánta actividad hospitalaria hay por cama?</td></tr>
+        <tr><td>Atenciones por médico</td><td>Consultas + cirugías + urgencias + hospitalización de la semana ÷ médicos con productividad medida</td><td>¿Cuánto produce en promedio cada médico?</td></tr>
+      </tbody>
+    </table></div>
+    <p class="d-nota">Se muestran sin semáforo: no hay umbrales validados. Por omisión las tablas se ordenan de menor a mayor uso para que lo subutilizado aparezca primero.</p>
+  </section>
+
+  <section class="d-card" aria-labelledby="h-pend">
+    <h2 id="h-pend">Decisiones pendientes</h2>
+    <ol class="d-lista">
+      <li>Validar fórmulas, días hábiles (5) y umbrales de los indicadores cruzados con el área de planeación.</li>
+      <li>Nombre del sistema integrado: se usó «Sistema de Información Hospitalaria»; el EDT queda como el expediente del médico.</li>
+      <li>Fuente y periodicidad de la plantilla: el SIH tiene fecha de corte y el EDT es semanal. Se propone mostrar la plantilla vigente al cierre de la semana seleccionada.</li>
+      <li>Si los residentes deben medirse con productividad o seguir fuera de la meta.</li>
+      <li>Si el perfil de captura del SIH (Carga inicial) se conserva en otro sistema o se retira.</li>
+    </ol>
+  </section>
+</div>
