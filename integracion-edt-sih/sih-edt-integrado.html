@@ -959,6 +959,44 @@ a.s-celda-nombre:hover .s-celda-nombre__t { color: var(--color-primary-800); }
 .s-trayectoria__lista dd { overflow-wrap: break-word; }
 @media (max-width: 400px) { .s-trayectoria__lista dl { grid-template-columns: minmax(0, 1fr); } }
 
+/* ===== Menú lateral de secciones (Todo el país, OOAD, UMAE, Personal) ===== */
+.s-app { display: flex; align-items: flex-start; gap: var(--space-6); }
+.s-contenido { flex: 1; min-width: 0; }
+.s-nav { position: sticky; top: var(--space-4); flex: 0 0 232px; width: 232px; padding: var(--space-3); background: var(--color-surface); border-radius: var(--radius-lg); box-shadow: var(--shadow-sm); transition: width .2s ease; }
+.s-nav__colapsar { display: inline-grid; place-content: center; width: 40px; height: 40px; margin: 0 0 var(--space-2) auto; padding: 0; border: 0; border-radius: var(--radius-sm); background: transparent; color: var(--color-neutral-600); cursor: pointer; }
+.s-nav__colapsar svg { width: 24px; height: 24px; }
+.s-nav__colapsar:hover { background: var(--color-neutral-50); color: var(--color-neutral-800); }
+.s-nav__colapsar:focus-visible { outline: 2px solid var(--color-primary-700); outline-offset: 2px; }
+.s-nav__lista { display: flex; flex-direction: column; gap: var(--space-1); margin: 0; padding: 0; list-style: none; }
+.s-nav__item { display: flex; align-items: center; gap: var(--space-2); min-height: 40px; padding: 8px; border-radius: var(--radius-sm); font-size: var(--font-size-sm); line-height: 18px; color: var(--color-neutral-700); text-decoration: none; }
+.s-nav__item svg { width: 24px; height: 24px; flex: none; }
+.s-nav__item:hover { background: var(--color-neutral-50); color: var(--color-neutral-800); }
+.s-nav__item:focus-visible { outline: 2px solid var(--color-primary-700); outline-offset: -2px; }
+.s-nav__item[aria-current="page"] { background: var(--color-primary-50); color: var(--color-primary-700); font-weight: var(--font-weight-semibold); }
+.s-nav-abrir, .s-nav-fondo { display: none; }
+
+/* Colapsado: solo íconos; la etiqueta se queda para lectores de pantalla */
+.s-app--colapsado .s-nav { flex-basis: 72px; width: 72px; }
+.s-app--colapsado .s-nav__colapsar { margin-left: 0; }
+.s-app--colapsado .s-nav__item { justify-content: center; padding: 8px 0; }
+.s-app--colapsado .s-nav__etq { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+/* Pantallas chicas: cajón que se abre desde un botón */
+@media (max-width: 1099px) {
+  .s-app { display: block; }
+  .s-nav { position: fixed; top: calc(var(--sdn-header-gob-height, 80px) + var(--sdn-user-bar-height, 54px)); bottom: 0; left: 0; z-index: 200; width: 264px; flex: none; max-width: 85vw; border-radius: 0 var(--radius-lg) var(--radius-lg) 0; overflow-y: auto; transform: translateX(-100%); transition: transform .2s ease; }
+  .s-app--nav-abierto .s-nav { transform: none; }
+  .s-nav__colapsar { display: none; }
+  .s-app--colapsado .s-nav { width: 264px; }
+  .s-app--colapsado .s-nav__etq { position: static; width: auto; height: auto; overflow: visible; clip: auto; }
+  .s-app--colapsado .s-nav__item { justify-content: flex-start; padding: 8px; }
+  .s-nav-abrir { display: inline-flex; align-items: center; gap: var(--space-2); min-height: 40px; margin-bottom: var(--space-3); padding: 8px 12px; border: 0; border-radius: var(--radius-sm); background: var(--color-surface); box-shadow: var(--shadow-sm); color: var(--color-primary-700); font-family: var(--font-family); font-size: var(--font-size-sm); font-weight: var(--font-weight-semibold); cursor: pointer; }
+  .s-nav-abrir svg { width: 24px; height: 24px; }
+  .s-nav-abrir:focus-visible { outline: 2px solid var(--color-primary-700); outline-offset: 2px; }
+  .s-app--nav-abierto .s-nav-fondo { position: fixed; inset: 0; z-index: 199; display: block; }
+  .s-nav-fondo::before { content: ""; position: absolute; inset: 0; background: var(--color-neutral-900); opacity: .4; }
+}
+
   </style>
 </head>
 <body>
@@ -1213,12 +1251,15 @@ a.s-celda-nombre:hover .s-celda-nombre__t { color: var(--color-primary-800); }
     cama: svg('<path d="M3 18V6M3 14h18v4M21 14v-2a3 3 0 0 0-3-3h-7v5"/><circle cx="7" cy="11" r="2"/>'),
     quirofano: svg('<path d="M4 21V7l8-4 8 4v14"/><path d="M9 21v-5h6v5M12 8v5M9.5 10.5h5"/>'),
     consultorio: svg('<rect x="3" y="4" width="18" height="16" rx="2"/><path d="M12 8v6M9 11h6"/>'),
+    mapa: svg('<rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/>'),
+    edificio: svg('<rect x="4" y="3" width="16" height="18" rx="1"/><path d="M8 7h2M14 7h2M8 11h2M14 11h2M8 15h2M14 15h2M10 21v-3h4v3"/>'),
+    hamburguesa: svg('<path d="M4 7h16M4 12h16M4 17h16"/>'),
     persona: svg('<circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8"/>'),
     doc: svg('<path d="M7 3h7l5 5v13H7z"/><path d="M14 3v5h5M10 13h6M10 17h6"/>')
   };
 
   /* ---------- Estado de la interfaz ---------- */
-  const ui = { semana: SEMANA_ACTUAL, vistas: {}, conteo: 0, drawer: null, retorno: null, enfocar: false };
+  const ui = { semana: SEMANA_ACTUAL, vistas: {}, conteo: 0, drawer: null, retorno: null, enfocar: false, navColapsado: false, navAbierto: false };
   const ctx = { items: [], agg: null };
   function vista(id, def) {
     ui.vistas[id] = ui.vistas[id] || Object.assign({ pagina: 1, q: '', estado: '', tipo: '', tipoU: '', area: '', tab: 'prod', ver: 'areas', cat: '', orden: { k: 'brecha', dir: -1 }, ordenI: { k: 'cpc', dir: 1 }, ordenP: { k: 'apm', dir: 1 }, ordenPer: { k: 'cat', dir: 1 }, abiertos: {} }, def);
@@ -1759,6 +1800,14 @@ a.s-celda-nombre:hover .s-celda-nombre__t { color: var(--color-primary-800); }
   }
 
   /* Secciones como pestañas, a la izquierda y debajo del título */
+  /* Menú lateral de secciones: destinos fijos. Los temas (Productividad, Infraestructura, Plantilla) quedan en la página. */
+  function navLateral(sec) {
+    const items = [['todo', 'Todo el país', '#/', I.mapa], ['ooad', 'OOAD', '#/c/ooad', I.edificio], ['umae', 'UMAE', '#/c/umae', I.hospital], ['personal', 'Personal', '#/p', I.personas]];
+    return `<nav class="s-nav" id="nav-lateral" aria-label="Secciones">
+      <button class="s-nav__colapsar" type="button" data-nav="colapsar" aria-expanded="${!ui.navColapsado}" aria-controls="nav-lateral" aria-label="${ui.navColapsado ? 'Expandir menú de secciones' : 'Contraer menú de secciones'}">${ui.navColapsado ? I.der : I.izq}</button>
+      <ul class="s-nav__lista">${items.map(([k, t, h, ic]) => `<li><a class="s-nav__item" href="${h}"${k === sec ? ' aria-current="page"' : ''}>${ic}<span class="s-nav__etq">${t}</span></a></li>`).join('')}</ul>
+    </nav>`;
+  }
   function pestanasSeccion(sec) {
     const items = [['todo', 'Todo el país', '#/'], ['ooad', 'OOAD', '#/c/ooad'], ['umae', 'UMAE', '#/c/umae'], ['personal', 'Personal', '#/p']];
     return `<nav class="s-tabs" aria-label="Secciones">${items.map(([k, t, h]) => `<a class="s-tab" href="${h}"${k === sec ? ' aria-current="page"' : ''}>${t}</a>`).join('')}</nav>`;
@@ -1899,7 +1948,7 @@ a.s-celda-nombre:hover .s-celda-nombre__t { color: var(--color-primary-800); }
     opts = opts || {};
     ui.pendiente = opts.inicial || opts.url ? parametrosDeURL() : null;
     const hash = location.hash.split('?')[0], id = rutaActual();
-    if (ultimaRuta !== hash) ui.drawer = null;
+    if (ultimaRuta !== hash) { ui.drawer = null; ui.navAbierto = false; }
     ctx.items = []; ctx.agg = null; ctx.tema = null; ctx.temaNodos = []; ctx.temaHijos = false;
     const n = id ? obtener(id) : NACIONAL;
     if (id && !n) { location.hash = '#/'; return; }
@@ -1917,10 +1966,12 @@ a.s-celda-nombre:hover .s-celda-nombre__t { color: var(--color-primary-800); }
       else html = vOoad(n);
       nombre = n.tipo === 'medico' || n.tipo === 'persona' ? cap(n.nombre) : n.nombre;
     }
-    html = html.replace('<!--tabs-->', pestanasSeccion(sec));
+    html = html.split('<!--tabs-->').join('');
     const dr = drawer();
     $app.classList.toggle('s-app--drawer', !!dr);
-    $app.innerHTML = html + dr;
+    $app.classList.toggle('s-app--colapsado', !!ui.navColapsado);
+    $app.classList.toggle('s-app--nav-abierto', !!ui.navAbierto);
+    $app.innerHTML = navLateral(sec) + '<div class="s-nav-fondo" data-nav-fondo></div><div class="s-contenido"><button class="s-nav-abrir" type="button" data-nav="abrir" aria-controls="nav-lateral" aria-expanded="' + !!ui.navAbierto + '">' + I.hamburguesa + '<span>Secciones</span></button>' + html + '</div>' + dr;
     ui.pendiente = null; sincronizarURL();
     document.title = `${nombre} · SIH`;
     const cambioRuta = ultimaRuta !== hash; ultimaRuta = hash;
@@ -1939,7 +1990,9 @@ a.s-celda-nombre:hover .s-celda-nombre__t { color: var(--color-primary-800); }
     anunciar(`Semana ${ui.semana}, ${rangoSemana(ui.semana).voz}`);
   }
   $app.addEventListener('click', ev => {
+    if (ev.target.closest('[data-nav-fondo]')) { ui.navAbierto = false; return render(); }
     const b = ev.target.closest('button'); if (!b) return;
+    if (b.dataset.nav) { if (b.dataset.nav === 'colapsar') ui.navColapsado = !ui.navColapsado; else ui.navAbierto = b.dataset.nav === 'abrir'; return render(); }
     if (b.dataset.drawer) {
       const mismo = ui.drawer && ui.drawer.k === b.dataset.drawer && ui.drawer.id === b.dataset.id;
       if (mismo) return cerrarDrawer();
@@ -1973,7 +2026,7 @@ a.s-celda-nombre:hover .s-celda-nombre__t { color: var(--color-primary-800); }
     const ret = ui.retorno; ui.drawer = null; render();
     const el = ret && document.getElementById(ret); if (el) el.focus();
   }
-  document.addEventListener('keydown', ev => { if (ev.key === 'Escape' && ui.drawer) { ev.preventDefault(); cerrarDrawer(); } });
+  document.addEventListener('keydown', ev => { if (ev.key === 'Escape' && ui.drawer) { ev.preventDefault(); cerrarDrawer(); } else if (ev.key === 'Escape' && ui.navAbierto) { ev.preventDefault(); ui.navAbierto = false; render(); } });
   $app.addEventListener('keydown', ev => {
     const t = ev.target; if (!t.matches('button.s-tab, button.s-subtab') || !['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(ev.key)) return;
     const todos = [...t.parentElement.querySelectorAll('.s-tab, .s-subtab')], i = todos.indexOf(t);
