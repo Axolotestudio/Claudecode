@@ -696,3 +696,6 @@ a.s-celda-nombre:hover .s-celda-nombre__t { color: var(--color-primary-800); }
 .s-trayectoria__lista dt { white-space: nowrap; }
 @media (max-width: 1100px) { .s-ficha2__campos--6 { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); } }
 @media (max-width: 640px) { .s-trayectoria__lista dl { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); } .s-trayectoria__lista dt { white-space: normal; } }
+.s-ficha2 { margin-top: var(--space-6); }
+.s-trayectoria__lista dd { overflow-wrap: break-word; }
+@media (max-width: 400px) { .s-trayectoria__lista dl { grid-template-columns: minmax(0, 1fr); } }

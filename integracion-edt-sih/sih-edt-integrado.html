@@ -955,6 +955,9 @@ a.s-celda-nombre:hover .s-celda-nombre__t { color: var(--color-primary-800); }
 .s-trayectoria__lista dt { white-space: nowrap; }
 @media (max-width: 1100px) { .s-ficha2__campos--6 { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); } }
 @media (max-width: 640px) { .s-trayectoria__lista dl { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); } .s-trayectoria__lista dt { white-space: normal; } }
+.s-ficha2 { margin-top: var(--space-6); }
+.s-trayectoria__lista dd { overflow-wrap: break-word; }
+@media (max-width: 400px) { .s-trayectoria__lista dl { grid-template-columns: minmax(0, 1fr); } }
 
   </style>
 </head>
@@ -1490,7 +1493,7 @@ a.s-celda-nombre:hover .s-celda-nombre__t { color: var(--color-primary-800); }
       <thead><tr><th scope="col">Atención</th><th scope="col" class="s-der">Real</th><th scope="col" class="s-der">Planeado</th><th scope="col" class="s-der">Cumplimiento</th></tr></thead>
       <tbody>${fila('Consultas', m.cr, m.cp)}${fila('Cirugías', m.qr, m.qp)}${fila('Urgencias', m.ur, null)}${fila('Hospitalización', m.hr, null)}</tbody></table></div>`;
     let extra;
-    const datosMed = it && it.n.tipo === 'medico' ? (() => { const e = expediente(it.n); return `<p class="s-drawer__dato">${esc(estatusMedico(it.n))} · ${esc(e.turno)} · ${esc(e.categoria)}</p>`; })() : '';
+    const datosMed = it && it.n.tipo === 'medico' ? (() => { const e = expediente(it.n); return `<p class="s-drawer__dato">${esc(estatusMedico(it.n))} · ${esc(e.turno)} · Categoría contractual: ${esc(e.categoria)}</p>`; })() : '';
     if (it) extra = `<a class="s-btn s-btn--outlined" href="#/e/${it.id}">${I.doc}Abrir ${it.n.tipo === 'medico' ? 'expediente' : 'detalle'}</a>`;
     else {
       const top = ctx.items.filter(x => x.plan > 0 && x.brecha > 0).sort((a, b) => b.brecha - a.brecha).slice(0, TOP);
@@ -1845,7 +1848,7 @@ a.s-celda-nombre:hover .s-celda-nombre__t { color: var(--color-primary-800); }
   const campo = (t, val) => `<div class="s-ficha2__campo"><dt>${t}</dt><dd>${esc(val)}</dd></div>`;
   function vMedico(m) {
     const conMeta = m.tipo === 'medico', e = expediente(m), w = ui.semana, idv = m.id;
-    vista(idv, {});
+    vista(idv, {}).tab = 'prod';
     const u = e.unidad, a = e.area, deleg = e.ooad ? e.ooad.nombre : u.nombre;
     const cvUnidad = `${clave(u.id, 2)}EA${clave(u.id + 'u', 6)}`, cvAdsc = `${cvUnidad.slice(0, 4)}${clave(a.id, 3)}E00`, cvPers = `${cvUnidad.slice(0, 4)}${clave(m.id, 2)}`;
     const st = estatusMedico(m), est = `<span class="s-tag s-tag--${st === 'Activo' ? 'activo' : 'medio'}"><i aria-hidden="true"></i>${st}</span>`;
@@ -1885,7 +1888,7 @@ a.s-celda-nombre:hover .s-celda-nombre__t { color: var(--color-primary-800); }
       <section class="s-card s-trayectoria" aria-labelledby="t-tray"><h2 id="t-tray" class="s-seccion__h">Movimientos - Trayectoria</h2>
         <ol class="s-trayectoria__lista">${e.movimientos.slice().reverse().map(x => `<li><dl>${campo('Fecha movimiento', x.fecha)}${campo('Tipo de movimiento', x.tipo)}${campo('Tipo de contratación', x.contrato)}<div class="s-ficha2__campo s-trayectoria__adsc"><dt>Adscripción</dt><dd>${esc(x.adsc)}</dd></div></dl></li>`).join('')}</ol></section>
     </div>`;
-    return encabezado(m, est) + ficha + prod + tarjetas;
+    return encabezado(m, '') + prod + ficha + tarjetas;
   }
 
   /* ---------- Render y eventos ---------- */
