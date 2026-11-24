@@ -1425,6 +1425,7 @@ a.s-celda-nombre:hover .s-celda-nombre__t { color: var(--color-primary-800); }
       <thead><tr><th scope="col">Atención</th><th scope="col" class="s-der">Real</th><th scope="col" class="s-der">Planeado</th><th scope="col" class="s-der">Cumplimiento</th></tr></thead>
       <tbody>${fila('Consultas', m.cr, m.cp)}${fila('Cirugías', m.qr, m.qp)}${fila('Urgencias', m.ur, null)}${fila('Hospitalización', m.hr, null)}</tbody></table></div>`;
     let extra;
+    const datosMed = it && it.n.tipo === 'medico' ? (() => { const e = expediente(it.n); return `<p class="s-drawer__dato">${esc(estatusMedico(it.n))} · ${esc(e.turno)} · ${esc(e.categoria)}</p>`; })() : '';
     if (it) extra = `<a class="s-btn s-btn--outlined" href="#/e/${it.id}">${I.doc}Abrir ${it.n.tipo === 'medico' ? 'expediente' : 'detalle'}</a>`;
     else {
       const top = ctx.items.filter(x => x.plan > 0 && x.brecha > 0).sort((a, b) => b.brecha - a.brecha).slice(0, TOP);
@@ -1435,7 +1436,7 @@ a.s-celda-nombre:hover .s-celda-nombre__t { color: var(--color-primary-800); }
     return `<aside class="s-drawer" role="dialog" aria-modal="false" aria-labelledby="drawer-titulo">
       <header class="s-drawer__cab"><div><h2 id="drawer-titulo" tabindex="-1">${esc(titulo)}</h2><p>${esc(sub)}</p></div>
         <button class="s-btn-icono" type="button" id="drawer-cerrar" data-cerrar aria-label="Cerrar detalle"><span class="s-icono-caja">${I.cerrar}</span></button></header>
-      <div class="s-drawer__cuerpo">${tabla}
+      <div class="s-drawer__cuerpo">${datosMed}${tabla}
         <section class="s-drawer__bloque"><h3>Real frente a planeado, últimas 8 semanas</h3>${tendencia(set)}</section>${extra}</div></aside>`;
   }
 
@@ -1818,9 +1819,9 @@ a.s-celda-nombre:hover .s-celda-nombre__t { color: var(--color-primary-800); }
     const hash = location.hash.split('?')[0], id = rutaActual();
     if (ultimaRuta !== hash) ui.drawer = null;
     ctx.items = []; ctx.agg = null; ctx.tema = null; ctx.temaNodos = []; ctx.temaHijos = false;
-    ctx.alcance = hash === '#/p' ? 'Personal' : !id ? ({ todo: 'Nivel Nacional', ooad: 'OOAD', umae: 'UMAE' }[RUTAS_SECCION[hash] || 'todo']) : obtener(id).nombre;
     const n = id ? obtener(id) : NACIONAL;
     if (id && !n) { location.hash = '#/'; return; }
+    ctx.alcance = hash === '#/p' ? 'Personal' : !id ? ({ todo: 'Nivel Nacional', ooad: 'OOAD', umae: 'UMAE' }[RUTAS_SECCION[hash] || 'todo']) : n.nombre;
     if (!id && !(hash in RUTAS_SECCION) && hash !== '#/p') { location.hash = '#/'; return; }
     const act = document.activeElement, focoId = act && act.id && $app.contains(act) ? act.id : null, caret = act && act.selectionStart;
     let html, sec, nombre;
