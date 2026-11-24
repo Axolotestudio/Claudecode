@@ -1151,7 +1151,7 @@ a.s-celda-nombre:hover .s-celda-nombre__t { color: var(--color-primary-800); }
   const ui = { semana: SEMANA_ACTUAL, vistas: {}, conteo: 0, drawer: null, retorno: null, enfocar: false };
   const ctx = { items: [], agg: null };
   function vista(id, def) {
-    ui.vistas[id] = ui.vistas[id] || Object.assign({ pagina: 1, q: '', estado: '', tipo: '', tipoU: '', area: '', tab: 'prod', ver: 'areas', cat: '', orden: { k: 'brecha', dir: -1 }, ordenI: { k: 'cpc', dir: 1 }, ordenP: { k: 'apm', dir: 1 }, abiertos: {} }, def);
+    ui.vistas[id] = ui.vistas[id] || Object.assign({ pagina: 1, q: '', estado: '', tipo: '', tipoU: '', area: '', tab: 'prod', ver: 'areas', cat: '', orden: { k: 'brecha', dir: -1 }, ordenI: { k: 'cpc', dir: 1 }, ordenP: { k: 'apm', dir: 1 }, ordenPer: { k: 'cat', dir: 1 }, abiertos: {} }, def);
     ui.idvActual = id;
     if (ui.pendiente) { aplicarParams(ui.vistas[id], ui.pendiente); ui.pendiente = null; }
     return ui.vistas[id];
@@ -1300,7 +1300,7 @@ a.s-celda-nombre:hover .s-celda-nombre__t { color: var(--color-primary-800); }
     const m = it.n;
     return `<li class="s-fila s-fila--medico" data-real="${it.real}"><div class="s-fila__linea"><div class="s-fila__id">${avatar(m.persona, 's-avatar--fila')}${botonDrawer(it, `Matrícula ${it.matricula} · ${it.area}`)}</div>${metricasFila(it)}</div></li>`;
   }
-  const DIR_INICIAL = { nombre: 1, cump: 1, brecha: -1, cam: -1, qui: -1, con: -1, cpc: 1, cpq: 1, hpc: 1, tot: -1, med: -1, res: -1, enf: -1, otr: -1, apm: 1 };
+  const DIR_INICIAL = { nombre: 1, cat: 1, cump: 1, brecha: -1, cam: -1, qui: -1, con: -1, cpc: 1, cpq: 1, hpc: 1, tot: -1, med: -1, res: -1, enf: -1, otr: -1, apm: 1 };
   function botonOrden(idv, v, k, texto) {
     const act = v.orden.k === k, dir = act ? (v.orden.dir > 0 ? 'asc' : 'desc') : 'none';
     const aria = act ? (v.orden.dir > 0 ? 'ascending' : 'descending') : 'none';
@@ -1596,18 +1596,26 @@ a.s-celda-nombre:hover .s-celda-nombre__t { color: var(--color-primary-800); }
     return (n._pers = lista);
   }
   function listaPersonal(idv, v, personas, titulo = 'Personal del servicio') {
-    const filas = personas.map(p => { const it = p.med ? item(p.med, ui.semana) : null; return Object.assign({}, p, { cump: it ? it.cump : null, orden: CATEGORIAS.findIndex(([k]) => k === p.cat) }); })
-      .sort((a, b) => a.orden - b.orden || (a.cump ?? 999) - (b.cump ?? 999) || a.nombre.localeCompare(b.nombre, 'es'));
+    const o = v.ordenPer;
+    const filas = personas.map(p => { const it = p.med ? item(p.med, ui.semana) : null; return Object.assign({}, p, { it, cump: it ? it.cump : null, brecha: it && it.plan > 0 ? it.brecha : null, orden: CATEGORIAS.findIndex(([k]) => k === p.cat) }); })
+      .sort((a, b) => {
+        if (o.k !== 'cat') { /* sin productividad medida, siempre al final */
+          const x = a[o.k], y = b[o.k];
+          if (x == null || y == null) { if (x != null) return -1; if (y != null) return 1; }
+          else if (x !== y) return (x < y ? -1 : 1) * o.dir;
+        }
+        return (o.k === 'cat' ? o.dir : 1) * (a.orden - b.orden) || (a.cump ?? 999) - (b.cump ?? 999) || a.nombre.localeCompare(b.nombre, 'es');
+      });
     const pag = paginar(v, filas);
     ui.conteo = filas.length;
     if (!ctx.agg) { ctx.items = personas.filter(p => p.med).map(p => item(p.med, ui.semana)); ctx.agg = { personas: true }; }
     const cuerpo = pag.length ? pag.map(p => `<tr><td>${p.med ? botonDrawer(ctx.items.find(x => x.id === p.med.id), `Matrícula ${p.matricula}`) : `<span class="s-celda-nombre"><span class="s-celda-nombre__t">${esc(p.nombre)}</span><span class="s-celda-nombre__s s-num">Matrícula ${p.matricula}</span></span>`}</td>
-      <td>${NOMBRE_CAT[p.cat]}</td><td>${p.estatus}</td><td>${p.turno}</td><td>${esc(p.adsc)}</td><td>${p.med ? cumpFila(p.cump) : '<span class="s-sinmeta">Sin productividad medida</span>'}</td></tr>`).join('')
-      : '<tr><td colspan="6" class="s-vacio">Sin resultados con los filtros actuales.</td></tr>';
+      <td>${NOMBRE_CAT[p.cat]}</td><td>${p.estatus}</td><td>${p.turno}</td><td>${esc(p.adsc)}</td><td>${p.med ? cumpFila(p.cump) : '<span class="s-sinmeta">Sin productividad medida</span>'}</td><td class="s-der s-num">${p.it ? `<span class="${p.it.brecha > 0 && p.it.plan > 0 ? 's-brecha' : ''}">${brechaTxt(p.it)}</span>` : '—'}</td></tr>`).join('')
+      : '<tr><td colspan="7" class="s-vacio">Sin resultados con los filtros actuales.</td></tr>';
     return `<section class="s-seccion" aria-labelledby="t-${idv}">
       <div class="s-lista__barra"><h2 id="t-${idv}" class="s-seccion__h" tabindex="-1">${esc(titulo)} <span class="s-pill s-num">${fmt(filas.length)}</span></h2></div>
-      <div class="s-card s-tabla-card"><div class="s-tabla-scroll" role="region" aria-labelledby="t-${idv}" tabindex="0"><table class="s-tabla"><caption class="s-sr">${esc(titulo)} con su cumplimiento en la semana ${ui.semana}</caption>
-        <thead><tr><th scope="col">Personal / matrícula</th><th scope="col">Categoría</th><th scope="col">Estatus</th><th scope="col">Turno</th><th scope="col">Adscripción</th><th scope="col">Cumplimiento semana ${ui.semana}</th></tr></thead>
+      <div class="s-card s-tabla-card"><div class="s-tabla-scroll" role="region" aria-labelledby="t-${idv}" tabindex="0"><table class="s-tabla s-tabla--ord"><caption class="s-sr">${esc(titulo)} con su cumplimiento en la semana ${ui.semana}</caption>
+        <thead><tr><th scope="col">Personal / matrícula</th>${thOrden(idv, v, 'ordenPer', 'cat', 'Categoría')}<th scope="col">Estatus</th><th scope="col">Turno</th><th scope="col">Adscripción</th>${thOrden(idv, v, 'ordenPer', 'cump', 'Cumplimiento semana ' + ui.semana)}${thOrden(idv, v, 'ordenPer', 'brecha', 'Faltan', 1)}</tr></thead>
         <tbody>${cuerpo}</tbody></table></div></div>${paginacion(idv, v, filas.length)}</section>`;
   }
 
@@ -1652,8 +1660,9 @@ a.s-celda-nombre:hover .s-celda-nombre__t { color: var(--color-primary-800); }
     const todas = RAICES.filter(h => h.estado === v.estado).flatMap(areasDe).flatMap(personalArea);
     const personas = todas.filter(p => (!v.cat || p.cat === v.cat) && (!q || norm(`${p.nombre} ${p.matricula}`).includes(q)));
     const medicos = personas.filter(p => p.med).map(p => item(p.med, ui.semana));
-    const pl = completar(Object.fromEntries(CATEGORIAS.map(([k]) => [k, todas.filter(p => p.cat === k).length])));
-    const grafica = `<section class="s-card s-seccion s-cats-card" aria-labelledby="t-cat-P"><h2 id="t-cat-P" class="s-seccion__h">Personal por categoría <span class="s-pill s-num">${fmt(pl.total)}</span></h2>${graficaCategorias(pl)}</section>`;
+    const base = todas.filter(p => !q || norm(`${p.nombre} ${p.matricula}`).includes(q));
+    const pl = completar(Object.fromEntries(CATEGORIAS.map(([k]) => [k, base.filter(p => p.cat === k).length])));
+    const grafica = `<section class="s-card s-seccion s-cats-card" aria-labelledby="t-cat-P"><h2 id="t-cat-P" class="s-seccion__h">Personal por categoría</h2>${graficaCategorias(pl)}</section>`;
     return cab + (medicos.length ? indicadores(medicos, 'médicos') : '') + grafica + listaPersonal(idv, v, personas, 'Personal de ' + v.estado);
   }
 
