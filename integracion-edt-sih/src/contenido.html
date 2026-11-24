@@ -5,7 +5,7 @@
   'use strict';
 
   /* ---------- Utilidades ---------- */
-  const ANIO = 2025, SEMANA_ACTUAL = 23, POR_PAGINA = 15, TOP = 5;
+  const ANIO = 2025, SEMANA_ACTUAL = 23, POR_PAGINA = 10, TOP = 5;
   const MESES = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
   const MESES_LARGO = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
   const fmt = n => Math.round(n).toLocaleString('es-MX');
@@ -399,6 +399,7 @@
   }
   function paginacion(idv, v, total) {
     const pags = Math.max(1, Math.ceil(total / POR_PAGINA)); if (v.pagina > pags) v.pagina = pags;
+    if (pags === 1) return '';
     const p = v.pagina, ini = total ? (p - 1) * POR_PAGINA + 1 : 0, fin = Math.min(total, p * POR_PAGINA);
     const nums = []; for (let i = 1; i <= pags; i++) if (i === 1 || i === pags || Math.abs(i - p) <= 1) nums.push(i); else if (nums[nums.length - 1] !== '…') nums.push('…');
     return `<nav class="s-paginacion" aria-label="Paginación de la lista"><span class="s-paginacion__info s-num">${fmt(ini)}–${fmt(fin)} de ${fmt(total)}</span>
