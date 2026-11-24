@@ -236,7 +236,7 @@
   const ui = { semana: SEMANA_ACTUAL, vistas: {}, conteo: 0, drawer: null, retorno: null, enfocar: false, navColapsado: false, navAbierto: false };
   const ctx = { items: [], agg: null };
   function vista(id, def) {
-    ui.vistas[id] = ui.vistas[id] || Object.assign({ pagina: 1, q: '', estado: '', tipo: '', tipoU: '', area: '', tab: 'prod', ver: 'areas', cat: '', orden: { k: 'brecha', dir: -1 }, ordenI: { k: 'cpc', dir: 1 }, ordenP: { k: 'apm', dir: 1 }, ordenPer: { k: 'cat', dir: 1 }, abiertos: {} }, def);
+    ui.vistas[id] = ui.vistas[id] || Object.assign({ pagina: 1, q: '', estado: '', tipo: '', tipoU: '', area: '', tab: 'prod', ver: 'areas', cat: '', orden: { k: 'cump', dir: 1 }, ordenI: { k: 'cpc', dir: 1 }, ordenP: { k: 'apm', dir: 1 }, ordenPer: { k: 'cat', dir: 1 }, abiertos: {} }, def);
     ui.idvActual = id;
     if (ui.pendiente) { aplicarParams(ui.vistas[id], ui.pendiente); ui.pendiente = null; }
     return ui.vistas[id];
@@ -259,7 +259,7 @@
     const par = new URLSearchParams();
     const porDefecto = { tab: 'prod', ver: 'areas' };
     CLAVES_URL.forEach(k => { if (v[k] && v[k] !== porDefecto[k]) par.set(k, v[k]); });
-    if (v.orden && !(v.orden.k === 'brecha' && v.orden.dir === -1)) par.set('orden', `${v.orden.k}|${v.orden.dir}`);
+    if (v.orden && !(v.orden.k === 'cump' && v.orden.dir === 1)) par.set('orden', `${v.orden.k}|${v.orden.dir}`);
     if (ui.semana !== SEMANA_ACTUAL) par.set('semana', ui.semana);
     const base = location.hash.split('?')[0], qs = par.toString();
     const nueva = location.pathname + location.search + base + (qs ? '?' + qs : '');
@@ -759,7 +759,7 @@
     </section>`;
   }
   function vNacional() {
-    const idv = 'N', v = vista(idv, { orden: { k: 'brecha', dir: -1 } }), tipo = v.tipo, tema = temaValido(v);
+    const idv = 'N', v = vista(idv, { orden: { k: 'cump', dir: 1 } }), tipo = v.tipo, tema = temaValido(v);
     const etiq = { ooad: 'OOAD', umae: 'UMAE' }[tipo] || 'Todo el país';
     const estados = [...new Set(RAICES.filter(h => !tipo || h.tipo === tipo).map(h => h.estado))].sort((a, b) => a.localeCompare(b, 'es'));
     const q = norm(v.q.trim());
@@ -782,7 +782,7 @@
   function medicosDe(n) { return n.tipo === 'medico' ? [n] : hijos(n).flatMap(medicosDe); }
   function areasDe(n) { return n.tipo === 'area' ? [n] : hijos(n).flatMap(areasDe); }
   function vPersonal() {
-    const idv = 'P', v = vista(idv, { orden: { k: 'brecha', dir: -1 } });
+    const idv = 'P', v = vista(idv, { orden: { k: 'cump', dir: 1 } });
     ctx.alcance = v.estado || 'Personal';
     const estados = [...new Set(RAICES.map(h => h.estado))].sort((a, b) => a.localeCompare(b, 'es'));
     const q = norm(v.q.trim());
@@ -819,7 +819,7 @@
   }
 
   function vOoad(n) {
-    const idv = n.id, v = vista(idv, { orden: { k: 'brecha', dir: -1 } }), tema = temaValido(v);
+    const idv = n.id, v = vista(idv, { orden: { k: 'cump', dir: 1 } }), tema = temaValido(v);
     const q = norm(v.q.trim());
     const sel = hijos(n).filter(u => (!v.tipoU || u.tipoUnidad === v.tipoU) && (!q || norm(u.nombre).includes(q)));
     const campos = campoBuscar(idv, v, 'Buscar unidad', 'Nombre de la unidad')
@@ -836,7 +836,7 @@
     return conTema(idv, v, encabezado(n, n.titular ? `Titular: ${esc(n.titular)}` : ''), cuerpo);
   }
   function vUnidad(n) {
-    const idv = n.id, v = vista(idv, { ver: 'areas', orden: { k: 'brecha', dir: -1 } }), tema = temaValido(v);
+    const idv = n.id, v = vista(idv, { ver: 'areas', orden: { k: 'cump', dir: 1 } }), tema = temaValido(v);
     const areas = hijos(n), q = norm(v.q.trim());
     const meta = n.titular ? `Titular: ${esc(n.titular)}` : esc(n.padre ? n.padre.nombre : '');
     const cab = encabezado(n, meta);
@@ -865,7 +865,7 @@
     return conTema(idv, v, cab, barra(idv, campos, act) + indicadores(items, noun) + listado(idv, v, items, { titulo, etiqueta, medico, columna: 'Servicio' }));
   }
   function vArea(n) {
-    const idv = n.id, v = vista(idv, { orden: { k: 'brecha', dir: -1 } }), tema = temaValido(v);
+    const idv = n.id, v = vista(idv, { orden: { k: 'cump', dir: 1 } }), tema = temaValido(v);
     const q = norm(v.q.trim()), cab = encabezado(n, esc(n.padre.nombre));
     if (tema === 'infra') return conTema(idv, v, cab, panelInfra(idv, v, [n], { hijos: false }));
     if (tema === 'plant') {
