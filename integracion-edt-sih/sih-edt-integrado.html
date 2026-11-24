@@ -1472,11 +1472,6 @@ a.s-celda-nombre:hover .s-celda-nombre__t { color: var(--color-primary-800); }
   }
   /* Panel lateral de Infraestructura y Plantilla: mismo componente y CTA que el de Productividad */
   const RECURSO = { cama: ['Camas censables', 'cam', 'hpc', 'Hospitalización por cama'], quir: ['Quirófanos', 'qui', 'cpq', 'Cirugías por quirófano al día'], cons: ['Consultorios', 'con', 'cpc', 'Consultas por consultorio al día'] };
-  function tablaCapacidad(u) {
-    const f = (k) => { const [t, c, i] = RECURSO[k]; return `<tr><td>${t}</td><td class="s-der s-num">${fmt(u[c])}</td><td class="s-der s-num">${fmt1(u[i])}</td></tr>`; };
-    return `<div class="s-tabla-scroll" role="region" aria-label="Capacidad y uso" tabindex="0"><table class="s-tabla"><caption class="s-sr">Capacidad instalada y uso en la semana ${ui.semana}</caption>
-      <thead><tr><th scope="col">Recurso</th><th scope="col" class="s-der">Cantidad</th><th scope="col" class="s-der">Uso</th></tr></thead><tbody>${f('cama')}${f('quir')}${f('cons')}</tbody></table></div>`;
-  }
   function tendenciaUso(nodos) {
     const filas = []; for (let w = Math.max(1, ui.semana - 7); w <= ui.semana; w++) filas.push({ w, u: usoDe(nodos, w) });
     return `<section class="s-drawer__bloque"><h3>Uso en las últimas 8 semanas</h3><div class="s-tabla-scroll" role="region" aria-label="Uso por semana" tabindex="0"><table class="s-tabla"><caption class="s-sr">Uso de la capacidad por semana</caption>
@@ -1486,18 +1481,16 @@ a.s-celda-nombre:hover .s-celda-nombre__t { color: var(--color-primary-800); }
   function tablaRecurso(k, nodos) {
     const [t, c, i, etq] = RECURSO[k], u = usoDe(nodos, ui.semana);
     const filas = []; for (let w = Math.max(1, ui.semana - 7); w <= ui.semana; w++) filas.push({ w, v: usoDe(nodos, w)[i] });
-    return `<p class="s-drawer__dato">${t}: <strong class="s-num">${fmt(u[c])}</strong> · ${etq}: <strong class="s-num">${fmt1(u[i])}</strong></p>
-      <section class="s-drawer__bloque"><h3>${etq}, últimas 8 semanas</h3><div class="s-tabla-scroll" role="region" aria-label="${etq} por semana" tabindex="0"><table class="s-tabla"><caption class="s-sr">${etq} por semana</caption>
+    return `<section class="s-drawer__bloque"><h3>${etq}, últimas 8 semanas</h3><div class="s-tabla-scroll" role="region" aria-label="${etq} por semana" tabindex="0"><table class="s-tabla"><caption class="s-sr">${etq} por semana</caption>
       <thead><tr><th scope="col">Semana</th><th scope="col" class="s-der">${etq}</th></tr></thead>
       <tbody>${filas.reverse().map(f => `<tr><td>Semana ${f.w} · ${rangoSemana(f.w).corto}</td><td class="s-der s-num">${fmt1(f.v)}</td></tr>`).join('')}</tbody></table></div></section>`;
   }
-  function tablaPlantilla(pl, u) {
-    const apm = pl.medicos ? u.at / pl.medicos : null;
-    return `<div class="s-tabla-scroll" role="region" aria-label="Plantilla por categoría" tabindex="0"><table class="s-tabla"><caption class="s-sr">Plantilla por categoría</caption>
+  /* El panel solo muestra lo que la fila o la tarjeta no muestra: el desglose de los agregados (médicos y otras categorías) */
+  const DESGLOSE = ['ME', 'MF', 'OM', 'AD', 'LI', 'PA', 'TE'];
+  function tablaPlantilla(pl) {
+    return `<div class="s-tabla-scroll" role="region" aria-label="Desglose de la plantilla" tabindex="0"><table class="s-tabla"><caption class="s-sr">Desglose de la plantilla por categoría</caption>
       <thead><tr><th scope="col">Categoría</th><th scope="col" class="s-der">Personas</th></tr></thead>
-      <tbody>${CATEGORIAS.map(([k, t]) => `<tr><td>${t}${CAT_MEDIDAS.includes(k) ? ' <span class="s-sinmeta">· con meta</span>' : ''}</td><td class="s-der s-num">${fmt(pl[k])}</td></tr>`).join('')}
-      <tr><td><strong>Total</strong></td><td class="s-der s-num"><strong>${fmt(pl.total)}</strong></td></tr></tbody></table></div>
-      <p class="s-drawer__dato">Atenciones por médico en la semana ${ui.semana}: <strong class="s-num">${fmt1(apm)}</strong></p>`;
+      <tbody>${CATEGORIAS.filter(([k]) => DESGLOSE.includes(k)).map(([k, t]) => `<tr><td>${t}${CAT_MEDIDAS.includes(k) ? ' <span class="s-sinmeta">· con meta</span>' : ''}</td><td class="s-der s-num">${fmt(pl[k])}</td></tr>`).join('')}</tbody></table></div>`;
   }
   function bloqueProd(n) {
     const it = item(n, ui.semana);
@@ -1513,7 +1506,7 @@ a.s-celda-nombre:hover .s-celda-nombre__t { color: var(--color-primary-800); }
     if (d.k === 't-fila') {
       const n = ctx.temaNodos.find(x => x.id === d.id); if (!n) { ui.drawer = null; return ''; }
       titulo = n.nombre;
-      cuerpo = (ctx.tema === 'infra' ? tablaCapacidad(usoDe([n], ui.semana)) + tendenciaUso([n]) : tablaPlantilla(plantilla(n), usoDe([n], ui.semana)))
+      cuerpo = (ctx.tema === 'infra' ? tendenciaUso([n]) : tablaPlantilla(plantilla(n)))
         + bloqueProd(n) + `<a class="s-btn s-btn--outlined" href="#/e/${n.id}?tab=${ctx.tema}">${I.doc}Abrir detalle</a>`;
     } else if (ctx.tema === 'infra' && RECURSO[d.id]) {
       const [t, , i, etq] = RECURSO[d.id], nodos = ctx.temaNodos;
@@ -1521,7 +1514,7 @@ a.s-celda-nombre:hover .s-celda-nombre__t { color: var(--color-primary-800); }
       if (ctx.temaHijos) cuerpo += ranking(`Menor uso: ${etq.toLowerCase()}`, nodos.map(n => ({ n, v: usoDe([n], ui.semana)[i] })).filter(x => x.v != null).sort((a, b) => a.v - b.v).slice(0, TOP), fmt1);
     } else if (ctx.tema === 'plant' && d.id === 'pl') {
       const nodos = ctx.temaNodos;
-      titulo = 'Plantilla'; cuerpo = tablaPlantilla(plantillaDe(nodos), usoDe(nodos, ui.semana));
+      titulo = 'Plantilla'; cuerpo = tablaPlantilla(plantillaDe(nodos));
       if (ctx.temaHijos) cuerpo += ranking('Menos atenciones por médico', nodos.map(n => { const p = plantilla(n); return { n, v: p.medicos ? usoDe([n], ui.semana).at / p.medicos : null }; }).filter(x => x.v != null).sort((a, b) => a.v - b.v).slice(0, TOP), fmt1);
     } else { ui.drawer = null; return ''; }
     return `<aside class="s-drawer" role="dialog" aria-modal="false" aria-labelledby="drawer-titulo">
@@ -1541,7 +1534,11 @@ a.s-celda-nombre:hover .s-celda-nombre__t { color: var(--color-primary-800); }
       titulo = it.nombre; sub = 'Semana ' + ui.semana + ' · ' + rangoSemana(ui.semana).corto; m = it.m; set = [it];
     }
     const fila = (n, r, pl) => { const pct = pl ? Math.round(r / pl * 100) : null; return `<tr><td>${n}</td><td class="s-der s-num">${fmt(r)}</td><td class="s-der s-num">${pl == null ? 'Sin meta' : fmt(pl)}</td><td class="s-der">${pct == null ? 'Sin meta' : tagCump(pct)}</td></tr>`; };
-    const tabla = `<div class="s-tabla-scroll" role="region" aria-label="Real frente a planeado" tabindex="0"><table class="s-tabla"><caption class="s-sr">Real frente a planeado por tipo de atención</caption>
+    const tabla = it
+      ? `<div class="s-tabla-scroll" role="region" aria-label="Otras atenciones" tabindex="0"><table class="s-tabla"><caption class="s-sr">Atenciones sin meta de la semana</caption>
+      <thead><tr><th scope="col">Atención</th><th scope="col" class="s-der">Real</th></tr></thead>
+      <tbody><tr><td>Urgencias</td><td class="s-der s-num">${fmt(m.ur)}</td></tr><tr><td>Hospitalización</td><td class="s-der s-num">${fmt(m.hr)}</td></tr></tbody></table></div>`
+      : `<div class="s-tabla-scroll" role="region" aria-label="Real frente a planeado" tabindex="0"><table class="s-tabla"><caption class="s-sr">Real frente a planeado por tipo de atención</caption>
       <thead><tr><th scope="col">Atención</th><th scope="col" class="s-der">Real</th><th scope="col" class="s-der">Planeado</th><th scope="col" class="s-der">Cumplimiento</th></tr></thead>
       <tbody>${fila('Consultas', m.cr, m.cp)}${fila('Cirugías', m.qr, m.qp)}${fila('Urgencias', m.ur, null)}${fila('Hospitalización', m.hr, null)}</tbody></table></div>`;
     let extra;
