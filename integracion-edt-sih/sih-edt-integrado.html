@@ -997,6 +997,16 @@ a.s-celda-nombre:hover .s-celda-nombre__t { color: var(--color-primary-800); }
   .s-nav-fondo::before { content: ""; position: absolute; inset: 0; background: var(--color-neutral-900); opacity: .4; }
 }
 
+/* Menú pegado al borde izquierdo: sin margen, sin radio y a todo el alto disponible */
+.s-app { max-width: none; margin: 0; padding: 0; gap: 0; align-items: stretch; }
+.s-nav { position: sticky; top: calc(var(--sdn-header-gob-height, 80px) + var(--sdn-user-bar-height, 54px)); align-self: flex-start; height: calc(100vh - var(--sdn-header-gob-height, 80px) - var(--sdn-user-bar-height, 54px)); overflow-y: auto; padding: var(--space-3) var(--space-2); border-radius: 0; box-shadow: none; border-right: 1px solid var(--color-neutral-100); }
+.s-contenido { max-width: 1208px; padding: var(--space-4) var(--space-6) var(--space-6); }
+@media (max-width: 1099px) {
+  .s-app { display: block; }
+  .s-nav { height: auto; border-right: 0; }
+  .s-contenido { max-width: none; padding: var(--space-3); }
+}
+
   </style>
 </head>
 <body>
