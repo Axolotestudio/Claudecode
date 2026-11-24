@@ -778,3 +778,20 @@ a.s-celda-nombre:hover .s-celda-nombre__t { color: var(--color-primary-800); }
   .s-drawer { position: sticky; top: calc(var(--sdn-header-gob-height, 80px) + var(--sdn-user-bar-height, 54px)); right: auto; bottom: auto; z-index: 1; flex: 0 0 360px; width: 360px; max-width: none; height: calc(100vh - var(--sdn-header-gob-height, 80px) - var(--sdn-user-bar-height, 54px)); align-self: flex-start; border-radius: 0; border-left: 1px solid var(--color-neutral-100); box-shadow: none; }
   .s-app .s-contenido { min-width: 0; }
 }
+
+/* ===== Animación del panel lateral ===== */
+@keyframes s-drawer-entra { from { opacity: 0; transform: translateX(28px); } to { opacity: 1; transform: none; } }
+@keyframes s-drawer-sale { from { opacity: 1; transform: none; } to { opacity: 0; transform: translateX(28px); } }
+@keyframes s-drawer-sube { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+.s-drawer { animation: s-drawer-entra .32s cubic-bezier(.2, .7, .2, 1) both; }
+.s-drawer--sale { animation: s-drawer-sale .22s ease-in both; pointer-events: none; }
+.s-drawer--sin-entrada, .s-drawer--sin-entrada > .s-drawer__cuerpo > *, .s-drawer--sin-entrada > .s-drawer__cab { animation: none; }
+.s-drawer > .s-drawer__cab { animation: s-drawer-sube .3s cubic-bezier(.2, .7, .2, 1) .05s both; }
+.s-drawer > .s-drawer__cuerpo > * { animation: s-drawer-sube .34s cubic-bezier(.2, .7, .2, 1) both; }
+.s-drawer > .s-drawer__cuerpo > :nth-child(2) { animation-delay: .08s; }
+.s-drawer > .s-drawer__cuerpo > :nth-child(3) { animation-delay: .14s; }
+.s-drawer > .s-drawer__cuerpo > :nth-child(4) { animation-delay: .2s; }
+.s-drawer > .s-drawer__cuerpo > :nth-child(n+5) { animation-delay: .26s; }
+@media (prefers-reduced-motion: reduce) {
+  .s-drawer, .s-drawer--sale, .s-drawer > .s-drawer__cab, .s-drawer > .s-drawer__cuerpo > * { animation: none !important; }
+}

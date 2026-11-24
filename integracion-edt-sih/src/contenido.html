@@ -972,7 +972,14 @@
       nombre = n.tipo === 'medico' || n.tipo === 'persona' ? cap(n.nombre) : n.nombre;
     }
     html = html.split('<!--tabs-->').join('');
-    const dr = drawer();
+    let dr = drawer();
+    /* Animación del panel: entra al abrirse, sale al cerrarse (el panel sigue en pantalla un instante) */
+    if (dr) { dr = dr.replace('class="s-drawer"', ui.drawerVisible ? 'class="s-drawer s-drawer--sin-entrada"' : 'class="s-drawer"'); ui.ultimoDrawer = dr; }
+    else if (ui.drawerVisible && ui.ultimoDrawer && !opts.sinSalida) {
+      dr = ui.ultimoDrawer.replace(/class="s-drawer[^"]*"/, 'class="s-drawer s-drawer--sale"');
+      setTimeout(() => render({ sinSalida: true }), 230);
+    }
+    ui.drawerVisible = !!dr;
     $app.classList.toggle('s-app--drawer', !!dr);
     $app.classList.toggle('s-app--colapsado', !!ui.navColapsado);
     $app.classList.toggle('s-app--nav-abierto', !!ui.navAbierto);
