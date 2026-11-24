@@ -795,8 +795,8 @@
     let cuerpo = barra(idv, campos, act);
     if (tema === 'prod') {
       const items = sel.map(h => item(h, ui.semana));
-      const nodosNiv = [...RAICES.filter(h => h.tipo === 'ooad' && (!v.estado || estadoDe(h) === v.estado)).flatMap(hijos), ...RAICES.filter(h => h.tipo === 'umae' && (!v.estado || estadoDe(h) === v.estado))];
-      cuerpo += indicadores(items, titulo) + (tipo ? '' : tarjetaNiveles(v.estado, nodosNiv) + tarjetaLejos(v)) + listado(idv, v, items, { titulo, etiqueta: 'Atención médica por ' + titulo, medico: false, columna: 'OOAD o UMAE' });
+      const nodosNiv = [...(tipo === 'umae' ? [] : RAICES.filter(h => h.tipo === 'ooad' && (!v.estado || estadoDe(h) === v.estado)).flatMap(hijos)), ...(tipo === 'ooad' ? [] : RAICES.filter(h => h.tipo === 'umae' && (!v.estado || estadoDe(h) === v.estado)))];
+      cuerpo += indicadores(items, titulo) + tarjetaNiveles(v.estado || (tipo ? etiq : ''), nodosNiv) + (tipo ? '' : tarjetaLejos(v)) + listado(idv, v, items, { titulo, etiqueta: 'Atención médica por ' + titulo, medico: false, columna: 'OOAD o UMAE' });
     } else if (tema === 'infra') cuerpo += panelInfra(idv, v, sel, { hijos: true, titulo: 'Capacidad por ' + titulo, columna: 'OOAD o UMAE', sub: subEntidad });
     else cuerpo += panelPlantilla(idv, v, sel, { hijos: true, titulo: 'Plantilla por ' + titulo, columna: 'OOAD o UMAE', sub: subEntidad });
     return conTema(idv, v, encabezado({ tipo: 'vista', nombre: etiq }, null), cuerpo);
