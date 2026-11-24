@@ -499,10 +499,15 @@
       titulo = it.nombre; sub = 'Semana ' + ui.semana + ' · ' + rangoSemana(ui.semana).corto; m = it.m; set = [it];
     }
     const fila = (n, r, pl) => { const pct = pl ? Math.round(r / pl * 100) : null; return `<tr><td>${n}</td><td class="s-der s-num">${fmt(r)}</td><td class="s-der s-num">${pl == null ? 'Sin meta' : fmt(pl)}</td><td class="s-der">${pct == null ? 'Sin meta' : tagCump(pct)}</td></tr>`; };
+    const porTipo = (n, r, pl) => { const pct = pl ? Math.round(r / pl * 100) : null, falta = pl - r; return `<tr><td>${n}</td><td class="s-der">${pct == null ? 'Sin meta' : tagCump(pct)}</td><td class="s-der s-num">${pl == null ? '—' : (falta > 0 ? `<span class="s-brecha">Faltan ${fmt(falta)}</span>` : 'Cumple')}</td></tr>`; };
+    const sinMeta = (n, r) => `<tr><td>${n}</td><td class="s-der s-num">${fmt(r)}</td></tr>`;
     const tabla = it
-      ? `<div class="s-tabla-scroll" role="region" aria-label="Otras atenciones" tabindex="0"><table class="s-tabla"><caption class="s-sr">Atenciones sin meta de la semana</caption>
+      ? `<div class="s-tabla-scroll" role="region" aria-label="Cumplimiento por tipo de atención" tabindex="0"><table class="s-tabla"><caption class="s-sr">Cumplimiento por tipo de atención</caption>
+      <thead><tr><th scope="col">Atención</th><th scope="col" class="s-der">Cumplimiento</th><th scope="col" class="s-der">Faltan</th></tr></thead>
+      <tbody>${porTipo('Consultas', m.cr, m.cp)}${porTipo('Cirugías', m.qr, m.qp)}</tbody></table></div>
+      <section class="s-drawer__bloque"><h3>Atenciones sin meta</h3><div class="s-tabla-scroll" role="region" aria-label="Atenciones sin meta" tabindex="0"><table class="s-tabla"><caption class="s-sr">Urgencias y hospitalización, real de la semana</caption>
       <thead><tr><th scope="col">Atención</th><th scope="col" class="s-der">Real</th></tr></thead>
-      <tbody><tr><td>Urgencias</td><td class="s-der s-num">${fmt(m.ur)}</td></tr><tr><td>Hospitalización</td><td class="s-der s-num">${fmt(m.hr)}</td></tr></tbody></table></div>`
+      <tbody>${sinMeta('Urgencias', m.ur)}${sinMeta('Hospitalización', m.hr)}</tbody></table></div></section>`
       : `<div class="s-tabla-scroll" role="region" aria-label="Real frente a planeado" tabindex="0"><table class="s-tabla"><caption class="s-sr">Real frente a planeado por tipo de atención</caption>
       <thead><tr><th scope="col">Atención</th><th scope="col" class="s-der">Real</th><th scope="col" class="s-der">Planeado</th><th scope="col" class="s-der">Cumplimiento</th></tr></thead>
       <tbody>${fila('Consultas', m.cr, m.cp)}${fila('Cirugías', m.qr, m.qp)}${fila('Urgencias', m.ur, null)}${fila('Hospitalización', m.hr, null)}</tbody></table></div>`;
@@ -715,12 +720,12 @@
     ui.conteo = filas.length;
     if (!ctx.agg) { ctx.items = personas.filter(p => p.med).map(p => item(p.med, ui.semana)); ctx.agg = { personas: true }; }
     const cuerpo = pag.length ? pag.map(p => `<tr><td>${p.med ? botonDrawer(ctx.items.find(x => x.id === p.med.id), `Matrícula ${p.matricula}`) : botonPersona(p)}</td>
-      <td>${NOMBRE_CAT[p.cat]}</td><td>${p.estatus}</td><td>${p.turno}</td><td>${esc(p.adsc)}</td><td>${p.med ? cumpFila(p.cump) : '<span class="s-sinmeta">Sin productividad medida</span>'}</td><td class="s-der s-num">${p.it ? `<span class="${p.it.brecha > 0 && p.it.plan > 0 ? 's-brecha' : ''}">${brechaTxt(p.it)}</span>` : '—'}</td></tr>`).join('')
-      : '<tr><td colspan="7" class="s-vacio">Sin resultados con los filtros actuales.</td></tr>';
+      <td>${NOMBRE_CAT[p.cat]}</td><td>${p.estatus}</td><td>${p.turno}</td><td>${esc(p.adsc)}</td><td class="s-der s-num">${p.it ? `<b>${fmt(p.it.m.cr)}</b> de ${fmt(p.it.m.cp)}` : '—'}</td><td class="s-der s-num">${p.it ? `<b>${fmt(p.it.m.qr)}</b> de ${fmt(p.it.m.qp)}` : '—'}</td><td>${p.med ? cumpFila(p.cump) : '<span class="s-sinmeta">Sin productividad medida</span>'}</td><td class="s-der s-num">${p.it ? `<span class="${p.it.brecha > 0 && p.it.plan > 0 ? 's-brecha' : ''}">${brechaTxt(p.it)}</span>` : '—'}</td></tr>`).join('')
+      : '<tr><td colspan="9" class="s-vacio">Sin resultados con los filtros actuales.</td></tr>';
     return `<section class="s-seccion" aria-labelledby="t-${idv}">
       <div class="s-lista__barra"><h2 id="t-${idv}" class="s-seccion__h" tabindex="-1">${esc(titulo)} <span class="s-pill s-num">${fmt(filas.length)}</span></h2></div>
       <div class="s-card s-tabla-card"><div class="s-tabla-scroll" role="region" aria-labelledby="t-${idv}" tabindex="0"><table class="s-tabla s-tabla--ord"><caption class="s-sr">${esc(titulo)} con su cumplimiento en la semana ${ui.semana}</caption>
-        <thead><tr><th scope="col">Personal / matrícula</th>${thOrden(idv, v, 'ordenPer', 'cat', 'Categoría')}<th scope="col">Estatus</th><th scope="col">Turno</th><th scope="col">Adscripción</th>${thOrden(idv, v, 'ordenPer', 'cump', 'Cumplimiento semana ' + ui.semana)}${thOrden(idv, v, 'ordenPer', 'brecha', 'Faltan', 1)}</tr></thead>
+        <thead><tr><th scope="col">Personal / matrícula</th>${thOrden(idv, v, 'ordenPer', 'cat', 'Categoría')}<th scope="col">Estatus</th><th scope="col">Turno</th><th scope="col">Adscripción</th><th scope="col" class="s-der">Consultas</th><th scope="col" class="s-der">Cirugías</th>${thOrden(idv, v, 'ordenPer', 'cump', 'Cumplimiento semana ' + ui.semana)}${thOrden(idv, v, 'ordenPer', 'brecha', 'Faltan', 1)}</tr></thead>
         <tbody>${cuerpo}</tbody></table></div></div>${paginacion(idv, v, filas.length)}</section>`;
   }
 
