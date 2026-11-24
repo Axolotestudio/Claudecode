@@ -1368,6 +1368,8 @@ a.s-celda-nombre:hover .s-celda-nombre__t { color: var(--color-primary-800); }
     ['OM', 'Otros médicos'], ['PA', 'Paramédicos'], ['RE', 'Residentes'], ['TE', 'Técnicos']];
   const ORDEN_PERSONAS = ['MF', 'ME', 'OM', 'RE', 'EN', 'PA', 'TE', 'AD', 'LI'];
   const ESTATUS = ['Activo', 'Activo', 'Activo', 'Activo', 'Activo', 'Activo', 'Activo', 'Vacaciones', 'Incapacidad', 'Licencia'];
+  /* Un solo estatus por médico: lo comparten la tabla de personal y el expediente */
+  function estatusMedico(mm) { const e = expediente(mm); if (!e.estatus) e.estatus = elegir(rng('st|' + mm.id), ESTATUS); return e.estatus; }
   const NOMBRE_CAT = Object.fromEntries(CATEGORIAS);
   const CAT_MEDIDAS = ['MF', 'ME', 'OM'];
   const TURNOS = ['Matutino', 'Matutino', 'Vespertino', 'Nocturno', 'Jornada acumulada'];
@@ -1497,7 +1499,7 @@ a.s-celda-nombre:hover .s-celda-nombre__t { color: var(--color-primary-800); }
   function personalArea(n) {
     if (n._pers) return n._pers;
     const k0 = catMedicoArea(n);
-    const lista = hijos(n).map(mm => { const e = expediente(mm); return { med: mm, nombre: cap(mm.nombre), matricula: e.matricula, cat: k0, turno: e.turno, estatus: elegir(rng('st|' + mm.id), ESTATUS), adsc: `${n.padre.nombre} · ${n.nombre}` }; });
+    const lista = hijos(n).map(mm => { const e = expediente(mm); return { med: mm, nombre: cap(mm.nombre), matricula: e.matricula, cat: k0, turno: e.turno, estatus: estatusMedico(mm), adsc: `${n.padre.nombre} · ${n.nombre}` }; });
     const pl = plantilla(n);
     ['RE', 'EN', 'PA', 'TE', 'AD', 'LI'].forEach(k => {
       for (let i = 0; i < pl[k]; i++) {
@@ -1677,7 +1679,7 @@ a.s-celda-nombre:hover .s-celda-nombre__t { color: var(--color-primary-800); }
         <thead><tr><th scope="col">Fecha</th><th scope="col">Movimiento</th><th scope="col">Tipo de contratación</th><th scope="col">Adscripción</th></tr></thead>
         <tbody>${e.movimientos.slice().reverse().map(x => `<tr><td class="s-num">${x.fecha}</td><td>${x.tipo}</td><td>${x.contrato}</td><td>${esc(x.adsc)}</td></tr>`).join('')}</tbody></table></div></section>`;
     }
-    const est = `<span class="s-tag s-tag--activo"><i aria-hidden="true"></i>Activo</span>`;
+    const st = estatusMedico(m), est = `<span class="s-tag s-tag--${st === 'Activo' ? 'activo' : 'medio'}"><i aria-hidden="true"></i>${st}</span>`;
     return encabezado(m, est) + perfil
       + `<section class="s-seccion" aria-labelledby="t-edt"><div class="s-seccion__cab"><h2 id="t-edt" class="s-seccion__h" tabindex="-1">Expediente digital del trabajador</h2></div>
       ${tabs(idv, [['prod', 'Productividad'], ['lab', 'Datos laborales'], ['aus', 'Ausentismo y horas extras'], ['tray', 'Trayectoria']], v.tab, 'panel-' + idv)}
