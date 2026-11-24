@@ -632,3 +632,67 @@ a.s-celda-nombre:hover .s-celda-nombre__t { color: var(--color-primary-800); }
 .s-tabla tr:has(.s-fila__abrir[aria-pressed="true"]) td { background: var(--color-primary-50); }
 .s-tabla tr:has(.s-fila__abrir[aria-pressed="true"]) td:first-child { box-shadow: inset 2px 0 0 var(--color-primary-500); }
 .s-tabla--datos th { width: 45%; background: var(--color-surface); font-weight: var(--font-weight-regular); color: var(--color-neutral-600); text-align: left; border-bottom: 1px solid var(--color-neutral-100); }
+
+/* ===== Ficha del trabajador (estructura de la ficha SIPS) ===== */
+.s-ficha2 { display: grid; grid-template-columns: minmax(200px, 300px) minmax(0, 1fr); gap: var(--space-6); padding: var(--space-5); margin-bottom: var(--space-6); }
+.s-ficha2__foto { display: grid; place-content: center; min-height: 280px; border-radius: var(--radius-lg); background: var(--color-surface-alt); overflow: hidden; }
+.s-avatar--foto { width: 180px; height: 180px; background: var(--color-primary-100); }
+.s-avatar--foto svg { padding: 16px; }
+.s-ficha2__cuerpo { display: flex; flex-direction: column; gap: var(--space-5); min-width: 0; }
+.s-ficha2__titulo { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-3); }
+.s-ficha2__titulo h2 { font-size: var(--font-size-2xl); font-weight: var(--font-weight-medium); line-height: 1.25; color: var(--color-neutral-800); }
+.s-ficha2__grupo + .s-ficha2__grupo { padding-top: var(--space-5); border-top: 1px solid var(--color-cornflower-100); }
+.s-ficha2__grupo h3 { margin-bottom: var(--space-3); font-size: var(--font-size-lg); font-weight: var(--font-weight-semibold); line-height: 1.3; color: var(--color-neutral-800); }
+.s-ficha2__fila { display: flex; align-items: flex-start; gap: var(--space-4); }
+.s-ficha2__icono { flex: none; width: 28px; height: 28px; color: var(--color-primary-400); }
+.s-ficha2__icono svg { width: 28px; height: 28px; }
+.s-ficha2__campos { flex: 1; display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: var(--space-5) var(--space-6); margin: 0; min-width: 0; }
+.s-ficha2__campos--5 { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+.s-ficha2__campo { display: flex; flex-direction: column; gap: var(--space-1); min-width: 0; }
+.s-ficha2__campo dt { font-size: var(--font-size-sm); font-weight: var(--font-weight-medium); line-height: 1.3; color: var(--color-neutral-500); }
+.s-ficha2__campo dd { margin: 0; font-size: var(--font-size-md); line-height: 1.4; color: var(--color-neutral-800); overflow-wrap: anywhere; }
+
+/* Notas, capacitación, ausentismos, horas extras y trayectoria */
+.s-ficha2__bloques { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: var(--space-6); align-items: start; margin-top: var(--space-6); }
+.s-ficha2__izq { display: flex; flex-direction: column; gap: var(--space-6); min-width: 0; }
+.s-ficha2__par { display: grid; grid-template-columns: minmax(0, 2.4fr) minmax(0, 1fr); gap: var(--space-6); }
+.s-tarjeta { background: var(--color-surface); border-radius: var(--radius-lg); box-shadow: var(--shadow-sm); overflow: hidden; }
+.s-tarjeta__cab { padding: var(--space-4); text-align: center; font-size: var(--font-size-xl); font-weight: var(--font-weight-semibold); line-height: 1.3; color: var(--color-neutral-800); }
+.s-tarjeta--notas .s-tarjeta__cab { background: var(--color-cornflower-100); }
+.s-tarjeta--cap .s-tarjeta__cab { background: var(--color-teal-100); }
+.s-tarjeta--aus .s-tarjeta__cab { background: var(--color-pollen-200); }
+.s-tarjeta--hx .s-tarjeta__cab { background: var(--color-lavender-100); }
+.s-tarjeta__pares { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); margin: 0; padding: var(--space-4); }
+.s-tarjeta__pares div { display: flex; flex-direction: column; align-items: center; gap: var(--space-1); text-align: center; }
+.s-tarjeta__pares dt { font-size: var(--font-size-sm); color: var(--color-neutral-600); }
+.s-tarjeta__pares dd { margin: 0; font-size: var(--font-size-2xl); font-weight: var(--font-weight-medium); line-height: 1.2; color: var(--color-neutral-800); }
+.s-tarjeta--hx .s-tarjeta__pares dd { font-size: var(--font-size-lg); }
+.s-tarjeta__unico { margin: 0; padding: var(--space-5) var(--space-4); text-align: center; font-size: var(--font-size-2xl); font-weight: var(--font-weight-medium); color: var(--color-neutral-800); }
+.s-tarjeta__tabla { width: 100%; border-collapse: collapse; text-align: center; }
+.s-tarjeta__tabla th { padding: var(--space-2); background: var(--color-pollen-50); font-size: var(--font-size-sm); font-weight: var(--font-weight-regular); color: var(--color-neutral-700); }
+.s-tarjeta__tabla td { padding: var(--space-5) var(--space-2); font-size: var(--font-size-xl); color: var(--color-neutral-800); }
+.s-trayectoria { padding: var(--space-5); }
+.s-trayectoria > h2 { margin-bottom: var(--space-4); font-size: var(--font-size-xl); }
+.s-trayectoria__lista { display: flex; flex-direction: column; gap: var(--space-3); margin: 0; padding: 0; list-style: none; }
+.s-trayectoria__lista li { padding: var(--space-3) var(--space-4); border: 1px solid var(--color-neutral-100); border-radius: var(--radius-md); background: var(--color-surface-alt); }
+.s-trayectoria__lista dl { display: grid; grid-template-columns: minmax(0, .8fr) minmax(0, 1.1fr) minmax(0, .9fr) minmax(0, 1.4fr); gap: var(--space-3); margin: 0; }
+
+@media (max-width: 1100px) {
+  .s-ficha2 { grid-template-columns: minmax(0, 1fr); }
+  .s-ficha2__foto { min-height: 200px; }
+  .s-ficha2__campos--5 { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
+  .s-ficha2__bloques { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 640px) {
+  .s-ficha2 { padding: var(--space-4); }
+  .s-ficha2__fila { gap: var(--space-2); }
+  .s-ficha2__icono { display: none; }
+  .s-ficha2__par { grid-template-columns: minmax(0, 1fr); }
+  .s-trayectoria__lista dl { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+}
+.s-ficha2__campos--6 { grid-template-columns: repeat(6, minmax(0, auto)); justify-content: space-between; }
+.s-trayectoria__lista dl { grid-template-columns: minmax(0, 1fr) minmax(0, 1.3fr) minmax(0, 1fr); }
+.s-trayectoria__adsc { grid-column: 1 / -1; }
+.s-trayectoria__lista dt { white-space: nowrap; }
+@media (max-width: 1100px) { .s-ficha2__campos--6 { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); } }
+@media (max-width: 640px) { .s-trayectoria__lista dl { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); } .s-trayectoria__lista dt { white-space: normal; } }

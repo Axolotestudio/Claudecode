@@ -892,6 +892,70 @@ a.s-celda-nombre:hover .s-celda-nombre__t { color: var(--color-primary-800); }
 .s-tabla tr:has(.s-fila__abrir[aria-pressed="true"]) td:first-child { box-shadow: inset 2px 0 0 var(--color-primary-500); }
 .s-tabla--datos th { width: 45%; background: var(--color-surface); font-weight: var(--font-weight-regular); color: var(--color-neutral-600); text-align: left; border-bottom: 1px solid var(--color-neutral-100); }
 
+/* ===== Ficha del trabajador (estructura de la ficha SIPS) ===== */
+.s-ficha2 { display: grid; grid-template-columns: minmax(200px, 300px) minmax(0, 1fr); gap: var(--space-6); padding: var(--space-5); margin-bottom: var(--space-6); }
+.s-ficha2__foto { display: grid; place-content: center; min-height: 280px; border-radius: var(--radius-lg); background: var(--color-surface-alt); overflow: hidden; }
+.s-avatar--foto { width: 180px; height: 180px; background: var(--color-primary-100); }
+.s-avatar--foto svg { padding: 16px; }
+.s-ficha2__cuerpo { display: flex; flex-direction: column; gap: var(--space-5); min-width: 0; }
+.s-ficha2__titulo { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-3); }
+.s-ficha2__titulo h2 { font-size: var(--font-size-2xl); font-weight: var(--font-weight-medium); line-height: 1.25; color: var(--color-neutral-800); }
+.s-ficha2__grupo + .s-ficha2__grupo { padding-top: var(--space-5); border-top: 1px solid var(--color-cornflower-100); }
+.s-ficha2__grupo h3 { margin-bottom: var(--space-3); font-size: var(--font-size-lg); font-weight: var(--font-weight-semibold); line-height: 1.3; color: var(--color-neutral-800); }
+.s-ficha2__fila { display: flex; align-items: flex-start; gap: var(--space-4); }
+.s-ficha2__icono { flex: none; width: 28px; height: 28px; color: var(--color-primary-400); }
+.s-ficha2__icono svg { width: 28px; height: 28px; }
+.s-ficha2__campos { flex: 1; display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: var(--space-5) var(--space-6); margin: 0; min-width: 0; }
+.s-ficha2__campos--5 { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+.s-ficha2__campo { display: flex; flex-direction: column; gap: var(--space-1); min-width: 0; }
+.s-ficha2__campo dt { font-size: var(--font-size-sm); font-weight: var(--font-weight-medium); line-height: 1.3; color: var(--color-neutral-500); }
+.s-ficha2__campo dd { margin: 0; font-size: var(--font-size-md); line-height: 1.4; color: var(--color-neutral-800); overflow-wrap: anywhere; }
+
+/* Notas, capacitación, ausentismos, horas extras y trayectoria */
+.s-ficha2__bloques { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: var(--space-6); align-items: start; margin-top: var(--space-6); }
+.s-ficha2__izq { display: flex; flex-direction: column; gap: var(--space-6); min-width: 0; }
+.s-ficha2__par { display: grid; grid-template-columns: minmax(0, 2.4fr) minmax(0, 1fr); gap: var(--space-6); }
+.s-tarjeta { background: var(--color-surface); border-radius: var(--radius-lg); box-shadow: var(--shadow-sm); overflow: hidden; }
+.s-tarjeta__cab { padding: var(--space-4); text-align: center; font-size: var(--font-size-xl); font-weight: var(--font-weight-semibold); line-height: 1.3; color: var(--color-neutral-800); }
+.s-tarjeta--notas .s-tarjeta__cab { background: var(--color-cornflower-100); }
+.s-tarjeta--cap .s-tarjeta__cab { background: var(--color-teal-100); }
+.s-tarjeta--aus .s-tarjeta__cab { background: var(--color-pollen-200); }
+.s-tarjeta--hx .s-tarjeta__cab { background: var(--color-lavender-100); }
+.s-tarjeta__pares { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); margin: 0; padding: var(--space-4); }
+.s-tarjeta__pares div { display: flex; flex-direction: column; align-items: center; gap: var(--space-1); text-align: center; }
+.s-tarjeta__pares dt { font-size: var(--font-size-sm); color: var(--color-neutral-600); }
+.s-tarjeta__pares dd { margin: 0; font-size: var(--font-size-2xl); font-weight: var(--font-weight-medium); line-height: 1.2; color: var(--color-neutral-800); }
+.s-tarjeta--hx .s-tarjeta__pares dd { font-size: var(--font-size-lg); }
+.s-tarjeta__unico { margin: 0; padding: var(--space-5) var(--space-4); text-align: center; font-size: var(--font-size-2xl); font-weight: var(--font-weight-medium); color: var(--color-neutral-800); }
+.s-tarjeta__tabla { width: 100%; border-collapse: collapse; text-align: center; }
+.s-tarjeta__tabla th { padding: var(--space-2); background: var(--color-pollen-50); font-size: var(--font-size-sm); font-weight: var(--font-weight-regular); color: var(--color-neutral-700); }
+.s-tarjeta__tabla td { padding: var(--space-5) var(--space-2); font-size: var(--font-size-xl); color: var(--color-neutral-800); }
+.s-trayectoria { padding: var(--space-5); }
+.s-trayectoria > h2 { margin-bottom: var(--space-4); font-size: var(--font-size-xl); }
+.s-trayectoria__lista { display: flex; flex-direction: column; gap: var(--space-3); margin: 0; padding: 0; list-style: none; }
+.s-trayectoria__lista li { padding: var(--space-3) var(--space-4); border: 1px solid var(--color-neutral-100); border-radius: var(--radius-md); background: var(--color-surface-alt); }
+.s-trayectoria__lista dl { display: grid; grid-template-columns: minmax(0, .8fr) minmax(0, 1.1fr) minmax(0, .9fr) minmax(0, 1.4fr); gap: var(--space-3); margin: 0; }
+
+@media (max-width: 1100px) {
+  .s-ficha2 { grid-template-columns: minmax(0, 1fr); }
+  .s-ficha2__foto { min-height: 200px; }
+  .s-ficha2__campos--5 { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
+  .s-ficha2__bloques { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 640px) {
+  .s-ficha2 { padding: var(--space-4); }
+  .s-ficha2__fila { gap: var(--space-2); }
+  .s-ficha2__icono { display: none; }
+  .s-ficha2__par { grid-template-columns: minmax(0, 1fr); }
+  .s-trayectoria__lista dl { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+}
+.s-ficha2__campos--6 { grid-template-columns: repeat(6, minmax(0, auto)); justify-content: space-between; }
+.s-trayectoria__lista dl { grid-template-columns: minmax(0, 1fr) minmax(0, 1.3fr) minmax(0, 1fr); }
+.s-trayectoria__adsc { grid-column: 1 / -1; }
+.s-trayectoria__lista dt { white-space: nowrap; }
+@media (max-width: 1100px) { .s-ficha2__campos--6 { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); } }
+@media (max-width: 640px) { .s-trayectoria__lista dl { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); } .s-trayectoria__lista dt { white-space: normal; } }
+
   </style>
 </head>
 <body>
@@ -1146,6 +1210,7 @@ a.s-celda-nombre:hover .s-celda-nombre__t { color: var(--color-primary-800); }
     cama: svg('<path d="M3 18V6M3 14h18v4M21 14v-2a3 3 0 0 0-3-3h-7v5"/><circle cx="7" cy="11" r="2"/>'),
     quirofano: svg('<path d="M4 21V7l8-4 8 4v14"/><path d="M9 21v-5h6v5M12 8v5M9.5 10.5h5"/>'),
     consultorio: svg('<rect x="3" y="4" width="18" height="16" rx="2"/><path d="M12 8v6M9 11h6"/>'),
+    persona: svg('<circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8"/>'),
     doc: svg('<path d="M7 3h7l5 5v13H7z"/><path d="M14 3v5h5M10 13h6M10 17h6"/>')
   };
 
@@ -1454,6 +1519,7 @@ a.s-celda-nombre:hover .s-celda-nombre__t { color: var(--color-primary-800); }
   const NOMBRE_CAT = Object.fromEntries(CATEGORIAS);
   const CAT_MEDIDAS = ['MF', 'ME', 'OM'];
   const TURNOS = ['Matutino', 'Matutino', 'Vespertino', 'Nocturno', 'Jornada acumulada'];
+  const CONTRACTUAL = { RE: 'Médico residente', EN: 'Enfermera general', PA: 'Paramédico', TE: 'Técnico en salud', AD: 'Auxiliar administrativo', LI: 'Auxiliar de servicios de intendencia' };
   const JORNADAS = { Matutino: '07:00 a 15:00', Vespertino: '14:00 a 22:00', Nocturno: '21:00 a 07:00', 'Jornada acumulada': 'Sáb, dom y festivos' };
   const TEMAS = [['prod', 'Productividad', 'pulso'], ['infra', 'Infraestructura', 'hospital'], ['plant', 'Plantilla', 'personas']];
 
@@ -1596,7 +1662,7 @@ a.s-celda-nombre:hover .s-celda-nombre__t { color: var(--color-primary-800); }
       for (let i = 0; i < pl[k]; i++) {
         const r = rng(`p|${n.id}|${k}|${i}`), p = persona(r), turno = elegir(r, TURNOS);
         const nodo = registrar({ id: `${n.id}.x${k}${i}`, tipo: 'persona', padre: n, persona: p, nombre: `${p.ap1} ${p.ap2} ${p.nombre}`, cat: k,
-          _fijo: { matricula: String(10000000 + Math.floor(r() * 89999999)), categoria: NOMBRE_CAT[k], turno, jornada: JORNADAS[turno], estatus: elegir(r, ESTATUS), cedula: ['AD', 'LI'].includes(k) ? 'No aplica' : String(1e7 + Math.floor(r() * 8.9e7)) } });
+          _fijo: { matricula: String(10000000 + Math.floor(r() * 89999999)), categoria: CONTRACTUAL[k], turno, jornada: JORNADAS[turno], estatus: elegir(r, ESTATUS), cedula: ['AD', 'LI'].includes(k) ? 'No aplica' : String(1e7 + Math.floor(r() * 8.9e7)) } });
         lista.push({ med: null, nodo, nombre: cap(nodo.nombre), matricula: nodo._fijo.matricula, cat: k, turno, estatus: nodo._fijo.estatus, adsc: `${n.padre.nombre} · ${n.nombre}` });
       }
     });
@@ -1609,10 +1675,10 @@ a.s-celda-nombre:hover .s-celda-nombre__t { color: var(--color-primary-800); }
   function drawerPersona(n) {
     const e = expediente(n), dato = (t, val) => `<tr><th scope="row">${t}</th><td>${esc(val)}</td></tr>`;
     return `<aside class="s-drawer" role="dialog" aria-modal="false" aria-labelledby="drawer-titulo">
-      <header class="s-drawer__cab"><div><h2 id="drawer-titulo" tabindex="-1">${esc(cap(n.nombre))}</h2><p>${esc(e.categoria)} · Matrícula ${e.matricula}</p></div>
+      <header class="s-drawer__cab"><div><h2 id="drawer-titulo" tabindex="-1">${esc(cap(n.nombre))}</h2><p>${esc(NOMBRE_CAT[n.cat])} · Matrícula ${e.matricula}</p></div>
         <button class="s-btn-icono" type="button" id="drawer-cerrar" data-cerrar aria-label="Cerrar detalle"><span class="s-icono-caja">${I.cerrar}</span></button></header>
       <div class="s-drawer__cuerpo"><div class="s-tabla-scroll" role="region" aria-label="Datos del trabajador" tabindex="0"><table class="s-tabla s-tabla--datos"><caption class="s-sr">Datos del trabajador</caption><tbody>
-        ${dato('Estatus', e.estatus)}${dato('Categoría', e.categoria)}${dato('Turno', `${e.turno} · ${e.jornada}`)}${dato('Unidad', e.unidad.nombre)}${dato('Servicio', e.area.nombre)}${dato('Tipo de contratación', e.contrato)}${dato('Antigüedad', `${e.antig} años`)}${dato(`Ausentismo ${ANIO}`, `${e.ausProg + e.ausNoProg} días`)}
+        ${dato('Estatus', e.estatus)}${dato('Categoría', NOMBRE_CAT[n.cat])}${dato('Categoría contractual', e.categoria)}${dato('Turno', `${e.turno} · ${e.jornada}`)}${dato('Unidad', e.unidad.nombre)}${dato('Servicio', e.area.nombre)}${dato('Tipo de contratación', e.contrato)}${dato('Antigüedad', `${e.antig} años`)}${dato(`Ausentismo ${ANIO}`, `${e.ausProg + e.ausNoProg} días`)}
       </tbody></table></div>
       <section class="s-drawer__bloque"><h3>Productividad</h3><p class="s-drawer__dato"><span class="s-sinmeta">Sin productividad medida</span></p></section>
       <a class="s-btn s-btn--outlined" href="#/e/${n.id}">${I.doc}Abrir expediente</a></div></aside>`;
@@ -1766,48 +1832,60 @@ a.s-celda-nombre:hover .s-celda-nombre__t { color: var(--color-primary-800); }
     const max = Math.max(1, ...sem.map(s => s.t));
     return `<ul class="s-grafica" aria-hidden="true">${sem.map(s => `<li><span class="s-grafica__valor s-num">${fmt(s.t)}</span><span class="s-grafica__barra${s.s === ui.semana ? ' s-grafica__barra--actual' : ''}" style="height:${Math.max(2, Math.round(120 * s.t / max))}px"></span><span class="s-grafica__etiqueta">S${s.s}</span></li>`).join('')}</ul>`;
   }
+  /* Ficha del trabajador (estructura de la ficha SIPS): datos generales y laborales, productividad si tiene meta, notas, capacitación, ausentismo, horas extras y trayectoria */
+  const clave = (s, n) => String(hash(s)).padStart(10, '0').slice(0, n);
+  function division(a) {
+    if (a.umf) return a.nombre === 'Medicina familiar' ? 'Medicina familiar' : 'Servicios de apoyo';
+    if (/Urgencias/.test(a.nombre)) return 'División de urgencias';
+    if (/Pediatr/.test(a.nombre)) return 'División de pediatría';
+    if (/Ginecolog/.test(a.nombre)) return 'División de ginecobstetricia';
+    if (/Cirug|Anest|Ortoped|Urolog|Oftalm|Otorrino|Neurocir|Coloproct|Angiolog/.test(a.nombre)) return 'División de cirugía';
+    return 'División de medicina';
+  }
+  const campo = (t, val) => `<div class="s-ficha2__campo"><dt>${t}</dt><dd>${esc(val)}</dd></div>`;
   function vMedico(m) {
-    const conMeta = m.tipo === 'medico', pestanas = [['prod', 'Productividad'], ['lab', 'Datos laborales'], ['aus', 'Ausentismo y horas extras'], ['tray', 'Trayectoria']].filter(([k]) => conMeta || k !== 'prod');
-    const e = expediente(m), w = ui.semana, idv = m.id, v = vista(idv, { tab: pestanas[0][0] });
-    if (!pestanas.some(([k]) => k === v.tab)) v.tab = pestanas[0][0];
-    const dato = (t, val) => `<div class="s-dato"><dt>${t}</dt><dd>${esc(val)}</dd></div>`;
-    const perfil = `<section class="s-card s-perfil" aria-label="Datos generales del trabajador">
-      ${avatar(m.persona, 's-avatar--xl')}
-      <dl class="s-perfil__datos">${dato('Matrícula', e.matricula)}${dato('Categoría', e.categoria)}${dato('Servicio', e.area.nombre)}${dato('Unidad', e.unidad.nombre)}${dato('Turno', `${e.turno} · ${e.jornada}`)}${dato('Antigüedad', `${e.antig} años`)}</dl></section>`;
-    let panel = '';
-    if (v.tab === 'prod') {
+    const conMeta = m.tipo === 'medico', e = expediente(m), w = ui.semana, idv = m.id;
+    vista(idv, {});
+    const u = e.unidad, a = e.area, deleg = e.ooad ? e.ooad.nombre : u.nombre;
+    const cvUnidad = `${clave(u.id, 2)}EA${clave(u.id + 'u', 6)}`, cvAdsc = `${cvUnidad.slice(0, 4)}${clave(a.id, 3)}E00`, cvPers = `${cvUnidad.slice(0, 4)}${clave(m.id, 2)}`;
+    const st = estatusMedico(m), est = `<span class="s-tag s-tag--${st === 'Activo' ? 'activo' : 'medio'}"><i aria-hidden="true"></i>${st}</span>`;
+    const icono = `<span class="s-ficha2__icono" aria-hidden="true">${I.persona}</span>`;
+    const ficha = `<section class="s-card s-ficha2" aria-labelledby="t-ficha">
+      <div class="s-ficha2__foto" aria-hidden="true">${avatar(m.persona, 's-avatar--foto')}</div>
+      <div class="s-ficha2__cuerpo">
+        <div class="s-ficha2__titulo"><h2 id="t-ficha">${esc(cap(m.nombre))}</h2>${est}</div>
+        <section class="s-ficha2__grupo" aria-labelledby="t-gen"><h3 id="t-gen">Información general</h3>
+          <div class="s-ficha2__fila">${icono}<dl class="s-ficha2__campos s-ficha2__campos--6">${campo('CURP', e.curp)}${campo('Matrícula', e.matricula)}${campo('Cédula', e.cedula)}${campo('Área de responsabilidad', a.nombre)}${campo(e.ooad ? 'OOAD' : 'UMAE', deleg)}${campo('Otros empleos', String(e.otrosEmpleos))}</dl></div></section>
+        <section class="s-ficha2__grupo" aria-labelledby="t-cat"><h3 id="t-cat">Categoría, adscripción y jornada</h3>
+          <div class="s-ficha2__fila">${icono}<dl class="s-ficha2__campos s-ficha2__campos--5">${campo('Categoría contractual', e.categoria)}${campo('Clave de categoría', e.claveCategoria)}${campo('Descripción unidad', u.nombre)}${campo('Unidad de adscripción', cvUnidad)}${campo('Descripción adscripción', division(a))}
+            ${campo('Adscripción', cvAdsc)}${campo('Clave personal', cvPers)}${campo('Tipo de contratación', e.contrato)}${campo('Antigüedad (años)', String(e.antig))}${campo('Fecha de ocupación', e.ocupacion)}
+            ${campo('No. de plaza', e.plaza)}${campo('Turno', e.turno)}${campo('Jornada', e.jornada)}</dl></div></section>
+      </div></section>`;
+    let prod = '';
+    if (conMeta) {
       const sem = metricas(m, w), acu = acumulado(m, w), semanas = [];
       for (let s = Math.max(1, w - 7); s <= w; s++) { const x = metricas(m, s); semanas.push({ s, x, t: totalAt(x) }); }
-      panel = `<div class="s-kpis s-kpis--2">${kpi('Semana ' + w, I.pulso, sem)}${kpi('Acumulado semanas 1 a ' + w, I.calendario, acu)}</div>
+      prod = `<section class="s-seccion" aria-labelledby="t-prod"><div class="s-seccion__cab"><h2 id="t-prod" class="s-seccion__h" tabindex="-1">Productividad</h2></div>
+        <div class="s-kpis s-kpis--2">${kpi('Semana ' + w, I.pulso, sem)}${kpi('Acumulado semanas 1 a ' + w, I.calendario, acu)}</div>
         <section class="s-card s-seccion" aria-labelledby="t-tend"><h3 id="t-tend" class="s-seccion__h">Atenciones de las últimas 8 semanas</h3>
         ${grafica(semanas)}
         <div class="s-tabla-scroll" role="region" aria-label="Atenciones por semana" tabindex="0"><table class="s-tabla"><caption class="s-sr">Atenciones por semana</caption>
         <thead><tr><th scope="col">Semana</th><th scope="col" class="s-der">Real / planeado</th><th scope="col" class="s-der">Cumplimiento</th><th scope="col" class="s-der">Total atenciones</th></tr></thead>
-        <tbody>${semanas.slice().reverse().map(r => { const real = r.x.cr + r.x.qr, plan = r.x.cp + r.x.qp, pct = plan ? Math.round(real / plan * 100) : null; return `<tr><td>Semana ${r.s} · ${rangoSemana(r.s).corto}</td><td class="s-der s-num">${fmt(real)} de ${fmt(plan)}</td><td class="s-der">${pct == null ? 'Sin meta' : tagCump(pct)}</td><td class="s-der s-num">${fmt(r.t)}</td></tr>`; }).join('')}</tbody></table></div></section>`;
-    } else if (v.tab === 'lab') {
-      panel = `<div class="s-grid-2"><section class="s-card s-ficha" aria-labelledby="t-gen"><h3 id="t-gen">Información general</h3><dl>
-          ${dato('CURP', e.curp)}${dato('Matrícula', e.matricula)}${dato('Cédula profesional', e.cedula)}${dato('Región', e.region)}${dato('OOAD', e.ooad ? e.ooad.nombre : '—')}${dato('Otros empleos', String(e.otrosEmpleos))}</dl></section>
-        <section class="s-card s-ficha" aria-labelledby="t-cat"><h3 id="t-cat">Categoría, adscripción y jornada</h3><dl>
-          ${dato('Categoría', e.categoria)}${dato('Clave de categoría', e.claveCategoria)}${dato('Unidad de adscripción', e.unidad.nombre)}${dato('Servicio', e.area.nombre)}
-          ${dato('Tipo de contratación', e.contrato)}${dato('No. de plaza', e.plaza)}${dato('Fecha de ocupación', e.ocupacion)}${dato('Antigüedad', `${e.antig} años`)}${dato('Turno', e.turno)}${dato('Jornada', e.jornada)}</dl></section>
-        <section class="s-card s-ficha" aria-labelledby="t-not"><h3 id="t-not">Notas y capacitación</h3><dl>
-          ${dato('Notas de mérito', String(e.merito))}${dato('Notas de demérito', String(e.demerito))}${dato('Cursos de capacitación', String(e.capacitacion))}</dl></section></div>`;
-    } else if (v.tab === 'aus') {
-      const hAn = horasAnio(e, w);
-      panel = `<div class="s-grid-2"><section class="s-card s-ficha" aria-labelledby="t-aus"><h3 id="t-aus">Ausentismo ${ANIO}</h3><dl>
-          ${dato('Días programados', String(e.ausProg))}${dato('Días no programados', String(e.ausNoProg))}${dato('Total de días', String(e.ausProg + e.ausNoProg))}</dl></section>
-        <section class="s-card s-ficha" aria-labelledby="t-hx"><h3 id="t-hx">Horas extras</h3><dl>
-          ${dato(`Semana ${w}`, `${e.horas(w)} h`)}${dato(`Acumulado ${ANIO}`, `${hAn} h`)}${dato(`Importe ${ANIO}`, '$ ' + (hAn * e.tarifa).toLocaleString('es-MX', { minimumFractionDigits: 2 }))}</dl></section></div>`;
-    } else {
-      panel = `<section class="s-card s-tabla-card"><div class="s-tabla-scroll" role="region" aria-label="Movimientos" tabindex="0"><table class="s-tabla"><caption class="s-sr">Movimientos y trayectoria</caption>
-        <thead><tr><th scope="col">Fecha</th><th scope="col">Movimiento</th><th scope="col">Tipo de contratación</th><th scope="col">Adscripción</th></tr></thead>
-        <tbody>${e.movimientos.slice().reverse().map(x => `<tr><td class="s-num">${x.fecha}</td><td>${x.tipo}</td><td>${x.contrato}</td><td>${esc(x.adsc)}</td></tr>`).join('')}</tbody></table></div></section>`;
+        <tbody>${semanas.slice().reverse().map(r => { const real = r.x.cr + r.x.qr, plan = r.x.cp + r.x.qp, pct = plan ? Math.round(real / plan * 100) : null; return `<tr><td>Semana ${r.s} · ${rangoSemana(r.s).corto}</td><td class="s-der s-num">${fmt(real)} de ${fmt(plan)}</td><td class="s-der">${pct == null ? 'Sin meta' : tagCump(pct)}</td><td class="s-der s-num">${fmt(r.t)}</td></tr>`; }).join('')}</tbody></table></div></section></section>`;
     }
-    const st = estatusMedico(m), est = `<span class="s-tag s-tag--${st === 'Activo' ? 'activo' : 'medio'}"><i aria-hidden="true"></i>${st}</span>`;
-    return encabezado(m, est) + perfil
-      + `<section class="s-seccion" aria-labelledby="t-edt"><div class="s-seccion__cab"><h2 id="t-edt" class="s-seccion__h" tabindex="-1">Expediente digital del trabajador</h2></div>
-      ${tabs(idv, pestanas, v.tab, 'panel-' + idv)}
-      <div id="panel-${idv}" role="tabpanel" aria-labelledby="tab-${idv}-${v.tab}">${panel}</div></section>`;
+    const hAn = horasAnio(e, w);
+    const tarjeta = (clase, titulo, id, cuerpo) => `<section class="s-tarjeta s-tarjeta--${clase}" aria-labelledby="${id}"><h2 id="${id}" class="s-tarjeta__cab">${titulo}</h2>${cuerpo}</section>`;
+    const par = (pares) => `<dl class="s-tarjeta__pares">${pares.map(([t, v]) => `<div><dt>${t}</dt><dd class="s-num">${v}</dd></div>`).join('')}</dl>`;
+    const tarjetas = `<div class="s-ficha2__bloques">
+      <div class="s-ficha2__izq">
+        <div class="s-ficha2__par">${tarjeta('notas', 'Notas', 't-not', par([['Mérito', e.merito], ['Demérito', e.demerito]]))}${tarjeta('cap', 'Capacitación', 't-capa', `<p class="s-tarjeta__unico s-num">${e.capacitacion}</p>`)}</div>
+        ${tarjeta('aus', 'Ausentismos', 't-aus', `<div class="s-tabla-scroll"><table class="s-tarjeta__tabla"><caption class="s-sr">Días de ausentismo</caption><thead><tr><th scope="col">Año</th><th scope="col">Programada</th><th scope="col">No programada</th></tr></thead><tbody><tr><td class="s-num">${ANIO}</td><td class="s-num">${e.ausProg}</td><td class="s-num">${e.ausNoProg}</td></tr></tbody></table></div>`)}
+        ${tarjeta('hx', 'Horas extras', 't-hx', par([[`Semana ${w}`, `${e.horas(w)} h`], [`Acumulado ${ANIO}`, `${hAn} h`], [`Importe ${ANIO}`, '$ ' + (hAn * e.tarifa).toLocaleString('es-MX', { minimumFractionDigits: 2 })]]))}
+      </div>
+      <section class="s-card s-trayectoria" aria-labelledby="t-tray"><h2 id="t-tray" class="s-seccion__h">Movimientos - Trayectoria</h2>
+        <ol class="s-trayectoria__lista">${e.movimientos.slice().reverse().map(x => `<li><dl>${campo('Fecha movimiento', x.fecha)}${campo('Tipo de movimiento', x.tipo)}${campo('Tipo de contratación', x.contrato)}<div class="s-ficha2__campo s-trayectoria__adsc"><dt>Adscripción</dt><dd>${esc(x.adsc)}</dd></div></dl></li>`).join('')}</ol></section>
+    </div>`;
+    return encabezado(m, est) + ficha + prod + tarjetas;
   }
 
   /* ---------- Render y eventos ---------- */
