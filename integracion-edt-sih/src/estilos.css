@@ -627,3 +627,7 @@ a.s-celda-nombre:hover .s-celda-nombre__t { color: var(--color-primary-800); }
 .s-drawer__cuerpo > *, .s-drawer__bloque > * { flex-shrink: 0; }
 .s-drawer .s-tabla th { white-space: normal; line-height: 1.2; vertical-align: bottom; }
 .s-tabla .s-fila__abrir { margin: 0; }
+/* En tablas, el nombre se marca como en la lista de productividad: se resalta la fila, no el texto */
+.s-tabla .s-fila__abrir, .s-tabla .s-fila__abrir:hover, .s-tabla .s-fila__abrir[aria-pressed="true"] { margin: 0; padding: 0; background: transparent; box-shadow: none; border-radius: var(--radius-xs); }
+.s-tabla tr:has(.s-fila__abrir[aria-pressed="true"]) td { background: var(--color-primary-50); }
+.s-tabla tr:has(.s-fila__abrir[aria-pressed="true"]) td:first-child { box-shadow: inset 2px 0 0 var(--color-primary-500); }

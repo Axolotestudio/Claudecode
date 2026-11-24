@@ -674,18 +674,18 @@
     });
     return (n._pers = lista);
   }
-  function listaPersonal(idv, v, personas) {
-    const filas = personas.map(p => { const it = p.med ? item(p.med, ui.semana) : null; return Object.assign({}, p, { cump: it ? it.cump : null, orden: ORDEN_PERSONAS.indexOf(p.cat) }); })
+  function listaPersonal(idv, v, personas, titulo = 'Personal del servicio') {
+    const filas = personas.map(p => { const it = p.med ? item(p.med, ui.semana) : null; return Object.assign({}, p, { cump: it ? it.cump : null, orden: CATEGORIAS.findIndex(([k]) => k === p.cat) }); })
       .sort((a, b) => a.orden - b.orden || (a.cump ?? 999) - (b.cump ?? 999) || a.nombre.localeCompare(b.nombre, 'es'));
     const pag = paginar(v, filas);
     ui.conteo = filas.length;
-    ctx.items = personas.filter(p => p.med).map(p => item(p.med, ui.semana)); ctx.agg = { personas: true };
+    if (!ctx.agg) { ctx.items = personas.filter(p => p.med).map(p => item(p.med, ui.semana)); ctx.agg = { personas: true }; }
     const cuerpo = pag.length ? pag.map(p => `<tr><td>${p.med ? botonDrawer(ctx.items.find(x => x.id === p.med.id), `Matrícula ${p.matricula}`) : `<span class="s-celda-nombre"><span class="s-celda-nombre__t">${esc(p.nombre)}</span><span class="s-celda-nombre__s s-num">Matrícula ${p.matricula}</span></span>`}</td>
       <td>${NOMBRE_CAT[p.cat]}</td><td>${p.estatus}</td><td>${p.turno}</td><td>${esc(p.adsc)}</td><td>${p.med ? cumpFila(p.cump) : '<span class="s-sinmeta">Sin productividad medida</span>'}</td></tr>`).join('')
       : '<tr><td colspan="6" class="s-vacio">Sin resultados con los filtros actuales.</td></tr>';
     return `<section class="s-seccion" aria-labelledby="t-${idv}">
-      <div class="s-lista__barra"><h2 id="t-${idv}" class="s-seccion__h" tabindex="-1">Personal del servicio <span class="s-pill s-num">${fmt(filas.length)}</span></h2></div>
-      <div class="s-card s-tabla-card"><div class="s-tabla-scroll" role="region" aria-labelledby="t-${idv}" tabindex="0"><table class="s-tabla"><caption class="s-sr">Personal del servicio con su cumplimiento en la semana ${ui.semana}</caption>
+      <div class="s-lista__barra"><h2 id="t-${idv}" class="s-seccion__h" tabindex="-1">${esc(titulo)} <span class="s-pill s-num">${fmt(filas.length)}</span></h2></div>
+      <div class="s-card s-tabla-card"><div class="s-tabla-scroll" role="region" aria-labelledby="t-${idv}" tabindex="0"><table class="s-tabla"><caption class="s-sr">${esc(titulo)} con su cumplimiento en la semana ${ui.semana}</caption>
         <thead><tr><th scope="col">Personal / matrícula</th><th scope="col">Categoría</th><th scope="col">Estatus</th><th scope="col">Turno</th><th scope="col">Adscripción</th><th scope="col">Cumplimiento semana ${ui.semana}</th></tr></thead>
         <tbody>${cuerpo}</tbody></table></div></div>${paginacion(idv, v, filas.length)}</section>`;
   }
@@ -713,22 +713,27 @@
   }
   /* Personal: solo por estado, para no cargar más de 100 000 médicos a la vez */
   function medicosDe(n) { return n.tipo === 'medico' ? [n] : hijos(n).flatMap(medicosDe); }
+  function areasDe(n) { return n.tipo === 'area' ? [n] : hijos(n).flatMap(areasDe); }
   function vPersonal() {
     const idv = 'P', v = vista(idv, { orden: { k: 'brecha', dir: -1 } });
     ctx.alcance = v.estado || 'Personal';
     const estados = [...new Set(RAICES.map(h => h.estado))].sort((a, b) => a.localeCompare(b, 'es'));
     const q = norm(v.q.trim());
     const campos = selectCampo(idv, 'estado', 'Estado', [['', 'Elige un estado'], ...estados.map(e => [e, e])], v.estado)
-      + campoBuscar(idv, v, 'Buscar médico', 'Nombre o matrícula');
+      + selectCampo(idv, 'cat', 'Categoría', [['', 'Todas'], ...CATEGORIAS], v.cat)
+      + campoBuscar(idv, v, 'Buscar persona', 'Nombre o matrícula');
     const act = [];
     if (v.estado) act.push(['estado', `Estado: ${v.estado}`]);
+    if (v.cat) act.push(['cat', `Categoría: ${NOMBRE_CAT[v.cat]}`]);
     if (v.q) act.push(['q', `Buscar: “${v.q}”`]);
     const cab = encabezado({ tipo: 'vista', nombre: 'Personal' }, null) + barra(idv, campos, act);
     if (!v.estado) return cab + '<p class="s-vacio-bloque">Elige un estado para ver su personal.</p>';
-    const medicos = RAICES.filter(h => h.estado === v.estado).flatMap(medicosDe);
-    const items = medicos.filter(mm => !q || norm(`${mm.nombre} ${expediente(mm).matricula}`).includes(q)).map(mm => item(mm, ui.semana));
-    return cab + indicadores(items, 'médicos')
-      + listado(idv, v, items, { titulo: 'Personal de ' + v.estado, etiqueta: 'Productividad por médico en ' + v.estado, medico: true });
+    const todas = RAICES.filter(h => h.estado === v.estado).flatMap(areasDe).flatMap(personalArea);
+    const personas = todas.filter(p => (!v.cat || p.cat === v.cat) && (!q || norm(`${p.nombre} ${p.matricula}`).includes(q)));
+    const medicos = personas.filter(p => p.med).map(p => item(p.med, ui.semana));
+    const pl = completar(Object.fromEntries(CATEGORIAS.map(([k]) => [k, todas.filter(p => p.cat === k).length])));
+    const grafica = `<section class="s-card s-seccion s-cats-card" aria-labelledby="t-cat-P"><h2 id="t-cat-P" class="s-seccion__h">Personal por categoría <span class="s-pill s-num">${fmt(pl.total)}</span></h2>${graficaCategorias(pl)}</section>`;
+    return cab + (medicos.length ? indicadores(medicos, 'médicos') : '') + grafica + listaPersonal(idv, v, personas, 'Personal de ' + v.estado);
   }
 
   /* Secciones como pestañas, a la izquierda y debajo del título */
