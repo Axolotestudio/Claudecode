@@ -128,6 +128,7 @@
     for (let i = 1; n && i < partes.length; i++) { if (partes[i][0] === 'x' && n.tipo === 'area') personalArea(n); else hijos(n); n = nodos[partes.slice(0, i + 1).join('.')]; }
     return n || null;
   }
+  const estadoDe = n => cadena(n)[0].estado;
   const cadena = n => { const c = []; while (n) { c.unshift(n); n = n.padre; } return c; };
 
   /* ---------- Métricas ---------- */
@@ -241,7 +242,7 @@
     return ui.vistas[id];
   }
   /* Filtros en la URL: #/c/ooad?estado=Veracruz&orden=cump|1&semana=23 */
-  const CLAVES_URL = ['estado', 'tipo', 'tipoU', 'area', 'cat', 'q', 'ver', 'tab'];
+  const CLAVES_URL = ['estado', 'tipo', 'tipoU', 'area', 'cat', 'q', 'ver', 'tab', 'rnivel', 'rest'];
   function aplicarParams(v, par) {
     CLAVES_URL.forEach(k => { if (par.has(k)) v[k] = par.get(k); });
     if (par.has('orden')) { const [k, d] = par.get('orden').split('|'); v.orden = { k, dir: +d || -1 }; }
@@ -730,6 +731,33 @@
   }
 
   /* Vistas */
+  /* Tarjeta «Más lejos de la meta»: 5 filas, con filtro de nivel y de estado. Vive solo en Todo el país. */
+  const NIVELES_RANK = [['ooad', 'OOAD y UMAE'], ['unidad', 'Unidades'], ['servicio', 'Servicios']];
+  function candidatosRank(nivel) {
+    if (nivel === 'unidad') return RAICES.filter(h => h.tipo === 'ooad').flatMap(hijos);
+    if (nivel === 'servicio') return RAICES.flatMap(h => hijos(h).flatMap(x => x.tipo === 'area' ? [x] : hijos(x)));
+    return RAICES;
+  }
+  function tarjetaLejos(v) {
+    const nivelSel = v.rnivel || 'ooad', est = v.estado || '';
+    const base = candidatosRank(nivelSel).filter(h => !est || estadoDe(h) === est);
+    const conMeta = base.map(h => item(h, ui.semana)).filter(it => it.plan > 0 && it.cump != null);
+    const top = conMeta.slice().sort((a, b) => a.cump - b.cump || b.brecha - a.brecha).slice(0, 5);
+    const padreTxt = h => h.tipo === 'ooad' || h.tipo === 'umae' ? '' : h.tipo === 'unidad' ? h.padre.nombre : h.padre.nombre;
+    const filas = top.map(it => {
+      const h = it.n, sub = [estadoDe(h), padreTxt(h)].filter(Boolean).join(' · ');
+      return `<li><a class="s-rank__fila" href="#/e/${h.id}">
+        <span class="s-rank__nombre">${esc(h.nombre)}<span class="s-rank__sub">${esc(sub)}</span></span>
+        <span class="s-rank__cump">${tagCump(it.cump)}<span class="s-barra s-barra--${nivel(it.cump)}" role="img" aria-label="Cumplimiento ${it.cump} %"><span style="width:${Math.min(100, it.cump)}%"></span></span></span>
+        <span class="s-rank__falta s-num">${it.brecha > 0 ? `Faltan ${fmt(it.brecha)}` : 'Cumple'}</span></a></li>`;
+    }).join('');
+    return `<section class="s-card s-rank" aria-labelledby="t-rank">
+      <div class="s-rank__cab"><div><h2 id="t-rank" class="s-seccion__h">Más lejos de la meta</h2>
+        <p class="s-rank__sub">Semana ${ui.semana} · las 5 con menor cumplimiento${est ? ' · ' + esc(est) : ''} · ${fmt(conMeta.length)} con meta</p></div>
+        <div class="s-rank__filtros">${selectCampo('N', 'rnivel', 'Nivel', NIVELES_RANK, nivelSel)}</div></div>
+      ${top.length ? `<ol class="s-rank__lista">${filas}</ol>` : '<p class="s-vacio-bloque">Sin resultados con este filtro.</p>'}
+    </section>`;
+  }
   function vNacional() {
     const idv = 'N', v = vista(idv, { orden: { k: 'brecha', dir: -1 } }), tipo = v.tipo, tema = temaValido(v);
     const etiq = { ooad: 'OOAD', umae: 'UMAE' }[tipo] || 'Todo el país';
@@ -745,7 +773,7 @@
     let cuerpo = barra(idv, campos, act);
     if (tema === 'prod') {
       const items = sel.map(h => item(h, ui.semana));
-      cuerpo += indicadores(items, titulo) + listado(idv, v, items, { titulo, etiqueta: 'Atención médica por ' + titulo, medico: false, columna: 'OOAD o UMAE' });
+      cuerpo += indicadores(items, titulo) + (tipo ? '' : tarjetaLejos(v)) + listado(idv, v, items, { titulo, etiqueta: 'Atención médica por ' + titulo, medico: false, columna: 'OOAD o UMAE' });
     } else if (tema === 'infra') cuerpo += panelInfra(idv, v, sel, { hijos: true, titulo: 'Capacidad por ' + titulo, columna: 'OOAD o UMAE', sub: subEntidad });
     else cuerpo += panelPlantilla(idv, v, sel, { hijos: true, titulo: 'Plantilla por ' + titulo, columna: 'OOAD o UMAE', sub: subEntidad });
     return conTema(idv, v, encabezado({ tipo: 'vista', nombre: etiq }, null), cuerpo);
