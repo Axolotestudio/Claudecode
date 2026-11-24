@@ -440,6 +440,14 @@
       <thead><tr><th scope="col">Semana</th><th scope="col" class="s-der">Consultas por consultorio</th><th scope="col" class="s-der">Cirugías por quirófano</th><th scope="col" class="s-der">Hospitalización por cama</th></tr></thead>
       <tbody>${filas.reverse().map(f => `<tr><td>S${f.w}</td><td class="s-der s-num">${fmt1(f.u.cpc)}</td><td class="s-der s-num">${fmt1(f.u.cpq)}</td><td class="s-der s-num">${fmt1(f.u.hpc)}</td></tr>`).join('')}</tbody></table></div></section>`;
   }
+  function tablaRecurso(k, nodos) {
+    const [t, c, i, etq] = RECURSO[k], u = usoDe(nodos, ui.semana);
+    const filas = []; for (let w = Math.max(1, ui.semana - 7); w <= ui.semana; w++) filas.push({ w, v: usoDe(nodos, w)[i] });
+    return `<p class="s-drawer__dato">${t}: <strong class="s-num">${fmt(u[c])}</strong> · ${etq}: <strong class="s-num">${fmt1(u[i])}</strong></p>
+      <section class="s-drawer__bloque"><h3>${etq}, últimas 8 semanas</h3><div class="s-tabla-scroll" role="region" aria-label="${etq} por semana" tabindex="0"><table class="s-tabla"><caption class="s-sr">${etq} por semana</caption>
+      <thead><tr><th scope="col">Semana</th><th scope="col" class="s-der">${etq}</th></tr></thead>
+      <tbody>${filas.reverse().map(f => `<tr><td>Semana ${f.w} · ${rangoSemana(f.w).corto}</td><td class="s-der s-num">${fmt1(f.v)}</td></tr>`).join('')}</tbody></table></div></section>`;
+  }
   function tablaPlantilla(pl, u) {
     const apm = pl.medicos ? u.at / pl.medicos : null;
     return `<div class="s-tabla-scroll" role="region" aria-label="Plantilla por categoría" tabindex="0"><table class="s-tabla"><caption class="s-sr">Plantilla por categoría</caption>
@@ -466,7 +474,7 @@
         + bloqueProd(n) + `<a class="s-btn s-btn--outlined" href="#/e/${n.id}?tab=${ctx.tema}">${I.doc}Abrir detalle</a>`;
     } else if (ctx.tema === 'infra' && RECURSO[d.id]) {
       const [t, , i, etq] = RECURSO[d.id], nodos = ctx.temaNodos;
-      titulo = t; cuerpo = tablaCapacidad(usoDe(nodos, ui.semana)) + tendenciaUso(nodos);
+      titulo = t; cuerpo = tablaRecurso(d.id, nodos);
       if (ctx.temaHijos) cuerpo += ranking(`Menor uso: ${etq.toLowerCase()}`, nodos.map(n => ({ n, v: usoDe([n], ui.semana)[i] })).filter(x => x.v != null).sort((a, b) => a.v - b.v).slice(0, TOP), fmt1);
     } else if (ctx.tema === 'plant' && d.id === 'pl') {
       const nodos = ctx.temaNodos;

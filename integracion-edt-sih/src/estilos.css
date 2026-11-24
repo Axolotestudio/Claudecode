@@ -626,3 +626,4 @@ a.s-celda-nombre:hover .s-celda-nombre__t { color: var(--color-primary-800); }
 .s-drawer__bloque .s-drawer__dato { margin-top: 0; }
 .s-drawer__cuerpo > *, .s-drawer__bloque > * { flex-shrink: 0; }
 .s-drawer .s-tabla th { white-space: normal; line-height: 1.2; vertical-align: bottom; }
+.s-tabla .s-fila__abrir { margin: 0; }
