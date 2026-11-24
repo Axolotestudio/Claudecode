@@ -436,15 +436,17 @@
   /* Panel lateral de Infraestructura y Plantilla: mismo componente y CTA que el de Productividad */
   const RECURSO = { cama: ['Camas censables', 'cam', 'hpc', 'Hospitalización por cama'], quir: ['Quirófanos', 'qui', 'cpq', 'Cirugías por quirófano al día'], cons: ['Consultorios', 'con', 'cpc', 'Consultas por consultorio al día'] };
   function tendenciaUso(nodos) {
-    const filas = []; for (let w = Math.max(1, ui.semana - 7); w <= ui.semana; w++) filas.push({ w, u: usoDe(nodos, w) });
-    return `<section class="s-drawer__bloque"><h3>Uso en las últimas 8 semanas</h3><div class="s-tabla-scroll" role="region" aria-label="Uso por semana" tabindex="0"><table class="s-tabla"><caption class="s-sr">Uso de la capacidad por semana</caption>
+    const filas = []; for (let w = Math.max(1, ui.semana - 7); w < ui.semana; w++) filas.push({ w, u: usoDe(nodos, w) });
+    if (!filas.length) return '';
+    return `<section class="s-drawer__bloque"><h3>Semanas ${filas[0].w} a ${filas[filas.length - 1].w}</h3><div class="s-tabla-scroll" role="region" aria-label="Uso por semana" tabindex="0"><table class="s-tabla"><caption class="s-sr">Uso de la capacidad por semana</caption>
       <thead><tr><th scope="col">Semana</th><th scope="col" class="s-der">Consultas por consultorio</th><th scope="col" class="s-der">Cirugías por quirófano</th><th scope="col" class="s-der">Hospitalización por cama</th></tr></thead>
       <tbody>${filas.reverse().map(f => `<tr><td>S${f.w}</td><td class="s-der s-num">${fmt1(f.u.cpc)}</td><td class="s-der s-num">${fmt1(f.u.cpq)}</td><td class="s-der s-num">${fmt1(f.u.hpc)}</td></tr>`).join('')}</tbody></table></div></section>`;
   }
   function tablaRecurso(k, nodos) {
     const [t, c, i, etq] = RECURSO[k], u = usoDe(nodos, ui.semana);
-    const filas = []; for (let w = Math.max(1, ui.semana - 7); w <= ui.semana; w++) filas.push({ w, v: usoDe(nodos, w)[i] });
-    return `<section class="s-drawer__bloque"><h3>${etq}, últimas 8 semanas</h3><div class="s-tabla-scroll" role="region" aria-label="${etq} por semana" tabindex="0"><table class="s-tabla"><caption class="s-sr">${etq} por semana</caption>
+    const filas = []; for (let w = Math.max(1, ui.semana - 7); w < ui.semana; w++) filas.push({ w, v: usoDe(nodos, w)[i] });
+    if (!filas.length) return '';
+    return `<section class="s-drawer__bloque"><h3>${etq}, semanas ${filas[0].w} a ${filas[filas.length - 1].w}</h3><div class="s-tabla-scroll" role="region" aria-label="${etq} por semana" tabindex="0"><table class="s-tabla"><caption class="s-sr">${etq} por semana</caption>
       <thead><tr><th scope="col">Semana</th><th scope="col" class="s-der">${etq}</th></tr></thead>
       <tbody>${filas.reverse().map(f => `<tr><td>Semana ${f.w} · ${rangoSemana(f.w).corto}</td><td class="s-der s-num">${fmt1(f.v)}</td></tr>`).join('')}</tbody></table></div></section>`;
   }
