@@ -236,7 +236,7 @@
   font-size: var(--font-size-md); line-height: 1.5; color: var(--color-neutral-800); }
 .s-bloques { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-4); }
 .s-bloques > :only-child { grid-column: 1 / -1; }
-.s-bloque { display: flex; flex-direction: column; gap: var(--space-3); padding: var(--space-5, 20px); }
+.s-bloque { display: flex; flex-direction: column; gap: var(--space-3); padding: var(--space-5); }
 .s-bloque__cab { display: flex; align-items: center; gap: var(--space-3); }
 .s-icono-circ { display: grid; place-content: center; flex: none; width: 48px; height: 48px; border-radius: 50%; color: var(--color-surface); }
 .s-icono-circ svg { width: 26px; height: 26px; }
@@ -555,7 +555,8 @@ a.s-tab { display: inline-flex; align-items: center; text-decoration: none; }
   font-family: var(--font-family); font-size: var(--font-size-sm); line-height: 16px; font-weight: var(--font-weight-regular); color: var(--color-neutral-600); cursor: pointer; }
 .s-subtab svg { width: 20px; height: 20px; flex: none; }
 .s-subtab:hover { background: var(--color-surface-alt); border-bottom-color: var(--color-neutral-200); }
-.s-subtab[aria-selected="true"] { background: var(--color-primary-50); border-bottom-color: var(--color-primary-400); color: var(--color-primary-700); font-weight: var(--font-weight-semibold); }
+/* Seleccionada: Cartillas pide fondo #F0FDF9 y texto primary-400; sin token exacto se usa primary-50 y, por contraste, texto primary-700. */
+.s-subtab[aria-selected="true"] { background: var(--color-primary-50); border-bottom-color: var(--color-primary-400); color: var(--color-primary-700); }
 .s-subtab:focus-visible { outline: 2px solid var(--color-primary-700); outline-offset: -2px; }
 
 /* Tarjetas de recurso (estilo del Resumen del SIH) */
@@ -605,4 +606,11 @@ a.s-celda-nombre:hover .s-celda-nombre__t { color: var(--color-primary-800); }
 @media (max-width: 640px) {
   .s-subtab { padding: 10px 8px; }
   .s-cats__etq { font-size: var(--font-size-2xs); }
+}
+
+/* Correcciones de auditoría */
+.s-app a.s-tab:not([aria-current="page"]) { color: var(--color-neutral-700); }
+.s-cats__meta { display: block; font-size: var(--font-size-2xs); font-weight: var(--font-weight-semibold); color: var(--color-sky-700); }
+@media (max-width: 640px) {
+  .s-ind__subs { flex-wrap: wrap; }
 }

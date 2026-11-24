@@ -74,14 +74,14 @@
   OOADS.forEach((nombre, i) => {
     const r = rng('O' + i), med = Math.round(entre(r, 900, 4200));
     registrar({ id: 'O' + (i + 1), tipo: 'ooad', nombre: 'OOAD ' + nombre, estado: estadoDeOoad(nombre), titular: titulo(persona(r)),
-      medicos: med, enfermeria: Math.round(med * entre(r, 1.1, 1.5)), camas: Math.round(med * entre(r, .25, .45)), consultorios: Math.round(med * entre(r, .25, .4)),
-      quirofanos: Math.round(med * entre(r, .015, .03)), k: { c: entre(r, 45, 70), q: entre(r, .6, 1.2), u: entre(r, 4, 9), h: entre(r, 1, 2.5), pc: entre(r, .72, 1.04), pq: entre(r, .7, 1.05) } });
+      medicos: med, enfermeria: Math.round(med * entre(r, 1.1, 1.5)), camas: Math.round(med * entre(r, .25, .45)), consultorios: Math.round(med * entre(r, .45, .65)),
+      quirofanos: Math.round(med * entre(r, .045, .07)), k: { c: entre(r, 45, 70), q: entre(r, .6, 1.2), u: entre(r, 4, 9), h: entre(r, 1, 2.5), pc: entre(r, .72, 1.04), pq: entre(r, .7, 1.05) } });
   });
   UMAES.forEach(([nombre, estado], i) => {
     const r = rng('U' + i), med = Math.round(entre(r, 300, 1500));
     registrar({ id: 'U' + (i + 1), tipo: 'umae', nombre: `UMAE ${String(i + 1).padStart(2, '0')} ${nombre}`, estado, titular: titulo(persona(r)),
-      medicos: med, enfermeria: Math.round(med * entre(r, 1.2, 1.6)), camas: Math.round(med * entre(r, .4, .8)), consultorios: Math.round(med * entre(r, .12, .25)),
-      quirofanos: Math.round(med * entre(r, .02, .04)), k: { c: entre(r, 25, 40), q: entre(r, 1.2, 2.2), u: entre(r, 2, 5), h: entre(r, 2, 4), pc: entre(r, .75, 1.05), pq: entre(r, .7, 1.05) } });
+      medicos: med, enfermeria: Math.round(med * entre(r, 1.2, 1.6)), camas: Math.round(med * entre(r, .4, .8)), consultorios: Math.round(med * entre(r, .2, .35)),
+      quirofanos: Math.round(med * entre(r, .07, .1)), k: { c: entre(r, 25, 40), q: entre(r, 1.2, 2.2), u: entre(r, 2, 5), h: entre(r, 2, 4), pc: entre(r, .75, 1.05), pq: entre(r, .7, 1.05) } });
   });
   const RAICES = Object.values(nodos);
 
@@ -379,11 +379,12 @@
     const m = it.n;
     return `<li class="s-fila s-fila--medico" data-real="${it.real}"><div class="s-fila__linea"><div class="s-fila__id">${avatar(m.persona, 's-avatar--fila')}${botonDrawer(it, `Matrícula ${it.matricula} · ${it.area}`)}</div>${metricasFila(it)}</div></li>`;
   }
-  const DIR_INICIAL = { nombre: 1, cump: 1, brecha: -1, cam: -1, qui: -1, con: -1, cpc: 1, cpq: 1, hpc: 1, tot: -1, med: -1, enf: -1, otr: -1, apm: 1 };
+  const DIR_INICIAL = { nombre: 1, cump: 1, brecha: -1, cam: -1, qui: -1, con: -1, cpc: 1, cpq: 1, hpc: 1, tot: -1, med: -1, res: -1, enf: -1, otr: -1, apm: 1 };
   function botonOrden(idv, v, k, texto) {
     const act = v.orden.k === k, dir = act ? (v.orden.dir > 0 ? 'asc' : 'desc') : 'none';
     const aria = act ? (v.orden.dir > 0 ? 'ascending' : 'descending') : 'none';
-    return `<span class="s-lista__th" role="columnheader" aria-sort="${aria}"><button class="s-lista__ord${act ? ' is-activa' : ''}" type="button" data-ordenar="${idv}" data-k="${k}" data-dir="${dir}">${texto}<span class="s-lista__chev" aria-hidden="true">${I.ordenar}</span></button></span>`;
+    const estado = act ? (v.orden.dir > 0 ? ', orden ascendente' : ', orden descendente') : '';
+    return `<span class="s-lista__th"><button class="s-lista__ord${act ? ' is-activa' : ''}" type="button" id="ord-${idv}-orden-${k}" data-ordenar="${idv}" data-k="${k}" data-dir="${dir}" aria-label="Ordenar por ${texto}${estado}">${texto}<span class="s-lista__chev" aria-hidden="true">${I.ordenar}</span></button></span>`;
   }
   function ordenar(items, o) {
     const val = x => (x == null ? (o.dir > 0 ? Infinity : -Infinity) : x);
@@ -411,7 +412,7 @@
         const filas = pag.length ? pag.map(it => o.medico ? filaMedico(it, idv, v, true) : filaEntidad(it)).join('') : '<li class="s-vacio">Sin resultados con los filtros actuales.</li>';
     return `<section class="s-seccion" aria-labelledby="t-${idv}">
       <div class="s-lista__barra"><h2 id="t-${idv}" class="s-seccion__h" tabindex="-1">${o.titulo} <span class="s-pill s-num">${fmt(total)}</span></h2></div>
-      <div class="s-lista__cab" role="row"><span role="columnheader">${o.medico ? 'Médico' : 'Unidad o área'}</span><span role="columnheader">Consultas</span><span role="columnheader">Cirugías</span>${botonOrden(idv, v, 'cump', 'Cumplimiento')}${botonOrden(idv, v, 'brecha', 'Faltan')}</div>
+      <div class="s-lista__cab"><span>${o.medico ? 'Médico' : (o.columna || 'Unidad o área')}</span><span>Consultas</span><span>Cirugías</span>${botonOrden(idv, v, 'cump', 'Cumplimiento')}${botonOrden(idv, v, 'brecha', 'Faltan')}</div>
       <ul class="s-lista" aria-label="${esc(o.etiqueta)}">${filas}</ul>${paginacion(idv, v, total)}</section>`;
   }
   /* Drawer lateral: detalle de la card o fila seleccionada */
@@ -459,8 +460,10 @@
   const DIAS_SEMANA = 5;
   const fmt1 = n => n == null ? '—' : n.toLocaleString('es-MX', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
   /* Catálogo de categorías del SIH. MF, ME y OM son los médicos que mide el EDT. */
-  const CATEGORIAS = [['MF', 'Médicos familiares'], ['ME', 'Médicos especialistas'], ['OM', 'Otros médicos'], ['RE', 'Residentes'], ['EN', 'Enfermeras'],
-    ['PA', 'Paramédicos'], ['TE', 'Técnicos'], ['AD', 'Administrativas'], ['LI', 'Limpieza e higiene']];
+  const CATEGORIAS = [['AD', 'Administrativas'], ['EN', 'Enfermeras'], ['LI', 'Limpieza e higiene'], ['ME', 'Médicos especialistas'], ['MF', 'Médicos familiares'],
+    ['OM', 'Otros médicos'], ['PA', 'Paramédicos'], ['RE', 'Residentes'], ['TE', 'Técnicos']];
+  const ORDEN_PERSONAS = ['MF', 'ME', 'OM', 'RE', 'EN', 'PA', 'TE', 'AD', 'LI'];
+  const ESTATUS = ['Activo', 'Activo', 'Activo', 'Activo', 'Activo', 'Activo', 'Activo', 'Vacaciones', 'Incapacidad', 'Licencia'];
   const NOMBRE_CAT = Object.fromEntries(CATEGORIAS);
   const CAT_MEDIDAS = ['MF', 'ME', 'OM'];
   const TURNOS = ['Matutino', 'Matutino', 'Vespertino', 'Nocturno', 'Jornada acumulada'];
@@ -516,7 +519,7 @@
 
   function thOrden(idv, v, campo, k, texto, der) {
     const o = v[campo], act = o.k === k, aria = act ? (o.dir > 0 ? 'ascending' : 'descending') : 'none';
-    return `<th scope="col" class="s-th-ord${der ? ' s-der' : ''}" aria-sort="${aria}"><button class="s-lista__ord${act ? ' is-activa' : ''}" type="button" data-ordenar="${idv}" data-campo-orden="${campo}" data-k="${k}">${texto}<span class="s-lista__chev" aria-hidden="true">${I.ordenar}</span></button></th>`;
+    return `<th scope="col" class="s-th-ord${der ? ' s-der' : ''}" aria-sort="${aria}"><button class="s-lista__ord${act ? ' is-activa' : ''}" type="button" id="ord-${idv}-${campo}-${k}" data-ordenar="${idv}" data-campo-orden="${campo}" data-k="${k}">${texto}<span class="s-lista__chev" aria-hidden="true">${I.ordenar}</span></button></th>`;
   }
   function paginar(v, filas) { const pags = Math.max(1, Math.ceil(filas.length / POR_PAGINA)); if (v.pagina > pags) v.pagina = pags; return filas.slice((v.pagina - 1) * POR_PAGINA, v.pagina * POR_PAGINA); }
   function celdaNombre(h, tema, sub) {
@@ -556,7 +559,7 @@
   /* ---------- Plantilla ---------- */
   function graficaCategorias(pl) {
     const max = Math.max(1, ...CATEGORIAS.map(([k]) => pl[k]));
-    return `<ul class="s-cats" aria-hidden="true">${CATEGORIAS.map(([k, t]) => `<li><span class="s-cats__valor s-num">${fmt(pl[k])}</span><span class="s-cats__barra${CAT_MEDIDAS.includes(k) ? ' s-cats__barra--medida' : ''}" style="height:${Math.max(2, Math.round(120 * pl[k] / max))}px"></span><span class="s-cats__etq">${t}</span></li>`).join('')}</ul>
+    return `<ul class="s-cats" aria-hidden="true">${CATEGORIAS.map(([k, t]) => `<li><span class="s-cats__valor s-num">${fmt(pl[k])}</span><span class="s-cats__barra${CAT_MEDIDAS.includes(k) ? ' s-cats__barra--medida' : ''}" style="height:${Math.max(2, Math.round(120 * pl[k] / max))}px"></span><span class="s-cats__etq">${t}${CAT_MEDIDAS.includes(k) ? '<span class="s-cats__meta">Con meta</span>' : ''}</span></li>`).join('')}</ul>
       <p class="s-par__leyenda"><span class="s-cats__sw s-cats__sw--medida"></span>Con productividad medida <span class="s-cats__sw"></span>Sin productividad medida</p>
       <div class="s-sr"><table><caption>Personal por categoría</caption><thead><tr><th scope="col">Categoría</th><th scope="col">Personas</th><th scope="col">Productividad medida</th></tr></thead><tbody>${CATEGORIAS.map(([k, t]) => `<tr><td>${t}</td><td>${fmt(pl[k])}</td><td>${CAT_MEDIDAS.includes(k) ? 'Sí' : 'No'}</td></tr>`).join('')}</tbody></table></div>`;
   }
@@ -575,43 +578,43 @@
       <section class="s-card s-seccion s-cats-card" aria-labelledby="t-cat-${idv}"><h3 id="t-cat-${idv}" class="s-seccion__h">Personal por categoría</h3>${graficaCategorias(pl)}</section></section>`;
     if (o.personas) return html + listaPersonal(idv, v, o.personas);
     if (!o.hijos) return html;
-    const filas = nodos.map(h => { const p = plantilla(h), x = usoDe([h], ui.semana); return { n: h, nombre: h.nombre, tot: p.total, med: p.medicos, enf: p.EN, otr: p.total - p.medicos - p.EN, apm: p.medicos ? x.at / p.medicos : null }; });
+    const filas = nodos.map(h => { const p = plantilla(h), x = usoDe([h], ui.semana); return { n: h, nombre: h.nombre, tot: p.total, med: p.medicos, res: p.RE, enf: p.EN, otr: p.otras, apm: p.medicos ? x.at / p.medicos : null }; });
     const ord = ordenar(filas, v.ordenP), pag = paginar(v, ord);
     ui.conteo = ord.length;
-    const cuerpo = pag.length ? pag.map(f => `<tr><td>${celdaNombre(f.n, 'plant', o.sub ? o.sub(f.n) : '')}</td><td class="s-der s-num">${fmt(f.tot)}</td><td class="s-der s-num">${fmt(f.med)}</td><td class="s-der s-num">${fmt(f.enf)}</td><td class="s-der s-num">${fmt(f.otr)}</td><td class="s-der s-num">${fmt1(f.apm)}</td></tr>`).join('')
-      : '<tr><td colspan="6" class="s-vacio">Sin resultados con los filtros actuales.</td></tr>';
+    const cuerpo = pag.length ? pag.map(f => `<tr><td>${celdaNombre(f.n, 'plant', o.sub ? o.sub(f.n) : '')}</td><td class="s-der s-num">${fmt(f.tot)}</td><td class="s-der s-num">${fmt(f.med)}</td><td class="s-der s-num">${fmt(f.res)}</td><td class="s-der s-num">${fmt(f.enf)}</td><td class="s-der s-num">${fmt(f.otr)}</td><td class="s-der s-num">${fmt1(f.apm)}</td></tr>`).join('')
+      : '<tr><td colspan="7" class="s-vacio">Sin resultados con los filtros actuales.</td></tr>';
     return html + `<section class="s-seccion" aria-labelledby="t-${idv}">
       <div class="s-lista__barra"><h2 id="t-${idv}" class="s-seccion__h" tabindex="-1">${o.titulo} <span class="s-pill s-num">${fmt(ord.length)}</span></h2></div>
       <div class="s-card s-tabla-card"><div class="s-tabla-scroll" role="region" aria-labelledby="t-${idv}" tabindex="0"><table class="s-tabla s-tabla--ord"><caption class="s-sr">${o.titulo}: plantilla y atenciones por médico en la semana ${ui.semana}</caption>
-        <thead><tr><th scope="col">${o.columna}</th>${thOrden(idv, v, 'ordenP', 'tot', 'Personal total', 1)}${thOrden(idv, v, 'ordenP', 'med', 'Médicos', 1)}${thOrden(idv, v, 'ordenP', 'enf', 'Enfermeras', 1)}${thOrden(idv, v, 'ordenP', 'otr', 'Otras categorías', 1)}${thOrden(idv, v, 'ordenP', 'apm', 'Atenciones por médico', 1)}</tr></thead>
+        <thead><tr><th scope="col">${o.columna}</th>${thOrden(idv, v, 'ordenP', 'tot', 'Personal total', 1)}${thOrden(idv, v, 'ordenP', 'med', 'Médicos', 1)}${thOrden(idv, v, 'ordenP', 'res', 'Residentes', 1)}${thOrden(idv, v, 'ordenP', 'enf', 'Enfermeras', 1)}${thOrden(idv, v, 'ordenP', 'otr', 'Otras categorías', 1)}${thOrden(idv, v, 'ordenP', 'apm', 'Atenciones por médico', 1)}</tr></thead>
         <tbody>${cuerpo}</tbody></table></div></div>${paginacion(idv, v, ord.length)}</section>`;
   }
   /* Personas del servicio: médicos del EDT (con productividad) y resto de la plantilla del SIH (sin meta) */
   function personalArea(n) {
     if (n._pers) return n._pers;
     const k0 = catMedicoArea(n);
-    const lista = hijos(n).map(mm => { const e = expediente(mm); return { med: mm, nombre: cap(mm.nombre), matricula: e.matricula, cat: k0, turno: e.turno }; });
+    const lista = hijos(n).map(mm => { const e = expediente(mm); return { med: mm, nombre: cap(mm.nombre), matricula: e.matricula, cat: k0, turno: e.turno, estatus: elegir(rng('st|' + mm.id), ESTATUS), adsc: `${n.padre.nombre} · ${n.nombre}` }; });
     const pl = plantilla(n);
     ['RE', 'EN', 'PA', 'TE', 'AD', 'LI'].forEach(k => {
       for (let i = 0; i < pl[k]; i++) {
         const r = rng(`p|${n.id}|${k}|${i}`), p = persona(r);
-        lista.push({ med: null, nombre: cap(`${p.ap1} ${p.ap2} ${p.nombre}`), matricula: String(10000000 + Math.floor(r() * 89999999)), cat: k, turno: elegir(r, TURNOS) });
+        lista.push({ med: null, nombre: cap(`${p.ap1} ${p.ap2} ${p.nombre}`), matricula: String(10000000 + Math.floor(r() * 89999999)), cat: k, turno: elegir(r, TURNOS), estatus: elegir(r, ESTATUS), adsc: `${n.padre.nombre} · ${n.nombre}` });
       }
     });
     return (n._pers = lista);
   }
   function listaPersonal(idv, v, personas) {
-    const filas = personas.map(p => { const it = p.med ? item(p.med, ui.semana) : null; return Object.assign({}, p, { cump: it ? it.cump : null, orden: CATEGORIAS.findIndex(([k]) => k === p.cat) }); })
+    const filas = personas.map(p => { const it = p.med ? item(p.med, ui.semana) : null; return Object.assign({}, p, { cump: it ? it.cump : null, orden: ORDEN_PERSONAS.indexOf(p.cat) }); })
       .sort((a, b) => a.orden - b.orden || (a.cump ?? 999) - (b.cump ?? 999) || a.nombre.localeCompare(b.nombre, 'es'));
     const pag = paginar(v, filas);
     ui.conteo = filas.length;
     const cuerpo = pag.length ? pag.map(p => `<tr><td>${p.med ? `<a class="s-celda-nombre" href="#/e/${p.med.id}"><span class="s-celda-nombre__t">${esc(p.nombre)}</span><span class="s-celda-nombre__s s-num">Matrícula ${p.matricula}</span></a>` : `<span class="s-celda-nombre"><span class="s-celda-nombre__t">${esc(p.nombre)}</span><span class="s-celda-nombre__s s-num">Matrícula ${p.matricula}</span></span>`}</td>
-      <td>${NOMBRE_CAT[p.cat]}</td><td>${p.turno}</td><td>${p.med ? cumpFila(p.cump) : '<span class="s-sinmeta">Sin productividad medida</span>'}</td></tr>`).join('')
-      : '<tr><td colspan="4" class="s-vacio">Sin resultados con los filtros actuales.</td></tr>';
+      <td>${NOMBRE_CAT[p.cat]}</td><td>${p.estatus}</td><td>${p.turno}</td><td>${esc(p.adsc)}</td><td>${p.med ? cumpFila(p.cump) : '<span class="s-sinmeta">Sin productividad medida</span>'}</td></tr>`).join('')
+      : '<tr><td colspan="6" class="s-vacio">Sin resultados con los filtros actuales.</td></tr>';
     return `<section class="s-seccion" aria-labelledby="t-${idv}">
       <div class="s-lista__barra"><h2 id="t-${idv}" class="s-seccion__h" tabindex="-1">Personal del servicio <span class="s-pill s-num">${fmt(filas.length)}</span></h2></div>
       <div class="s-card s-tabla-card"><div class="s-tabla-scroll" role="region" aria-labelledby="t-${idv}" tabindex="0"><table class="s-tabla"><caption class="s-sr">Personal del servicio con su cumplimiento en la semana ${ui.semana}</caption>
-        <thead><tr><th scope="col">Personal / matrícula</th><th scope="col">Categoría</th><th scope="col">Turno</th><th scope="col">Cumplimiento semana ${ui.semana}</th></tr></thead>
+        <thead><tr><th scope="col">Personal / matrícula</th><th scope="col">Categoría</th><th scope="col">Estatus</th><th scope="col">Turno</th><th scope="col">Adscripción</th><th scope="col">Cumplimiento semana ${ui.semana}</th></tr></thead>
         <tbody>${cuerpo}</tbody></table></div></div>${paginacion(idv, v, filas.length)}</section>`;
   }
 
@@ -631,7 +634,7 @@
     let cuerpo = barra(idv, campos, act);
     if (tema === 'prod') {
       const items = sel.map(h => item(h, ui.semana));
-      cuerpo += indicadores(items, titulo) + listado(idv, v, items, { titulo, etiqueta: 'Atención médica por ' + titulo, medico: false });
+      cuerpo += indicadores(items, titulo) + listado(idv, v, items, { titulo, etiqueta: 'Atención médica por ' + titulo, medico: false, columna: 'OOAD o UMAE' });
     } else if (tema === 'infra') cuerpo += panelInfra(idv, v, sel, { hijos: true, titulo: 'Capacidad por ' + titulo, columna: 'OOAD o UMAE', sub: subEntidad });
     else cuerpo += panelPlantilla(idv, v, sel, { hijos: true, titulo: 'Plantilla por ' + titulo, columna: 'OOAD o UMAE', sub: subEntidad });
     return conTema(idv, v, encabezado({ tipo: 'vista', nombre: etiq }, null), cuerpo);
@@ -674,7 +677,7 @@
     let cuerpo = barra(idv, campos, act);
     if (tema === 'prod') {
       const items = sel.map(u => item(u, ui.semana));
-      cuerpo += indicadores(items, 'unidades') + listado(idv, v, items, { titulo: 'Unidades médicas', etiqueta: 'Atención médica por unidad', medico: false });
+      cuerpo += indicadores(items, 'unidades') + listado(idv, v, items, { titulo: 'Unidades médicas', etiqueta: 'Atención médica por unidad', medico: false, columna: 'Unidad médica' });
     } else if (tema === 'infra') cuerpo += panelInfra(idv, v, sel, { hijos: true, titulo: 'Capacidad por unidad', columna: 'Unidad médica' });
     else cuerpo += panelPlantilla(idv, v, sel, { hijos: true, titulo: 'Plantilla por unidad', columna: 'Unidad médica' });
     return conTema(idv, v, encabezado(n, n.titular ? `Titular: ${esc(n.titular)}` : ''), cuerpo);
@@ -701,12 +704,12 @@
     } else {
       const todos = [].concat(...areas.map(a => hijos(a)));
       items = todos.filter(mm => (!v.area || mm.padre.nombre === v.area) && (!q || norm(`${mm.nombre} ${expediente(mm).matricula}`).includes(q))).map(mm => item(mm, ui.semana));
-      campos = selVer + selectCampo(idv, 'area', 'Servicio', [['', 'Todas'], ...areas.map(a => [a.nombre, a.nombre])], v.area) + campoBuscar(idv, v, 'Buscar médico', 'Nombre o matrícula');
-      if (v.area) act.push(['area', `Área: ${v.area}`]);
+      campos = selVer + selectCampo(idv, 'area', 'Servicio', [['', 'Todos'], ...areas.map(a => [a.nombre, a.nombre])], v.area) + campoBuscar(idv, v, 'Buscar médico', 'Nombre o matrícula');
+      if (v.area) act.push(['area', `Servicio: ${v.area}`]);
       if (v.q) act.push(['q', `Buscar: “${v.q}”`]);
       noun = 'médicos'; titulo = 'Médicos'; etiqueta = 'Productividad por médico'; medico = true;
     }
-    return conTema(idv, v, cab, barra(idv, campos, act) + indicadores(items, noun) + listado(idv, v, items, { titulo, etiqueta, medico }));
+    return conTema(idv, v, cab, barra(idv, campos, act) + indicadores(items, noun) + listado(idv, v, items, { titulo, etiqueta, medico, columna: 'Servicio' }));
   }
   function vArea(n) {
     const idv = n.id, v = vista(idv, { orden: { k: 'brecha', dir: -1 } }), tema = temaValido(v);
@@ -736,6 +739,7 @@
   }
   function vMedico(m) {
     const e = expediente(m), w = ui.semana, idv = m.id, v = vista(idv, { tab: 'prod' });
+    if (!['prod', 'lab', 'aus', 'tray'].includes(v.tab)) v.tab = 'prod';
     const dato = (t, val) => `<div class="s-dato"><dt>${t}</dt><dd>${esc(val)}</dd></div>`;
     const perfil = `<section class="s-card s-perfil" aria-label="Datos generales del trabajador">
       ${avatar(m.persona, 's-avatar--xl')}
@@ -806,7 +810,7 @@
     $app.classList.toggle('s-app--drawer', !!dr);
     $app.innerHTML = html + dr;
     ui.pendiente = null; sincronizarURL();
-    document.title = `${nombre} · EDT`;
+    document.title = `${nombre} · SIH`;
     const cambioRuta = ultimaRuta !== hash; ultimaRuta = hash;
     if (ui.enfocar && document.getElementById('drawer-titulo')) { ui.enfocar = false; document.getElementById('drawer-titulo').focus(); }
     else if (cambioRuta && !opts.inicial) {
@@ -841,7 +845,7 @@
       const h = document.getElementById('t-' + b.dataset.vista); if (h) h.focus();
       return anunciar(`Página ${v.pagina}`);
     }
-    if (b.dataset.tab) { const v = vista(b.dataset.vista); v.tab = b.dataset.tab; v.pagina = 1; ui.drawer = null; render(); return anunciar(b.textContent.trim()); }
+    if (b.dataset.tab) { const v = vista(b.dataset.vista); if (b.classList.contains('s-subtab') && v.tab !== b.dataset.tab) { v.qs = v.qs || {}; v.qs[v.tab] = v.q; v.q = v.qs[b.dataset.tab] || ''; } v.tab = b.dataset.tab; v.pagina = 1; ui.drawer = null; render(); return anunciar(b.textContent.trim()); }
   });
   $app.addEventListener('input', ev => {
     const t = ev.target; if (!t.matches('input.s-input')) return;
