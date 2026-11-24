@@ -427,7 +427,59 @@
       <p class="s-par__leyenda"><span class="s-par__sw s-par__sw--real"></span>Real <span class="s-par__sw s-par__sw--plan"></span>Planeado</p>
       <table class="s-sr"><caption>Real y planeado por semana</caption><thead><tr><th scope="col">Semana</th><th scope="col">Real</th><th scope="col">Planeado</th></tr></thead><tbody>${filas.map(f => `<tr><td>${f.w}</td><td>${fmt(f.real)}</td><td>${fmt(f.plan)}</td></tr>`).join('')}</tbody></table>`;
   }
+  /* Panel lateral de Infraestructura y Plantilla: mismo componente y CTA que el de Productividad */
+  const RECURSO = { cama: ['Camas censables', 'cam', 'hpc', 'Hospitalización por cama'], quir: ['Quirófanos', 'qui', 'cpq', 'Cirugías por quirófano al día'], cons: ['Consultorios', 'con', 'cpc', 'Consultas por consultorio al día'] };
+  function tablaCapacidad(u) {
+    const f = (k) => { const [t, c, i] = RECURSO[k]; return `<tr><td>${t}</td><td class="s-der s-num">${fmt(u[c])}</td><td class="s-der s-num">${fmt1(u[i])}</td></tr>`; };
+    return `<div class="s-tabla-scroll" role="region" aria-label="Capacidad y uso" tabindex="0"><table class="s-tabla"><caption class="s-sr">Capacidad instalada y uso en la semana ${ui.semana}</caption>
+      <thead><tr><th scope="col">Recurso</th><th scope="col" class="s-der">Cantidad</th><th scope="col" class="s-der">Uso</th></tr></thead><tbody>${f('cama')}${f('quir')}${f('cons')}</tbody></table></div>`;
+  }
+  function tendenciaUso(nodos) {
+    const filas = []; for (let w = Math.max(1, ui.semana - 7); w <= ui.semana; w++) filas.push({ w, u: usoDe(nodos, w) });
+    return `<section class="s-drawer__bloque"><h3>Uso en las últimas 8 semanas</h3><div class="s-tabla-scroll" role="region" aria-label="Uso por semana" tabindex="0"><table class="s-tabla"><caption class="s-sr">Uso de la capacidad por semana</caption>
+      <thead><tr><th scope="col">Semana</th><th scope="col" class="s-der">Consultas por consultorio</th><th scope="col" class="s-der">Cirugías por quirófano</th><th scope="col" class="s-der">Hospitalización por cama</th></tr></thead>
+      <tbody>${filas.reverse().map(f => `<tr><td>S${f.w}</td><td class="s-der s-num">${fmt1(f.u.cpc)}</td><td class="s-der s-num">${fmt1(f.u.cpq)}</td><td class="s-der s-num">${fmt1(f.u.hpc)}</td></tr>`).join('')}</tbody></table></div></section>`;
+  }
+  function tablaPlantilla(pl, u) {
+    const apm = pl.medicos ? u.at / pl.medicos : null;
+    return `<div class="s-tabla-scroll" role="region" aria-label="Plantilla por categoría" tabindex="0"><table class="s-tabla"><caption class="s-sr">Plantilla por categoría</caption>
+      <thead><tr><th scope="col">Categoría</th><th scope="col" class="s-der">Personas</th></tr></thead>
+      <tbody>${CATEGORIAS.map(([k, t]) => `<tr><td>${t}${CAT_MEDIDAS.includes(k) ? ' <span class="s-sinmeta">· con meta</span>' : ''}</td><td class="s-der s-num">${fmt(pl[k])}</td></tr>`).join('')}
+      <tr><td><strong>Total</strong></td><td class="s-der s-num"><strong>${fmt(pl.total)}</strong></td></tr></tbody></table></div>
+      <p class="s-drawer__dato">Atenciones por médico en la semana ${ui.semana}: <strong class="s-num">${fmt1(apm)}</strong></p>`;
+  }
+  function bloqueProd(n) {
+    const it = item(n, ui.semana);
+    return `<section class="s-drawer__bloque"><h3>Productividad de la semana ${ui.semana}</h3><p class="s-drawer__dato">${it.cump == null ? '<span class="s-sinmeta">Sin meta</span>' : tagCump(it.cump)} <span class="s-num"><strong>${fmt(it.real)}</strong> de ${fmt(it.plan)} planeadas</span> · <span class="s-num ${it.brecha > 0 && it.plan > 0 ? 's-brecha' : ''}">${brechaTxt(it)}</span></p></section>`;
+  }
+  function ranking(titulo, filas, fmtVal) {
+    return `<section class="s-drawer__bloque"><h3>${titulo}</h3>${filas.length
+      ? `<ol class="s-top">${filas.map(x => `<li><a href="#/e/${x.n.id}?tab=${ctx.tema}">${esc(x.n.nombre)}</a><span class="s-num">${fmtVal(x.v)}</span></li>`).join('')}</ol>`
+      : '<p class="s-vacio-bloque">Sin datos para comparar.</p>'}</section>`;
+  }
+  function drawerTema(d) {
+    let titulo, sub = 'Semana ' + ui.semana + ' · ' + rangoSemana(ui.semana).corto, cuerpo = '';
+    if (d.k === 't-fila') {
+      const n = ctx.temaNodos.find(x => x.id === d.id); if (!n) { ui.drawer = null; return ''; }
+      titulo = n.nombre;
+      cuerpo = (ctx.tema === 'infra' ? tablaCapacidad(usoDe([n], ui.semana)) + tendenciaUso([n]) : tablaPlantilla(plantilla(n), usoDe([n], ui.semana)))
+        + bloqueProd(n) + `<a class="s-btn s-btn--outlined" href="#/e/${n.id}?tab=${ctx.tema}">${I.doc}Abrir detalle</a>`;
+    } else if (ctx.tema === 'infra' && RECURSO[d.id]) {
+      const [t, , i, etq] = RECURSO[d.id], nodos = ctx.temaNodos;
+      titulo = t; cuerpo = tablaCapacidad(usoDe(nodos, ui.semana)) + tendenciaUso(nodos);
+      if (ctx.temaHijos) cuerpo += ranking(`Menor uso: ${etq.toLowerCase()}`, nodos.map(n => ({ n, v: usoDe([n], ui.semana)[i] })).filter(x => x.v != null).sort((a, b) => a.v - b.v).slice(0, TOP), fmt1);
+    } else if (ctx.tema === 'plant' && d.id === 'pl') {
+      const nodos = ctx.temaNodos;
+      titulo = 'Plantilla'; cuerpo = tablaPlantilla(plantillaDe(nodos), usoDe(nodos, ui.semana));
+      if (ctx.temaHijos) cuerpo += ranking('Menos atenciones por médico', nodos.map(n => { const p = plantilla(n); return { n, v: p.medicos ? usoDe([n], ui.semana).at / p.medicos : null }; }).filter(x => x.v != null).sort((a, b) => a.v - b.v).slice(0, TOP), fmt1);
+    } else { ui.drawer = null; return ''; }
+    return `<aside class="s-drawer" role="dialog" aria-modal="false" aria-labelledby="drawer-titulo">
+      <header class="s-drawer__cab"><div><h2 id="drawer-titulo" tabindex="-1">${esc(titulo)}</h2><p>${esc(sub)}</p></div>
+        <button class="s-btn-icono" type="button" id="drawer-cerrar" data-cerrar aria-label="Cerrar detalle"><span class="s-icono-caja">${I.cerrar}</span></button></header>
+      <div class="s-drawer__cuerpo">${cuerpo}</div></aside>`;
+  }
   function drawer() {
+    if (ui.drawer && ui.drawer.k.startsWith('t-')) return ctx.tema ? drawerTema(ui.drawer) : '';
     const d = ui.drawer; if (!d || !ctx.agg) return '';
     let titulo, sub, m, it = null, set = ctx.items;
     if (d.k === 'sem') { titulo = 'Semana ' + ui.semana; sub = rangoSemana(ui.semana).corto; m = ctx.agg.sem; }
@@ -524,6 +576,10 @@
     return `<th scope="col" class="s-th-ord${der ? ' s-der' : ''}" aria-sort="${aria}"><button class="s-lista__ord${act ? ' is-activa' : ''}" type="button" id="ord-${idv}-${campo}-${k}" data-ordenar="${idv}" data-campo-orden="${campo}" data-k="${k}">${texto}<span class="s-lista__chev" aria-hidden="true">${I.ordenar}</span></button></th>`;
   }
   function paginar(v, filas) { const pags = Math.max(1, Math.ceil(filas.length / POR_PAGINA)); if (v.pagina > pags) v.pagina = pags; return filas.slice((v.pagina - 1) * POR_PAGINA, v.pagina * POR_PAGINA); }
+  function botonTema(h, sub) {
+    const sel = ui.drawer && ui.drawer.k === 't-fila' && ui.drawer.id === h.id;
+    return `<button class="s-fila__abrir" type="button" id="dr-${h.id}" data-drawer="t-fila" data-id="${h.id}" aria-pressed="${!!sel}"><span class="s-fila__nombre">${esc(h.nombre)}</span>${sub ? `<span class="s-fila__sub">${esc(sub)}</span>` : ''}</button>`;
+  }
   function celdaNombre(h, tema, sub) {
     return `<a class="s-celda-nombre" href="#/e/${h.id}?tab=${tema}"><span class="s-celda-nombre__t">${esc(h.nombre)}</span>${sub ? `<span class="s-celda-nombre__s">${esc(sub)}</span>` : ''}</a>`;
   }
@@ -531,12 +587,14 @@
 
   /* ---------- Infraestructura ---------- */
   function tarjetaRecurso(clase, icono, etiq, valor, usoEtq, usoVal, sinUso) {
-    return `<article class="s-card s-recurso s-recurso--${clase}"><header class="s-recurso__cab"><span class="s-recurso__icono" aria-hidden="true">${icono}</span><h3 class="s-recurso__titulo">${etiq}</h3></header>
+    const sel = ui.drawer && ui.drawer.k === 't-res' && ui.drawer.id === clase;
+    return `<article class="s-card s-recurso s-recurso--${clase}"><button class="s-bloque__abrir" type="button" id="card-${clase}" data-drawer="t-res" data-id="${clase}" aria-pressed="${!!sel}" aria-label="Ver detalle de ${etiq}"></button><header class="s-recurso__cab"><span class="s-recurso__icono" aria-hidden="true">${icono}</span><h3 class="s-recurso__titulo">${etiq}</h3></header>
       <p class="s-recurso__valor s-num">${fmt(valor)}</p>
       <p class="s-recurso__uso">${usoVal == null ? esc(sinUso) : `<strong class="s-num">${fmt1(usoVal)}</strong> ${usoEtq}`}</p></article>`;
   }
   function panelInfra(idv, v, nodos, o) {
     const u = usoDe(nodos, ui.semana), al = esc(ctx.alcance || '');
+    ctx.tema = 'infra'; ctx.temaNodos = nodos; ctx.temaHijos = !!o.hijos;
     let html = `<section class="s-seccion" aria-labelledby="t-inf"><div class="s-seccion__cab"><h2 id="t-inf" class="s-seccion__h" tabindex="-1">Capacidad instalada <strong>${al}</strong></h2><p class="s-periodo">Uso calculado con la semana <mark class="s-num">${ui.semana}</mark></p></div>
       <div class="s-kpis s-kpis--3">
         ${tarjetaRecurso('cama', I.cama, 'Camas censables', u.cam, 'atenciones de hospitalización por cama en la semana', u.hpc, 'Sin camas censables')}
@@ -547,7 +605,7 @@
     const filas = nodos.map(h => { const x = usoDe([h], ui.semana); return { n: h, nombre: h.nombre, cam: x.cam, qui: x.qui, con: x.con, cpc: x.cpc, cpq: x.cpq, hpc: x.hpc }; });
     const ord = ordenar(filas, v.ordenI), pag = paginar(v, ord);
     ui.conteo = ord.length;
-    const cuerpo = pag.length ? pag.map(f => `<tr><td>${celdaNombre(f.n, 'infra', o.sub ? o.sub(f.n) : '')}</td><td class="s-der s-num">${fmt(f.cam)}</td><td class="s-der s-num">${fmt(f.qui)}</td><td class="s-der s-num">${fmt(f.con)}</td>
+    const cuerpo = pag.length ? pag.map(f => `<tr><td>${botonTema(f.n, o.sub ? o.sub(f.n) : '')}</td><td class="s-der s-num">${fmt(f.cam)}</td><td class="s-der s-num">${fmt(f.qui)}</td><td class="s-der s-num">${fmt(f.con)}</td>
       <td class="s-der s-num">${fmt1(f.cpc)}</td><td class="s-der s-num">${fmt1(f.cpq)}</td><td class="s-der s-num">${fmt1(f.hpc)}</td></tr>`).join('')
       : '<tr><td colspan="7" class="s-vacio">Sin resultados con los filtros actuales.</td></tr>';
     return html + `<section class="s-seccion" aria-labelledby="t-${idv}">
@@ -567,7 +625,9 @@
   }
   function resumenPlantilla(pl, u) {
     const apm = pl.medicos ? u.at / pl.medicos : null;
-    return `<section class="s-panel s-panel--personal s-resumen" aria-label="Resumen de la plantilla"><div class="s-ind__filas">
+    const sel = ui.drawer && ui.drawer.k === 't-res' && ui.drawer.id === 'pl';
+    return `<section class="s-panel s-panel--personal s-resumen" aria-label="Resumen de la plantilla">
+      <button class="s-bloque__abrir" type="button" id="card-pl" data-drawer="t-res" data-id="pl" aria-pressed="${!!sel}" aria-label="Ver detalle de la plantilla"></button><div class="s-ind__filas">
       ${filaInd('s-ind--personal', I.personas, 'Personal total', pl.total, [['Médicos', pl.medicos], ['Residentes', pl.RE], ['Enfermeras', pl.EN], ['Otras categorías', pl.otras]])}
       <span class="s-ind__sep" aria-hidden="true"></span>
       <div class="s-ind"><div class="s-ind__txt"><p class="s-ind__etq">Atenciones por médico en la semana ${ui.semana}</p><p class="s-ind__valor s-num">${fmt1(apm)}</p></div></div>
@@ -575,6 +635,7 @@
   }
   function panelPlantilla(idv, v, nodos, o) {
     const pl = plantillaDe(nodos), u = usoDe(nodos, ui.semana), al = esc(ctx.alcance || '');
+    ctx.tema = 'plant'; ctx.temaNodos = nodos; ctx.temaHijos = !!o.hijos;
     let html = `<section class="s-seccion" aria-labelledby="t-pl"><div class="s-seccion__cab"><h2 id="t-pl" class="s-seccion__h" tabindex="-1">Plantilla <strong>${al}</strong></h2><p class="s-periodo">Atenciones de la semana <mark class="s-num">${ui.semana}</mark></p></div>
       ${resumenPlantilla(pl, u)}
       <section class="s-card s-seccion s-cats-card" aria-labelledby="t-cat-${idv}"><h3 id="t-cat-${idv}" class="s-seccion__h">Personal por categoría</h3>${graficaCategorias(pl)}</section></section>`;
@@ -583,7 +644,7 @@
     const filas = nodos.map(h => { const p = plantilla(h), x = usoDe([h], ui.semana); return { n: h, nombre: h.nombre, tot: p.total, med: p.medicos, res: p.RE, enf: p.EN, otr: p.otras, apm: p.medicos ? x.at / p.medicos : null }; });
     const ord = ordenar(filas, v.ordenP), pag = paginar(v, ord);
     ui.conteo = ord.length;
-    const cuerpo = pag.length ? pag.map(f => `<tr><td>${celdaNombre(f.n, 'plant', o.sub ? o.sub(f.n) : '')}</td><td class="s-der s-num">${fmt(f.tot)}</td><td class="s-der s-num">${fmt(f.med)}</td><td class="s-der s-num">${fmt(f.res)}</td><td class="s-der s-num">${fmt(f.enf)}</td><td class="s-der s-num">${fmt(f.otr)}</td><td class="s-der s-num">${fmt1(f.apm)}</td></tr>`).join('')
+    const cuerpo = pag.length ? pag.map(f => `<tr><td>${botonTema(f.n, o.sub ? o.sub(f.n) : '')}</td><td class="s-der s-num">${fmt(f.tot)}</td><td class="s-der s-num">${fmt(f.med)}</td><td class="s-der s-num">${fmt(f.res)}</td><td class="s-der s-num">${fmt(f.enf)}</td><td class="s-der s-num">${fmt(f.otr)}</td><td class="s-der s-num">${fmt1(f.apm)}</td></tr>`).join('')
       : '<tr><td colspan="7" class="s-vacio">Sin resultados con los filtros actuales.</td></tr>';
     return html + `<section class="s-seccion" aria-labelledby="t-${idv}">
       <div class="s-lista__barra"><h2 id="t-${idv}" class="s-seccion__h" tabindex="-1">${o.titulo} <span class="s-pill s-num">${fmt(ord.length)}</span></h2></div>
@@ -610,7 +671,8 @@
       .sort((a, b) => a.orden - b.orden || (a.cump ?? 999) - (b.cump ?? 999) || a.nombre.localeCompare(b.nombre, 'es'));
     const pag = paginar(v, filas);
     ui.conteo = filas.length;
-    const cuerpo = pag.length ? pag.map(p => `<tr><td>${p.med ? `<a class="s-celda-nombre" href="#/e/${p.med.id}"><span class="s-celda-nombre__t">${esc(p.nombre)}</span><span class="s-celda-nombre__s s-num">Matrícula ${p.matricula}</span></a>` : `<span class="s-celda-nombre"><span class="s-celda-nombre__t">${esc(p.nombre)}</span><span class="s-celda-nombre__s s-num">Matrícula ${p.matricula}</span></span>`}</td>
+    ctx.items = personas.filter(p => p.med).map(p => item(p.med, ui.semana)); ctx.agg = { personas: true };
+    const cuerpo = pag.length ? pag.map(p => `<tr><td>${p.med ? botonDrawer(ctx.items.find(x => x.id === p.med.id), `Matrícula ${p.matricula}`) : `<span class="s-celda-nombre"><span class="s-celda-nombre__t">${esc(p.nombre)}</span><span class="s-celda-nombre__s s-num">Matrícula ${p.matricula}</span></span>`}</td>
       <td>${NOMBRE_CAT[p.cat]}</td><td>${p.estatus}</td><td>${p.turno}</td><td>${esc(p.adsc)}</td><td>${p.med ? cumpFila(p.cump) : '<span class="s-sinmeta">Sin productividad medida</span>'}</td></tr>`).join('')
       : '<tr><td colspan="6" class="s-vacio">Sin resultados con los filtros actuales.</td></tr>';
     return `<section class="s-seccion" aria-labelledby="t-${idv}">
@@ -790,7 +852,7 @@
     ui.pendiente = opts.inicial || opts.url ? parametrosDeURL() : null;
     const hash = location.hash.split('?')[0], id = rutaActual();
     if (ultimaRuta !== hash) ui.drawer = null;
-    ctx.items = []; ctx.agg = null;
+    ctx.items = []; ctx.agg = null; ctx.tema = null; ctx.temaNodos = []; ctx.temaHijos = false;
     ctx.alcance = hash === '#/p' ? 'Personal' : !id ? ({ todo: 'Nivel Nacional', ooad: 'OOAD', umae: 'UMAE' }[RUTAS_SECCION[hash] || 'todo']) : obtener(id).nombre;
     const n = id ? obtener(id) : NACIONAL;
     if (id && !n) { location.hash = '#/'; return; }
