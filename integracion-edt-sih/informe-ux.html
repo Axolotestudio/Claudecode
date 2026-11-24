@@ -1,0 +1,169 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Informe UX · Sistema de Información Hospitalaria</title>
+<style>
+:root {
+  color-scheme: light;
+  --bg: #F3F5F6; --surface: #FFFFFF; --fg: #282D32; --muted: #49515A; --line: #E5E8EA;
+  --accent: #08865C; --accent-soft: #DCF5E9; --warn: #8C4A0B; --warn-soft: #FFF3CD;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) { color-scheme: dark; --bg: #1A1D1F; --surface: #23272B; --fg: #E5E8EA; --muted: #A7AFB6; --line: #383E45; --accent: #76DEAE; --accent-soft: #113224; --warn: #FFCB1F; --warn-soft: #3B2F0A; }
+}
+:root[data-theme="dark"] { color-scheme: dark; --bg: #1A1D1F; --surface: #23272B; --fg: #E5E8EA; --muted: #A7AFB6; --line: #383E45; --accent: #76DEAE; --accent-soft: #113224; --warn: #FFCB1F; --warn-soft: #3B2F0A; }
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--fg); font: 14px/1.55 "Noto Sans", system-ui, sans-serif; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+main { max-width: 980px; margin: 0 auto; padding-block: 32px 48px; }
+h1 { font-size: 26px; line-height: 1.25; margin: 0 0 6px; text-wrap: balance; }
+h2 { font-size: 19px; margin: 36px 0 10px; }
+h3 { font-size: 15px; margin: 22px 0 6px; }
+p { margin: 0 0 12px; }
+.meta { color: var(--muted); font-size: 13px; margin-bottom: 20px; }
+.card { background: var(--surface); border-radius: 10px; padding: 18px 20px; box-shadow: 0 1px 2px rgba(0,0,0,.08); margin-bottom: 14px; }
+.tag { display: inline-block; font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 999px; background: var(--accent-soft); color: var(--accent); margin-right: 4px; }
+.tag--warn { background: var(--warn-soft); color: var(--warn); }
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+th, td { text-align: left; vertical-align: top; padding: 9px 8px; border-bottom: 1px solid var(--line); }
+th { color: var(--muted); font-weight: 600; background: var(--bg); }
+.wrap { overflow-x: auto; }
+ol, ul { padding-left: 20px; margin: 0 0 12px; }
+li + li { margin-top: 6px; }
+.note { color: var(--muted); font-size: 13px; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Informe UX: cómo llega el Director a la información</h1>
+  <p class="meta">Sistema de Información Hospitalaria · Prototipo integrado EDT + SIH · Revisión de escritorio con los métodos de arquitectura de la información y diseño centrado en el usuario.</p>
+
+  <div class="card">
+    <h3>Resumen</h3>
+    <p>El prototipo resuelve bien el recorrido de bajar de nivel y ver la causa. Tiene tres problemas de fondo:</p>
+    <ol>
+      <li><strong>No hay forma de ver el país completo por desempeño.</strong> Para saber qué servicio está más lejos de la meta hay que entrar a cada OOAD o UMAE, una por una.</li>
+      <li><strong>La métrica de orden favorece a los grandes.</strong> Por omisión se ordena por faltante absoluto, y eso pone arriba a las OOAD con más volumen aunque cumplan mejor.</li>
+      <li><strong>Los indicadores de capacidad no dicen si son buenos o malos.</strong> Un valor como «4.9 hospitalizaciones por cama» no tiene referencia.</li>
+    </ol>
+    <p class="note">Las tres recomendaciones de mayor impacto están en la sección 4. Todo lo que sigue es hipótesis hasta validarlo con directores reales (sección 5).</p>
+  </div>
+
+  <h2>1. Tarea y contexto</h2>
+  <div class="card">
+    <p><strong>Usuario:</strong> Director(a) de Nivel Central. Revisa la productividad de OOAD, UMAE, unidades, servicios y personal, y decide dónde intervenir.</p>
+    <p><strong>Tarea principal:</strong> detectar dónde no se cumple la meta, bajar a la causa (capacidad o plantilla) y llegar al responsable.</p>
+    <p><strong>Volumen real:</strong> 35 OOAD y 25 UMAE; de 8 a 21 unidades por OOAD; de 5 a 30 servicios por unidad; más de 100,000 médicos y personal en el país.</p>
+    <p><strong>Orden en que piensa la tarea:</strong> de lo general a lo particular: país → nivel (OOAD/UMAE) → unidad → servicio → persona. En cada nivel, primero productividad, luego capacidad y plantilla.</p>
+    <p><strong>Vocabulario del usuario:</strong> OOAD, UMAE, unidad, servicio, plantilla, cumplimiento, «faltan», camas, quirófanos, consultorios.</p>
+  </div>
+
+  <h2>2. Recorridos que probé</h2>
+  <p>Cuatro recorridos representativos de la tarea. Se midieron en el prototipo, no con usuarios.</p>
+  <div class="wrap"><table>
+    <thead><tr><th>Recorrido</th><th>Camino actual</th><th>Pasos</th><th>Observación</th></tr></thead>
+    <tbody>
+      <tr><td><strong>R1.</strong> ¿Qué OOAD está más lejos de la meta?</td><td>Todo el país → OOAD → revisar la columna de cumplimiento de 35 filas, 10 por página.</td><td>3 a 5 páginas de lectura</td><td>Sin vista de ranking. El orden por omisión es por faltante absoluto, no por cumplimiento.</td></tr>
+      <tr><td><strong>R2.</strong> ¿Por qué no cumple esta OOAD?</td><td>OOAD → unidad → pestaña Infraestructura o Plantilla.</td><td>3 clics</td><td>Bien resuelto. Las pestañas de tema y el panel lateral permiten ver capacidad y plantilla sin salir.</td></tr>
+      <tr><td><strong>R3.</strong> ¿Cuál es la situación de un servicio en todo el país?</td><td>Hay que entrar a cada OOAD o UMAE y a cada unidad.</td><td>Hasta 4 niveles por servicio, repetido en cada lugar</td><td>No se puede comparar un servicio entre unidades sin visitarlas una por una.</td></tr>
+      <tr><td><strong>R4.</strong> Comparar dos OOAD</td><td>No existe.</td><td>—</td><td>Hay que abrirlas en pestañas distintas del navegador y comparar de memoria.</td></tr>
+    </tbody>
+  </table></div>
+
+  <h2>3. Hallazgos</h2>
+  <p class="note">Cada hallazgo indica si es <strong>observación</strong> (se ve en el prototipo) o <strong>hipótesis</strong> (requiere validación). El impacto y la prioridad siguen el criterio de bloqueo de la tarea, costo del error, recurrencia y recuperabilidad.</p>
+  <div class="wrap"><table>
+    <thead><tr><th>#</th><th>Hallazgo</th><th>Tipo</th><th>Tarea afectada</th><th>Prioridad</th></tr></thead>
+    <tbody>
+      <tr><td>H1</td><td>No existe vista de ranking entre niveles. R1 y R3 requieren visitar cada OOAD o UMAE.</td><td><span class="tag">Observación</span></td><td>R1, R3</td><td><span class="tag tag--warn">Alta</span></td></tr>
+      <tr><td>H2</td><td>El orden por omisión es el faltante absoluto. Ejemplo ilustrativo: una OOAD grande con cumplimiento de 85 % puede aparecer arriba, delante de una pequeña con 60 %.</td><td><span class="tag">Observación + hipótesis</span></td><td>R1</td><td><span class="tag tag--warn">Alta</span></td></tr>
+      <tr><td>H3</td><td>Los indicadores de capacidad (consultas por consultorio al día, cirugías por quirófano al día, hospitalización por cama) no tienen referencia. El Director no puede saber si un valor es bajo.</td><td><span class="tag">Observación</span></td><td>R2</td><td><span class="tag tag--warn">Alta</span></td></tr>
+      <tr><td>H4</td><td>El panel lateral se superpone a la tabla. A 1440 px tapa las columnas de la derecha, incluidas Cumplimiento y Faltan, justo las que se está comparando.</td><td><span class="tag">Observación</span></td><td>R1, R2</td><td><span class="tag">Media</span></td></tr>
+      <tr><td>H5</td><td>En Personal hay que elegir un estado antes de ver algo. No hay resumen nacional de plantilla por categoría.</td><td><span class="tag">Observación</span></td><td>R3</td><td><span class="tag">Media</span></td></tr>
+      <tr><td>H6</td><td>Dos categorías para el mismo médico: la del SIH (por ejemplo, «Médicos especialistas») y la contractual del EDT («Médico no familiar»). Ya está rotulada, pero sigue siendo dos taxonomías.</td><td><span class="tag">Observación</span></td><td>R3</td><td><span class="tag">Media</span></td></tr>
+      <tr><td>H7</td><td>No hay comparación contra un periodo anterior: solo la semana actual y la tendencia de 8 semanas en paneles. El Director no puede decir si mejora o empeora contra el mismo periodo del año pasado.</td><td><span class="tag">Observación + hipótesis</span></td><td>R1, R2</td><td><span class="tag">Media</span></td></tr>
+      <tr><td>H8</td><td>En pantallas chicas, la tabla de personas tiene 9 columnas y necesita desplazamiento horizontal. El menú se abre como cajón, lo cual es correcto.</td><td><span class="tag">Observación</span></td><td>Todas, en celular</td><td><span class="tag">Baja</span></td></tr>
+      <tr><td>H9</td><td>Los umbrales de semáforo (alto ≥ 95 %, medio 80–94 %, bajo &lt; 80 %) vienen del EDT aprobado, pero no se han validado para estas métricas.</td><td><span class="tag">Hipótesis</span></td><td>R1, R2</td><td><span class="tag">Media</span></td></tr>
+    </tbody>
+  </table></div>
+
+  <h2>4. Recomendaciones, en orden de impacto</h2>
+
+  <div class="card">
+    <h3>R-1. Vista de ranking: «Dónde está más lejos de la meta»</h3>
+    <p><strong>Qué:</strong> en la vista Todo el país, una lista de unidades o servicios ordenados por cumplimiento, con filtro por nivel (OOAD, UMAE, unidad, servicio) y por estado.</p>
+    <p><strong>Por qué:</strong> responde R1 y R3 en un solo paso y ataca H1.</p>
+    <p><strong>Cómo validarlo:</strong> prueba de escritorio con la tarea «encuentra los 5 servicios de cirugía más lejos de la meta». Medir tiempo y número de clics contra el camino actual.</p>
+  </div>
+
+  <div class="card">
+    <h3>R-2. Cambiar el orden por omisión a cumplimiento</h3>
+    <p><strong>Qué:</strong> ordenar por cumplimiento relativo y mostrar el faltante absoluto como columna secundaria.</p>
+    <p><strong>Por qué:</strong> ataca H2. Un faltante de 77,864 atenciones en una OOAD grande no es comparable con un faltante de 800 en una unidad pequeña.</p>
+    <p><strong>Cómo validarlo:</strong> pedir a 5 directores que ordenen 10 OOAD por desempeño sin ver el orden del sistema, y comparar con el orden por faltante. Esto es una hipótesis que la prueba puede confirmar o rechazar.</p>
+  </div>
+
+  <div class="card">
+    <h3>R-3. Referencia para cada indicador de capacidad</h3>
+    <p><strong>Qué:</strong> junto a cada indicador, mostrar una referencia: el promedio nacional de la misma categoría, o la meta si planeación la define. Ejemplo ilustrativo (cifras no reales): «4.9 · promedio nacional 5.6».</p>
+    <p><strong>Por qué:</strong> ataca H3 y da sentido a los indicadores propuestos.</p>
+    <p><strong>Pendiente:</strong> la referencia no existe todavía; planeación debe definirla. Sin ella, la recomendación se queda en comparación contra el promedio, que es válido pero no es una meta.</p>
+  </div>
+
+  <div class="card">
+    <h3>R-4. El panel no debe tapar la tabla</h3>
+    <p><strong>Qué:</strong> al abrir el panel, la tabla se comprime en lugar de quedar debajo; o la fila seleccionada se queda visible.</p>
+    <p><strong>Por qué:</strong> ataca H4. Hoy, para comparar la fila con su detalle, hay que cerrar el panel.</p>
+    <p><strong>Cómo validarlo:</strong> medir cuántas veces los usuarios cierran el panel para ver una columna en la prueba de R-1.</p>
+  </div>
+
+  <div class="card">
+    <h3>R-5. Comparar hasta tres OOAD o unidades</h3>
+    <p><strong>Qué:</strong> seleccionar varias filas y verlas lado a lado con los mismos indicadores.</p>
+    <p><strong>Por qué:</strong> responde R4, que hoy no existe. Es la pregunta típica de un Director antes de decidir a quién apoyar.</p>
+    <p><strong>Prioridad:</strong> media. Conviene después de R-1 y R-2.</p>
+  </div>
+
+  <div class="card">
+    <h3>R-6. Plantilla nacional sin elegir estado</h3>
+    <p><strong>Qué:</strong> en Personal, mostrar primero el resumen nacional por categoría y por estado; el filtro de estado queda como detalle.</p>
+    <p><strong>Por qué:</strong> ataca H5.</p>
+  </div>
+
+  <div class="card">
+    <h3>R-7. Un solo vocabulario para la atención</h3>
+    <p><strong>Qué:</strong> definir una línea para «atenciones» y usarla en todo el sistema: consultas, cirugías, urgencias y hospitalización. Mostrar la definición en una línea junto al primer uso.</p>
+    <p><strong>Por qué:</strong> reduce confusión entre «atenciones», «consultas» y «productividad». Es de bajo costo.</p>
+  </div>
+
+  <h2>5. Lo que no cambiaría</h2>
+  <ul>
+    <li>La jerarquía de niveles y la ruta de navegación: permiten bajar de lo general a lo particular sin perder contexto.</li>
+    <li>Las pestañas de tema bajo el título: Productividad, Infraestructura y Plantilla.</li>
+    <li>El panel lateral con «Abrir detalle»: el atajo de ver sin salir ya está validado en el EDT aprobado.</li>
+    <li>La paginación de 10 resultados.</li>
+    <li>El expediente de una sola página.</li>
+  </ul>
+
+  <h2>6. Plan de validación</h2>
+  <p>Cinco directores o analistas del perfil, sin ayuda, con cuatro tareas:</p>
+  <ol>
+    <li><strong>T1 (R1):</strong> encontrar los cinco servicios más lejos de la meta en todo el país.</li>
+    <li><strong>T2 (R2):</strong> explicar por qué una OOAD no cumple: capacidad o plantilla.</li>
+    <li><strong>T3 (R4):</strong> comparar dos OOAD y decidir cuál apoyar.</li>
+    <li><strong>T4 (R3):</strong> llegar a un médico desde un servicio de otra OOAD.</li>
+  </ol>
+  <p>Medir: si completan la tarea, tiempo, clics, cuántas veces cierran el panel, y la explicación que dan de los indicadores de capacidad. Pasa si cuatro de cinco completan sin ayuda.</p>
+
+  <h2>7. Decisiones que necesito de ti</h2>
+  <ol>
+    <li>¿El orden principal debe ser cumplimiento o faltante absoluto? (R-2)</li>
+    <li>¿Quién define la referencia de capacidad: planeación, o usamos el promedio nacional? (R-3)</li>
+    <li>¿Personal debe mostrar primero el país completo o siempre por estado? (R-6)</li>
+    <li>¿Priorizamos R-1 y R-2 antes de tocar el resto? Es lo que recomiendo.</li>
+  </ol>
+  <p class="note">Esto es una revisión de escritorio. No hubo pruebas con directores. Las afirmaciones marcadas como hipótesis deben validarse antes de tomarlas como decisión.</p>
+</main>
+</body>
+</html>
