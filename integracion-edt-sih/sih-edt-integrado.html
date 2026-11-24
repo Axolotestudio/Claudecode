@@ -1054,6 +1054,9 @@ a.s-celda-nombre:hover .s-celda-nombre__t { color: var(--color-primary-800); }
 @media (prefers-reduced-motion: reduce) {
   .s-drawer, .s-drawer--sale, .s-drawer > .s-drawer__cab, .s-drawer > .s-drawer__cuerpo > * { animation: none !important; }
 }
+.s-rank__fila--fija { cursor: default; }
+.s-rank__fila--fija:hover { background: transparent; }
+.s-niveles .s-rank__fila { grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr) minmax(0, .6fr); }
 
   </style>
 </head>
@@ -1327,7 +1330,7 @@ a.s-celda-nombre:hover .s-celda-nombre__t { color: var(--color-primary-800); }
     return ui.vistas[id];
   }
   /* Filtros en la URL: #/c/ooad?estado=Veracruz&orden=cump|1&semana=23 */
-  const CLAVES_URL = ['estado', 'tipo', 'tipoU', 'area', 'cat', 'q', 'ver', 'tab', 'rnivel', 'rest'];
+  const CLAVES_URL = ['estado', 'tipo', 'tipoU', 'nivelA', 'area', 'cat', 'q', 'ver', 'tab', 'rnivel', 'rest'];
   function aplicarParams(v, par) {
     CLAVES_URL.forEach(k => { if (par.has(k)) v[k] = par.get(k); });
     if (par.has('orden')) { const [k, d] = par.get('orden').split('|'); v.orden = { k, dir: +d || -1 }; }
@@ -1462,8 +1465,12 @@ a.s-celda-nombre:hover .s-celda-nombre__t { color: var(--color-primary-800); }
     const sel = ui.drawer && ui.drawer.k === 'fila' && ui.drawer.id === it.id;
     return `<button class="s-fila__abrir" type="button" id="dr-${it.id}" data-drawer="fila" data-id="${it.id}" aria-pressed="${!!sel}"><span class="s-fila__nombre">${esc(it.nombre)}</span><span class="s-fila__sub">${esc(sub)}</span></button>`;
   }
+  /* Nivel de atención (criterio IMSS): UMF = primer nivel; HGZ y HGR = segundo nivel; UMAE = tercer nivel */
+  const NIVEL_LABEL = { p1: 'Primer nivel', p2: 'Segundo nivel', p3: 'Tercer nivel' };
+  function nivelDe(h) { if (h.tipo === 'umae') return 'p3'; if (h.tipo === 'unidad') return h.tipoUnidad === 'UMF' ? 'p1' : 'p2'; return null; }
   function filaEntidad(it) {
-    const sub = [it.estado, `${fmt(it.medicos)} médicos`, it.titular].filter(Boolean).join(' · ');
+    const nl = nivelDe(it.n);
+    const sub = [nl ? NIVEL_LABEL[nl] : '', it.estado, `${fmt(it.medicos)} médicos`, it.titular].filter(Boolean).join(' · ');
     return `<li class="s-fila" data-real="${it.real}"><div class="s-fila__linea"><div class="s-fila__id">${botonDrawer(it, sub)}</div>${metricasFila(it)}</div></li>`;
   }
   function filaMedico(it, idv, v, expandible) {
@@ -1843,6 +1850,24 @@ a.s-celda-nombre:hover .s-celda-nombre__t { color: var(--color-primary-800); }
       ${top.length ? `<ol class="s-rank__lista">${filas}</ol>` : '<p class="s-vacio-bloque">Sin resultados con este filtro.</p>'}
     </section>`;
   }
+  /* Tarjeta «Por nivel de atención»: una fila por nivel, con cumplimiento y faltante. Respeta el filtro de estado. */
+  function tarjetaNiveles(titulo, nodos) {
+    const g = { p1: { n: 0, real: 0, plan: 0 }, p2: { n: 0, real: 0, plan: 0 }, p3: { n: 0, real: 0, plan: 0 } };
+    nodos.forEach(h => { const k = nivelDe(h); if (!k) return; const it = item(h, ui.semana); g[k].n++; g[k].real += it.real; g[k].plan += it.plan; });
+    const filas = ['p1', 'p2', 'p3'].filter(k => g[k].n > 0).map(k => {
+      const x = g[k], pct = x.plan ? Math.round(x.real / x.plan * 100) : null, falta = x.plan - x.real;
+      const etq = k === 'p1' ? 'UMF' : k === 'p2' ? 'HGZ y HGR' : 'UMAE';
+      return `<li class="s-rank__fila s-rank__fila--fija">
+        <span class="s-rank__nombre">${NIVEL_LABEL[k]}<span class="s-rank__sub">${etq} · ${fmt(x.n)} ${k === 'p3' ? 'UMAE' : 'unidades'}</span></span>
+        <span class="s-rank__cump">${pct == null ? '<span class="s-sinmeta">Sin meta</span>' : `${tagCump(pct)}<span class="s-barra s-barra--${nivel(pct)}" role="img" aria-label="Cumplimiento ${pct} %"><span style="width:${Math.min(100, pct)}%"></span></span>`}</span>
+        <span class="s-rank__falta s-num">${pct == null ? '' : falta > 0 ? `Faltan ${fmt(falta)}` : 'Cumple'}</span></li>`;
+    }).join('');
+    return `<section class="s-card s-rank s-niveles" aria-labelledby="t-niv">
+      <div class="s-rank__cab"><div><h2 id="t-niv" class="s-seccion__h">Por nivel de atención</h2>
+        <p class="s-rank__sub">Semana ${ui.semana}${titulo ? ' · ' + esc(titulo) : ''}</p></div></div>
+      <ol class="s-rank__lista">${filas}</ol>
+    </section>`;
+  }
   function vNacional() {
     const idv = 'N', v = vista(idv, { orden: { k: 'cump', dir: 1 } }), tipo = v.tipo, tema = temaValido(v);
     const etiq = { ooad: 'OOAD', umae: 'UMAE' }[tipo] || 'Todo el país';
@@ -1858,7 +1883,8 @@ a.s-celda-nombre:hover .s-celda-nombre__t { color: var(--color-primary-800); }
     let cuerpo = barra(idv, campos, act);
     if (tema === 'prod') {
       const items = sel.map(h => item(h, ui.semana));
-      cuerpo += indicadores(items, titulo) + (tipo ? '' : tarjetaLejos(v)) + listado(idv, v, items, { titulo, etiqueta: 'Atención médica por ' + titulo, medico: false, columna: 'OOAD o UMAE' });
+      const nodosNiv = [...RAICES.filter(h => h.tipo === 'ooad' && (!v.estado || estadoDe(h) === v.estado)).flatMap(hijos), ...RAICES.filter(h => h.tipo === 'umae' && (!v.estado || estadoDe(h) === v.estado))];
+      cuerpo += indicadores(items, titulo) + (tipo ? '' : tarjetaNiveles(v.estado, nodosNiv) + tarjetaLejos(v)) + listado(idv, v, items, { titulo, etiqueta: 'Atención médica por ' + titulo, medico: false, columna: 'OOAD o UMAE' });
     } else if (tema === 'infra') cuerpo += panelInfra(idv, v, sel, { hijos: true, titulo: 'Capacidad por ' + titulo, columna: 'OOAD o UMAE', sub: subEntidad });
     else cuerpo += panelPlantilla(idv, v, sel, { hijos: true, titulo: 'Plantilla por ' + titulo, columna: 'OOAD o UMAE', sub: subEntidad });
     return conTema(idv, v, encabezado({ tipo: 'vista', nombre: etiq }, null), cuerpo);
@@ -1906,16 +1932,16 @@ a.s-celda-nombre:hover .s-celda-nombre__t { color: var(--color-primary-800); }
   function vOoad(n) {
     const idv = n.id, v = vista(idv, { orden: { k: 'cump', dir: 1 } }), tema = temaValido(v);
     const q = norm(v.q.trim());
-    const sel = hijos(n).filter(u => (!v.tipoU || u.tipoUnidad === v.tipoU) && (!q || norm(u.nombre).includes(q)));
+    const sel = hijos(n).filter(u => (!v.nivelA || nivelDe(u) === v.nivelA) && (!q || norm(u.nombre).includes(q)));
     const campos = campoBuscar(idv, v, 'Buscar unidad', 'Nombre de la unidad')
-      + selectCampo(idv, 'tipoU', 'Tipo de unidad', [['', 'Todas'], ['HGR', 'HGR'], ['HGZ', 'HGZ'], ['UMF', 'UMF']], v.tipoU);
+      + selectCampo(idv, 'nivelA', 'Nivel de atención', [['', 'Todos'], ['p1', 'Primer nivel'], ['p2', 'Segundo nivel']], v.nivelA);
     const act = [];
-    if (v.tipoU) act.push(['tipoU', `Tipo: ${v.tipoU}`]);
+    if (v.nivelA) act.push(['nivelA', NIVEL_LABEL[v.nivelA]]);
     if (v.q) act.push(['q', `Buscar: “${v.q}”`]);
     let cuerpo = barra(idv, campos, act);
     if (tema === 'prod') {
       const items = sel.map(u => item(u, ui.semana));
-      cuerpo += indicadores(items, 'unidades') + listado(idv, v, items, { titulo: 'Unidades médicas', etiqueta: 'Atención médica por unidad', medico: false, columna: 'Unidad médica' });
+      cuerpo += indicadores(items, 'unidades') + tarjetaNiveles(ctx.alcance, hijos(n)) + listado(idv, v, items, { titulo: 'Unidades médicas', etiqueta: 'Atención médica por unidad', medico: false, columna: 'Unidad médica' });
     } else if (tema === 'infra') cuerpo += panelInfra(idv, v, sel, { hijos: true, titulo: 'Capacidad por unidad', columna: 'Unidad médica' });
     else cuerpo += panelPlantilla(idv, v, sel, { hijos: true, titulo: 'Plantilla por unidad', columna: 'Unidad médica' });
     return conTema(idv, v, encabezado(n, n.titular ? `Titular: ${esc(n.titular)}` : ''), cuerpo);
@@ -2100,7 +2126,7 @@ a.s-celda-nombre:hover .s-celda-nombre__t { color: var(--color-primary-800); }
     if (b.id === 'sem-sig') return cambiarSemana(ui.semana + 1);
     if (b.dataset.ordenar) { const v = vista(b.dataset.ordenar), k = b.dataset.k, c = b.dataset.campoOrden || 'orden'; v[c] = v[c].k === k ? { k, dir: -v[c].dir } : { k, dir: DIR_INICIAL[k] || 1 }; v.pagina = 1; return render(); }
     if (b.dataset.quitar) { const v = vista(b.dataset.quitar); v[b.dataset.campo] = ''; v.pagina = 1; return render(); }
-    if (b.dataset.limpiar) { const v = vista(b.dataset.limpiar); v.q = ''; v.estado = ''; v.tipo = ''; v.tipoU = ''; v.area = ''; v.cat = ''; v.pagina = 1; return render(); }
+    if (b.dataset.limpiar) { const v = vista(b.dataset.limpiar); v.q = ''; v.estado = ''; v.tipo = ''; v.tipoU = ''; v.nivelA = ''; v.area = ''; v.cat = ''; v.pagina = 1; return render(); }
     if (b.dataset.abrir) { const v = vista(b.dataset.vista); v.abiertos[b.dataset.abrir] = !v.abiertos[b.dataset.abrir]; return render(); }
     if (b.dataset.pag) {
       const v = vista(b.dataset.vista); v.pagina = +b.dataset.pag; render();
