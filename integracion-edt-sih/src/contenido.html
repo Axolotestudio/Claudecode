@@ -125,7 +125,7 @@
   function obtener(id) {
     if (nodos[id]) return nodos[id];
     const partes = id.split('.'); let n = nodos[partes[0]];
-    for (let i = 1; n && i < partes.length; i++) { hijos(n); n = nodos[partes.slice(0, i + 1).join('.')]; }
+    for (let i = 1; n && i < partes.length; i++) { if (partes[i][0] === 'x' && n.tipo === 'area') personalArea(n); else hijos(n); n = nodos[partes.slice(0, i + 1).join('.')]; }
     return n || null;
   }
   const cadena = n => { const c = []; while (n) { c.unshift(n); n = n.padre; } return c; };
@@ -186,6 +186,7 @@
       merito: Math.floor(r() * 4), demerito: r() < .15 ? 1 : 0, capacitacion: Math.floor(r() * 7),
       ausProg: Math.floor(r() * 18), ausNoProg: r() < .55 ? 0 : 1 + Math.floor(r() * 6), tarifa,
       horas: w => { const rh = rng('hx|' + m.id + '|' + w); return rh() < .6 ? 0 : 1 + Math.floor(rh() * 8); }, movimientos: mov };
+    if (m._fijo) Object.assign(m._edt, m._fijo);
     return m._edt;
   }
   const horasAnio = (e, w) => { let t = 0; for (let i = 1; i <= w; i++) t += e.horas(i); return t; };
@@ -272,7 +273,7 @@
   }
   function ruta(n) {
     if (n.tipo === 'nacional' || n.tipo === 'vista') return '';
-    const items = [{ t: 'Nivel Nacional', h: '#/' }].concat(cadena(n).map(x => ({ t: x.tipo === 'medico' ? cap(x.nombre) : x.nombre, h: '#/e/' + x.id })));
+    const items = [{ t: 'Nivel Nacional', h: '#/' }].concat(cadena(n).map(x => ({ t: x.tipo === 'medico' || x.tipo === 'persona' ? cap(x.nombre) : x.nombre, h: '#/e/' + x.id })));
     return `<nav class="s-ruta" aria-label="Ruta de navegación"><ol>${items.map((it, i) => i === items.length - 1 ? `<li><span aria-current="page">${esc(it.t)}</span></li>` : `<li><a href="${it.h}">${esc(it.t)}</a></li>`).join('')}</ol></nav>`;
   }
   function periodo() {
@@ -285,11 +286,11 @@
       <span class="s-periodo__fechas"><strong>${rangoSemana(w).largo}</strong></span></div>`;
   }
   /* Título = nivel del sistema; el nombre de la entidad va como dato secundario */
-  const NIVEL_TIPO = { nacional: 'Nivel nacional', ooad: 'Nivel OOAD', umae: 'Nivel UMAE', unidad: 'Nivel unidad', area: 'Nivel servicio', medico: 'Nivel médico' };
+  const NIVEL_TIPO = { nacional: 'Nivel nacional', ooad: 'Nivel OOAD', umae: 'Nivel UMAE', unidad: 'Nivel unidad', area: 'Nivel servicio', medico: 'Nivel médico', persona: 'Nivel trabajador' };
   const NIVEL_VISTA = { 'Todo el país': 'Nivel nacional', 'OOAD': 'Nivel OOAD', 'UMAE': 'Nivel UMAE', 'Personal': 'Personal' };
   function encabezado(n, meta) {
     const titulo = n.tipo === 'vista' ? (NIVEL_VISTA[n.nombre] || n.nombre) : (NIVEL_TIPO[n.tipo] || n.nombre);
-    const nombre = n.tipo === 'vista' || n.tipo === 'nacional' ? '' : `<span class="s-titulo__nombre">${esc(n.tipo === 'medico' ? cap(n.nombre) : n.nombre)}</span>`;
+    const nombre = n.tipo === 'vista' || n.tipo === 'nacional' ? '' : `<span class="s-titulo__nombre">${esc(n.tipo === 'medico' || n.tipo === 'persona' ? cap(n.nombre) : n.nombre)}</span>`;
     const migas = n.tipo === 'vista' || n.tipo === 'nacional' ? [] : [{ t: 'Nivel Nacional', h: '#/' }].concat(cadena(n).map(x => ({ t: x.nombre, h: '#/e/' + x.id })));
     const padre = migas.length >= 2 ? migas[migas.length - 2] : null;
     const atras = padre ? `<a class="s-btn-atras" href="${padre.h}" aria-label="Regresar a ${esc(padre.t)}">${I.flecha}</a>` : '';
@@ -487,6 +488,7 @@
       <div class="s-drawer__cuerpo">${cuerpo}</div></aside>`;
   }
   function drawer() {
+    if (ui.drawer && ui.drawer.k === 't-pers') { const n = nodos[ui.drawer.id]; if (n) return drawerPersona(n); ui.drawer = null; return ''; }
     if (ui.drawer && ui.drawer.k.startsWith('t-')) return ctx.tema ? drawerTema(ui.drawer) : '';
     const d = ui.drawer; if (!d || !ctx.agg) return '';
     let titulo, sub, m, it = null, set = ctx.items;
@@ -529,6 +531,7 @@
   const NOMBRE_CAT = Object.fromEntries(CATEGORIAS);
   const CAT_MEDIDAS = ['MF', 'ME', 'OM'];
   const TURNOS = ['Matutino', 'Matutino', 'Vespertino', 'Nocturno', 'Jornada acumulada'];
+  const JORNADAS = { Matutino: '07:00 a 15:00', Vespertino: '14:00 a 22:00', Nocturno: '21:00 a 07:00', 'Jornada acumulada': 'Sáb, dom y festivos' };
   const TEMAS = [['prod', 'Productividad', 'pulso'], ['infra', 'Infraestructura', 'hospital'], ['plant', 'Plantilla', 'personas']];
 
   function catMedicoArea(a) { return a.nombre === 'Medicina familiar' ? 'MF' : /Urgencias|continua/.test(a.nombre) ? 'OM' : 'ME'; }
@@ -668,11 +671,28 @@
     const pl = plantilla(n);
     ['RE', 'EN', 'PA', 'TE', 'AD', 'LI'].forEach(k => {
       for (let i = 0; i < pl[k]; i++) {
-        const r = rng(`p|${n.id}|${k}|${i}`), p = persona(r);
-        lista.push({ med: null, nombre: cap(`${p.ap1} ${p.ap2} ${p.nombre}`), matricula: String(10000000 + Math.floor(r() * 89999999)), cat: k, turno: elegir(r, TURNOS), estatus: elegir(r, ESTATUS), adsc: `${n.padre.nombre} · ${n.nombre}` });
+        const r = rng(`p|${n.id}|${k}|${i}`), p = persona(r), turno = elegir(r, TURNOS);
+        const nodo = registrar({ id: `${n.id}.x${k}${i}`, tipo: 'persona', padre: n, persona: p, nombre: `${p.ap1} ${p.ap2} ${p.nombre}`, cat: k,
+          _fijo: { matricula: String(10000000 + Math.floor(r() * 89999999)), categoria: NOMBRE_CAT[k], turno, jornada: JORNADAS[turno], estatus: elegir(r, ESTATUS), cedula: ['AD', 'LI'].includes(k) ? 'No aplica' : String(1e7 + Math.floor(r() * 8.9e7)) } });
+        lista.push({ med: null, nodo, nombre: cap(nodo.nombre), matricula: nodo._fijo.matricula, cat: k, turno, estatus: nodo._fijo.estatus, adsc: `${n.padre.nombre} · ${n.nombre}` });
       }
     });
     return (n._pers = lista);
+  }
+  function botonPersona(p) {
+    const sel = ui.drawer && ui.drawer.k === 't-pers' && ui.drawer.id === p.nodo.id;
+    return `<button class="s-fila__abrir" type="button" id="dr-${p.nodo.id}" data-drawer="t-pers" data-id="${p.nodo.id}" aria-pressed="${!!sel}"><span class="s-fila__nombre">${esc(p.nombre)}</span><span class="s-fila__sub s-num">Matrícula ${p.matricula}</span></button>`;
+  }
+  function drawerPersona(n) {
+    const e = expediente(n), dato = (t, val) => `<tr><th scope="row">${t}</th><td>${esc(val)}</td></tr>`;
+    return `<aside class="s-drawer" role="dialog" aria-modal="false" aria-labelledby="drawer-titulo">
+      <header class="s-drawer__cab"><div><h2 id="drawer-titulo" tabindex="-1">${esc(cap(n.nombre))}</h2><p>${esc(e.categoria)} · Matrícula ${e.matricula}</p></div>
+        <button class="s-btn-icono" type="button" id="drawer-cerrar" data-cerrar aria-label="Cerrar detalle"><span class="s-icono-caja">${I.cerrar}</span></button></header>
+      <div class="s-drawer__cuerpo"><div class="s-tabla-scroll" role="region" aria-label="Datos del trabajador" tabindex="0"><table class="s-tabla s-tabla--datos"><caption class="s-sr">Datos del trabajador</caption><tbody>
+        ${dato('Estatus', e.estatus)}${dato('Categoría', e.categoria)}${dato('Turno', `${e.turno} · ${e.jornada}`)}${dato('Unidad', e.unidad.nombre)}${dato('Servicio', e.area.nombre)}${dato('Tipo de contratación', e.contrato)}${dato('Antigüedad', `${e.antig} años`)}${dato(`Ausentismo ${ANIO}`, `${e.ausProg + e.ausNoProg} días`)}
+      </tbody></table></div>
+      <section class="s-drawer__bloque"><h3>Productividad</h3><p class="s-drawer__dato"><span class="s-sinmeta">Sin productividad medida</span></p></section>
+      <a class="s-btn s-btn--outlined" href="#/e/${n.id}">${I.doc}Abrir expediente</a></div></aside>`;
   }
   function listaPersonal(idv, v, personas, titulo = 'Personal del servicio') {
     const o = v.ordenPer;
@@ -688,7 +708,7 @@
     const pag = paginar(v, filas);
     ui.conteo = filas.length;
     if (!ctx.agg) { ctx.items = personas.filter(p => p.med).map(p => item(p.med, ui.semana)); ctx.agg = { personas: true }; }
-    const cuerpo = pag.length ? pag.map(p => `<tr><td>${p.med ? botonDrawer(ctx.items.find(x => x.id === p.med.id), `Matrícula ${p.matricula}`) : `<span class="s-celda-nombre"><span class="s-celda-nombre__t">${esc(p.nombre)}</span><span class="s-celda-nombre__s s-num">Matrícula ${p.matricula}</span></span>`}</td>
+    const cuerpo = pag.length ? pag.map(p => `<tr><td>${p.med ? botonDrawer(ctx.items.find(x => x.id === p.med.id), `Matrícula ${p.matricula}`) : botonPersona(p)}</td>
       <td>${NOMBRE_CAT[p.cat]}</td><td>${p.estatus}</td><td>${p.turno}</td><td>${esc(p.adsc)}</td><td>${p.med ? cumpFila(p.cump) : '<span class="s-sinmeta">Sin productividad medida</span>'}</td><td class="s-der s-num">${p.it ? `<span class="${p.it.brecha > 0 && p.it.plan > 0 ? 's-brecha' : ''}">${brechaTxt(p.it)}</span>` : '—'}</td></tr>`).join('')
       : '<tr><td colspan="7" class="s-vacio">Sin resultados con los filtros actuales.</td></tr>';
     return `<section class="s-seccion" aria-labelledby="t-${idv}">
@@ -824,8 +844,9 @@
     return `<ul class="s-grafica" aria-hidden="true">${sem.map(s => `<li><span class="s-grafica__valor s-num">${fmt(s.t)}</span><span class="s-grafica__barra${s.s === ui.semana ? ' s-grafica__barra--actual' : ''}" style="height:${Math.max(2, Math.round(120 * s.t / max))}px"></span><span class="s-grafica__etiqueta">S${s.s}</span></li>`).join('')}</ul>`;
   }
   function vMedico(m) {
-    const e = expediente(m), w = ui.semana, idv = m.id, v = vista(idv, { tab: 'prod' });
-    if (!['prod', 'lab', 'aus', 'tray'].includes(v.tab)) v.tab = 'prod';
+    const conMeta = m.tipo === 'medico', pestanas = [['prod', 'Productividad'], ['lab', 'Datos laborales'], ['aus', 'Ausentismo y horas extras'], ['tray', 'Trayectoria']].filter(([k]) => conMeta || k !== 'prod');
+    const e = expediente(m), w = ui.semana, idv = m.id, v = vista(idv, { tab: pestanas[0][0] });
+    if (!pestanas.some(([k]) => k === v.tab)) v.tab = pestanas[0][0];
     const dato = (t, val) => `<div class="s-dato"><dt>${t}</dt><dd>${esc(val)}</dd></div>`;
     const perfil = `<section class="s-card s-perfil" aria-label="Datos generales del trabajador">
       ${avatar(m.persona, 's-avatar--xl')}
@@ -862,7 +883,7 @@
     const st = estatusMedico(m), est = `<span class="s-tag s-tag--${st === 'Activo' ? 'activo' : 'medio'}"><i aria-hidden="true"></i>${st}</span>`;
     return encabezado(m, est) + perfil
       + `<section class="s-seccion" aria-labelledby="t-edt"><div class="s-seccion__cab"><h2 id="t-edt" class="s-seccion__h" tabindex="-1">Expediente digital del trabajador</h2></div>
-      ${tabs(idv, [['prod', 'Productividad'], ['lab', 'Datos laborales'], ['aus', 'Ausentismo y horas extras'], ['tray', 'Trayectoria']], v.tab, 'panel-' + idv)}
+      ${tabs(idv, pestanas, v.tab, 'panel-' + idv)}
       <div id="panel-${idv}" role="tabpanel" aria-labelledby="tab-${idv}-${v.tab}">${panel}</div></section>`;
   }
 
@@ -885,11 +906,11 @@
     else if (!id) { vista('N').tipo = RUTAS_SECCION[hash]; sec = RUTAS_SECCION[hash] || 'todo'; html = vNacional(); nombre = sec === 'todo' ? 'Todo el país' : sec.toUpperCase(); }
     else {
       sec = cadena(n)[0].tipo === 'umae' ? 'umae' : 'ooad';
-      if (n.tipo === 'medico') html = vMedico(n);
+      if (n.tipo === 'medico' || n.tipo === 'persona') html = vMedico(n);
       else if (n.tipo === 'area') html = vArea(n);
       else if (n.tipo === 'umae' || n.tipo === 'unidad') html = vUnidad(n);
       else html = vOoad(n);
-      nombre = n.tipo === 'medico' ? cap(n.nombre) : n.nombre;
+      nombre = n.tipo === 'medico' || n.tipo === 'persona' ? cap(n.nombre) : n.nombre;
     }
     html = html.replace('<!--tabs-->', pestanasSeccion(sec));
     const dr = drawer();
