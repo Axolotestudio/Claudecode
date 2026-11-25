@@ -1197,6 +1197,24 @@ button.s-rank__fila:focus-visible { outline: 2px solid var(--color-primary-700);
   .s-pers__datos { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 
+/* ===== Personal según referencia: título a la izquierda, categorías en cuadrícula de 4 columnas ===== */
+.s-panel--personal { display: grid; grid-template-columns: minmax(180px, 220px) minmax(0, 1fr); align-items: center; gap: var(--space-6); padding: var(--space-5) var(--space-6); min-height: 0; }
+.s-pers__titulo { display: flex; align-items: center; gap: var(--space-4); }
+.s-pers__titulo .s-icono-circ--personal { width: 56px; height: 56px; background: var(--color-sky-300); }
+.s-pers__titulo .s-ind__txt { display: flex; flex-direction: column; gap: 2px; }
+.s-pers__titulo .s-ind__etq { font-size: var(--font-size-md); color: var(--color-neutral-600); }
+.s-pers__total { font-size: var(--font-size-2xl) !important; color: var(--color-neutral-700); }
+.s-pers__datos { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--space-4) var(--space-5); }
+.s-pers__dato { padding: 0; border-top: 0; }
+.s-pers__dato .s-infra__etq { font-size: var(--font-size-md); color: var(--color-neutral-500); white-space: nowrap; }
+.s-pers__val { font-size: var(--font-size-xl); font-weight: var(--font-weight-semibold); color: var(--color-cornflower-600); }
+@container (max-width: 900px) {
+  .s-panel--personal { grid-template-columns: minmax(0, 1fr); }
+}
+@container (max-width: 640px) {
+  .s-pers__datos { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
 /* Versión delegado: a todo el ancho */
 .s-contenido { max-width: none; margin: 0; }
 
