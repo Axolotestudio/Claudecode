@@ -1106,3 +1106,21 @@ h1[tabindex="-1"]:focus, h2[tabindex="-1"]:focus { outline: none; }
 .s-tarjeta .s-tarjeta__pares dd, .s-tarjeta .s-tarjeta__unico { font-weight: var(--font-weight-semibold); }
 /* Nacional: horas extras incluye el importe; cifras un paso más chicas para que quepan las tres */
 .s-tarjeta--hx .s-tarjeta__pares dd { font-size: var(--font-size-xl); }
+
+/* Alerta de sistema (Cartillas, estado Alerta): flotante, pegada al borde inferior del header SDN; se retira sola a los 4 s */
+.s-alerta { position: fixed; top: calc(var(--sdn-header-gob-height) + var(--sdn-user-bar-height)); left: 50%; z-index: 200; transform: translateX(-50%);
+  box-sizing: border-box; display: flex; align-items: center; gap: var(--space-4); width: 930px; max-width: calc(100vw - 2 * var(--space-4)); min-height: 72px;
+  padding: var(--space-2) 15px; border: 2px solid; border-radius: var(--radius-xs); box-shadow: var(--shadow-md); font-family: var(--font-family);
+  animation: s-alerta-entra .2s ease-out; }
+.s-alerta__icono { display: grid; place-content: center; flex: none; width: 56px; height: 56px; padding: var(--space-4); box-sizing: border-box; }
+.s-alerta__icono svg { width: 24px; height: 24px; }
+.s-alerta__texto { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: var(--space-1); font-size: var(--font-size-sm); font-weight: var(--font-weight-regular); line-height: 1.2; }
+.s-alerta__texto strong { font-weight: var(--font-weight-medium); }
+.s-alerta__texto span { color: var(--color-neutral-700); }
+.s-alerta__cerrar { display: grid; place-content: center; flex: none; width: 56px; height: 42px; padding: var(--space-4); box-sizing: border-box; border: 0; background: transparent; color: inherit; cursor: pointer; }
+.s-alerta__cerrar svg { width: 10px; height: 10px; stroke-width: 3; }
+.s-alerta__cerrar:focus-visible { outline: 2px solid currentColor; outline-offset: -4px; border-radius: var(--radius-xs); }
+.s-alerta--warning { background: var(--color-warning-100); border-color: var(--color-warning-800); color: var(--color-warning-800); }
+.s-alerta--sale { opacity: 0; transition: opacity .2s; }
+@keyframes s-alerta-entra { from { opacity: 0; transform: translate(-50%, calc(-1 * var(--space-2))); } }
+@media (prefers-reduced-motion: reduce) { .s-alerta { animation: none; } .s-alerta--sale { transition: none; } }

@@ -757,12 +757,12 @@
     ui.conteo = filas.length;
     if (!ctx.agg) { ctx.items = personas.filter(p => p.med).map(p => item(p.med, ui.semana)); ctx.agg = { personas: true }; }
     const cuerpo = pag.length ? pag.map(p => `<tr><td>${p.med ? botonDrawer(ctx.items.find(x => x.id === p.med.id), `Matrícula ${p.matricula}`) : botonPersona(p)}</td>
-      <td>${NOMBRE_CAT[p.cat]}</td><td>${p.estatus}</td><td>${p.turno}</td><td>${esc(p.adsc)}</td><td class="s-der s-num">${p.it ? `<b>${fmt(p.it.m.cr)}</b> de ${fmt(p.it.m.cp)}` : '—'}</td><td class="s-der s-num">${p.it ? `<b>${fmt(p.it.m.qr)}</b> de ${fmt(p.it.m.qp)}` : '—'}</td><td>${p.med ? cumpFila(p.cump) : '<span class="s-sinmeta">Sin productividad medida</span>'}</td><td class="s-der s-num">${p.it ? `<span class="${p.it.brecha > 0 && p.it.plan > 0 ? 's-brecha' : ''}">${brechaTxt(p.it)}</span>` : '—'}</td></tr>`).join('')
-      : '<tr><td colspan="9" class="s-vacio">Sin resultados con los filtros actuales.</td></tr>';
+      <td>${NOMBRE_CAT[p.cat]}</td><td>${p.estatus}</td><td>${p.turno}</td><td>${esc(p.adsc)}</td><td class="s-der s-num">${p.it ? `<b>${fmt(p.it.m.cr)}</b> de ${fmt(p.it.m.cp)}` : '—'}</td><td class="s-der s-num">${p.it ? `<b>${fmt(p.it.m.qr)}</b> de ${fmt(p.it.m.qp)}` : '—'}</td><td>${p.med ? cumpFila(p.cump) : '<span class="s-sinmeta">Sin productividad medida</span>'}</td><td class="s-der s-num">${p.it ? `<span class="${p.it.brecha > 0 && p.it.plan > 0 ? 's-brecha' : ''}">${brechaTxt(p.it)}</span>` : '—'}</td><td class="s-der s-num">${fmt(expediente(p.med || p.nodo).ausNoProg)}</td></tr>`).join('')
+      : '<tr><td colspan="10" class="s-vacio">Sin resultados con los filtros actuales.</td></tr>';
     return `<section class="s-seccion" aria-labelledby="t-${idv}">
       <div class="s-lista__barra"><h2 id="t-${idv}" class="s-seccion__h" tabindex="-1">${esc(titulo)} <span class="s-pill s-num">${fmt(filas.length)}</span></h2></div>
       <div class="s-card s-tabla-card"><div class="s-tabla-scroll" role="region" aria-labelledby="t-${idv}" tabindex="0"><table class="s-tabla s-tabla--ord"><caption class="s-sr">${esc(titulo)} con su cumplimiento en la semana ${ui.semana}</caption>
-        <thead><tr><th scope="col">Personal / matrícula</th>${thOrden(idv, v, 'ordenPer', 'cat', 'Categoría')}<th scope="col">Estatus</th><th scope="col">Turno</th><th scope="col">Adscripción</th><th scope="col" class="s-der">Consultas</th><th scope="col" class="s-der">Cirugías</th>${thOrden(idv, v, 'ordenPer', 'cump', 'Cumplimiento semana ' + ui.semana)}${thOrden(idv, v, 'ordenPer', 'brecha', 'Faltan', 1)}</tr></thead>
+        <thead><tr><th scope="col">Personal / matrícula</th>${thOrden(idv, v, 'ordenPer', 'cat', 'Categoría')}<th scope="col">Estatus</th><th scope="col">Turno</th><th scope="col">Adscripción</th><th scope="col" class="s-der">Consultas</th><th scope="col" class="s-der">Cirugías</th>${thOrden(idv, v, 'ordenPer', 'cump', 'Cumplimiento semana ' + ui.semana)}${thOrden(idv, v, 'ordenPer', 'brecha', 'Faltan', 1)}<th scope="col" class="s-der">Ausentismo no programado (días, ${ANIO})</th></tr></thead>
         <tbody>${cuerpo}</tbody></table></div></div>${paginacion(idv, v, filas.length)}</section>`;
   }
 
@@ -1001,6 +1001,31 @@
     return encabezado(m, '') + prod + ficha + tarjetas;
   }
 
+  /* ---------- Alerta de sistema (Cartillas): flotante bajo el header, se retira sola a los 4 s ---------- */
+  const ICONO_ALERTA = svg('<path d="M12 4 21 20H3z"/><path d="M12 10v4"/><path d="M12 17h.01"/>');
+  const alertasVistas = new Set();
+  function mostrarAlerta(a) {
+    const prev = document.getElementById('s-alerta'); if (prev) prev.remove();
+    const el = document.createElement('div');
+    el.id = 's-alerta'; el.className = 's-alerta s-alerta--' + a.tipo; el.setAttribute('role', 'status');
+    el.innerHTML = `<span class="s-alerta__icono">${ICONO_ALERTA}</span><div class="s-alerta__texto"><strong>${esc(a.titulo)}</strong><span>${esc(a.mensaje)}</span></div><button class="s-alerta__cerrar" type="button" aria-label="Cerrar alerta">${I.cerrar}</button>`;
+    el.querySelector('button').addEventListener('click', () => el.remove());
+    document.body.appendChild(el);
+    setTimeout(() => { el.classList.add('s-alerta--sale'); setTimeout(() => el.remove(), 200); }, 4000);
+  }
+  function enLista(xs) { return xs.length < 2 ? xs.join('') : xs.slice(0, -1).join(', ') + ' y ' + xs[xs.length - 1]; }
+  function alertaBajoMeta(nodos, plural, singular) {
+    const bajos = nodos.map(h => item(h, ui.semana)).filter(x => x.cump != null && x.cump < 80).sort((a, b) => a.cump - b.cump);
+    if (!bajos.length) return null;
+    const top = bajos.slice(0, 3).map(x => `${x.nombre} ${x.cump} %`), resto = bajos.length - top.length;
+    return { tipo: 'warning', titulo: `Semana ${ui.semana}: ${bajos.length} ${bajos.length === 1 ? singular : plural} por debajo del 80 % de la meta`,
+      mensaje: (resto > 0 ? `${top.join(', ')} y ${resto} más` : enLista(top)) + '.' };
+  }
+  function alertaPerfil(hash, id) {
+    if (hash !== '#/') return null;
+    return alertaBajoMeta(RAICES, 'OOAD y UMAE', 'OOAD o UMAE');
+  }
+
   /* ---------- Render y eventos ---------- */
   function rutaActual() { const h = location.hash.split('?')[0].replace(/^#\/?/, ''); return h.startsWith('e/') ? h.slice(2) : ''; }
   const RUTAS_SECCION = { '#/': '', '#/c/ooad': 'ooad', '#/c/umae': 'umae' };
@@ -1050,8 +1075,13 @@
       const el = document.getElementById(focoId); el.focus();
       if (caret != null && el.setSelectionRange) { try { el.setSelectionRange(caret, caret); } catch (e) { /* tipo sin selección */ } }
     }
+    /* Una vez por vista de entrada y semana: al llegar y al cambiar de semana */
+    const clave = hash + '|' + ui.semana, al = alertasVistas.has(clave) ? null : alertaPerfil(hash, id);
+    alertasVistas.add(clave);
+    if (al) mostrarAlerta(al);
   }
   function cambiarSemana(s) {
+    const vieja = document.getElementById('s-alerta'); if (vieja) vieja.remove(); /* la alerta de otra semana no se queda */
     ui.semana = Math.min(SEMANA_ACTUAL, Math.max(1, s)); render();
     const a = document.activeElement; if (!a || a === document.body || a.disabled) document.getElementById('sem-sel').focus();
     anunciar(`Semana ${ui.semana}, ${rangoSemana(ui.semana).voz}`);
