@@ -807,5 +807,17 @@ button.s-rank__fila:focus-visible { outline: 2px solid var(--color-primary-700);
 .s-ind--apilado { flex-wrap: wrap; row-gap: var(--space-2); }
 .s-ind--apilado .s-ind__subs { flex-basis: 100%; padding-left: 52px; }
 
+/* ===== Tarjetas de Infraestructura y Personal (formato de referencia) ===== */
+.s-panel--infra { flex-direction: row; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: var(--space-4) var(--space-6); }
+.s-panel--infra .s-ind { flex: 0 0 auto; }
+.s-infra__datos { display: flex; flex-wrap: wrap; gap: var(--space-5) var(--space-6); position: relative; z-index: 2; }
+.s-infra__dato { display: flex; flex-direction: column; gap: 2px; min-width: 96px; padding: 4px 8px; border: 0; border-radius: var(--radius-sm); background: transparent; text-align: left; font-family: var(--font-family); cursor: pointer; }
+.s-infra__dato:hover { background: var(--color-surface); }
+.s-infra__dato:focus-visible { outline: 2px solid var(--color-primary-700); outline-offset: 2px; }
+.s-infra__etq { font-size: var(--font-size-sm); color: var(--color-neutral-600); }
+.s-infra__val { font-size: var(--font-size-xl); font-weight: var(--font-weight-semibold); color: var(--color-lavender-600); }
+.s-panel--personal .s-ind__filas .s-ind__subs dd { font-size: var(--font-size-xl); }
+.s-ind--real .s-ind__subs dd, .s-ind--plan .s-ind__subs dd { font-size: var(--font-size-xl); }
+
 /* Versión delegado: a todo el ancho */
 .s-contenido { max-width: none; margin: 0; }

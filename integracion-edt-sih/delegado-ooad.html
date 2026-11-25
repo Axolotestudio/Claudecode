@@ -1066,6 +1066,18 @@ button.s-rank__fila:focus-visible { outline: 2px solid var(--color-primary-700);
 .s-ind--apilado { flex-wrap: wrap; row-gap: var(--space-2); }
 .s-ind--apilado .s-ind__subs { flex-basis: 100%; padding-left: 52px; }
 
+/* ===== Tarjetas de Infraestructura y Personal (formato de referencia) ===== */
+.s-panel--infra { flex-direction: row; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: var(--space-4) var(--space-6); }
+.s-panel--infra .s-ind { flex: 0 0 auto; }
+.s-infra__datos { display: flex; flex-wrap: wrap; gap: var(--space-5) var(--space-6); position: relative; z-index: 2; }
+.s-infra__dato { display: flex; flex-direction: column; gap: 2px; min-width: 96px; padding: 4px 8px; border: 0; border-radius: var(--radius-sm); background: transparent; text-align: left; font-family: var(--font-family); cursor: pointer; }
+.s-infra__dato:hover { background: var(--color-surface); }
+.s-infra__dato:focus-visible { outline: 2px solid var(--color-primary-700); outline-offset: 2px; }
+.s-infra__etq { font-size: var(--font-size-sm); color: var(--color-neutral-600); }
+.s-infra__val { font-size: var(--font-size-xl); font-weight: var(--font-weight-semibold); color: var(--color-lavender-600); }
+.s-panel--personal .s-ind__filas .s-ind__subs dd { font-size: var(--font-size-xl); }
+.s-ind--real .s-ind__subs dd, .s-ind--plan .s-ind__subs dd { font-size: var(--font-size-xl); }
+
 /* Versión delegado: a todo el ancho */
 .s-contenido { max-width: none; margin: 0; }
 
@@ -1720,11 +1732,10 @@ button.s-rank__fila:focus-visible { outline: 2px solid var(--color-primary-700);
     const u = usoDe(nodos, ui.semana), al = esc(ctx.alcance || '');
     ctx.tema = 'infra'; ctx.temaNodos = nodos; ctx.temaHijos = !!o.hijos;
     let html = `<section class="s-seccion" aria-labelledby="t-inf"><div class="s-seccion__cab"><h2 id="t-inf" class="s-seccion__h" tabindex="-1">Capacidad instalada <strong>${al}</strong></h2><p class="s-periodo">Uso calculado con la semana <mark class="s-num">${ui.semana}</mark></p></div>
-      <div class="s-kpis s-kpis--3">
-        ${tarjetaRecurso('cama', I.cama, 'Camas censables', u.cam, 'atenciones de hospitalización por cama en la semana', u.hpc, 'Sin camas censables')}
-        ${tarjetaRecurso('quir', I.quirofano, 'Quirófanos', u.qui, 'cirugías por quirófano al día', u.cpq, 'Sin quirófanos')}
-        ${tarjetaRecurso('cons', I.consultorio, 'Consultorios', u.con, 'consultas por consultorio al día', u.cpc, 'Sin consultorios')}
-      </div></section>`;
+      <section class="s-panel s-panel--infra s-resumen" aria-label="Infraestructura médica">
+        <div class="s-ind s-ind--infra"><span class="s-icono-circ s-icono-circ--infra" aria-hidden="true">${I.hospital}</span><div class="s-ind__txt"><p class="s-ind__etq">Infraestructura médica</p></div></div>
+        <div class="s-infra__datos">${[['cama', 'Camas', u.cam], ['cons', 'Consultorios', u.con], ['quir', 'Quirófanos', u.qui]].map(([k, t, v]) => `<button class="s-infra__dato" type="button" data-drawer="t-res" data-id="${k}" aria-label="Ver detalle de ${t}"><span class="s-infra__etq">${t}</span><span class="s-infra__val s-num">${fmt(v)}</span></button>`).join('')}</div>
+      </section></section>`;
     if (!o.hijos) return html;
     const filas = nodos.map(h => { const x = usoDe([h], ui.semana); return { n: h, nombre: h.nombre, cam: x.cam, qui: x.qui, con: x.con, cpc: x.cpc, cpq: x.cpq, hpc: x.hpc }; });
     const ord = ordenar(filas, v.ordenI), pag = paginar(v, ord);
@@ -1748,14 +1759,11 @@ button.s-rank__fila:focus-visible { outline: 2px solid var(--color-primary-700);
       <div class="s-sr"><table><caption>Personal por categoría</caption><thead><tr><th scope="col">Categoría</th><th scope="col">Personas</th><th scope="col">Productividad medida</th></tr></thead><tbody>${CATEGORIAS.map(([k, t]) => `<tr><td>${t}</td><td>${fmt(pl[k])}</td><td>${CAT_MEDIDAS.includes(k) ? 'Sí' : 'No'}</td></tr>`).join('')}</tbody></table></div>`;
   }
   function resumenPlantilla(pl, u) {
-    const apm = pl.medicos ? u.at / pl.medicos : null;
     const sel = ui.drawer && ui.drawer.k === 't-res' && ui.drawer.id === 'pl';
-    return `<section class="s-panel s-panel--personal s-resumen" aria-label="Resumen de la plantilla">
-      <button class="s-bloque__abrir" type="button" id="card-pl" data-drawer="t-res" data-id="pl" aria-pressed="${!!sel}" aria-label="Ver detalle de la plantilla"></button><div class="s-ind__filas">
-      ${filaInd('s-ind--personal', I.personas, 'Personal total', pl.total, [['Médicos', pl.medicos], ['Residentes', pl.RE], ['Enfermeras', pl.EN], ['Otras categorías', pl.otras]])}
-      <span class="s-ind__sep" aria-hidden="true"></span>
-      <div class="s-ind"><div class="s-ind__txt"><p class="s-ind__etq">Atenciones por médico en la semana ${ui.semana}</p><p class="s-ind__valor s-num">${fmt1(apm)}</p></div></div>
-    </div></section>`;
+    return `<section class="s-panel s-panel--personal s-resumen" aria-label="Personal">
+      <button class="s-bloque__abrir" type="button" id="card-pl" data-drawer="t-res" data-id="pl" aria-pressed="${!!sel}" aria-label="Ver detalle del personal"></button>
+      <div class="s-ind__filas">${filaInd('s-ind--personal', I.personas, 'Personal', pl.total, [['Médicos', pl.medicos], ['Enfermeras', pl.EN]])}</div>
+    </section>`;
   }
   function panelPlantilla(idv, v, nodos, o) {
     const pl = plantillaDe(nodos), u = usoDe(nodos, ui.semana), al = esc(ctx.alcance || '');
