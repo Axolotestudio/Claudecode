@@ -1152,6 +1152,27 @@ button.s-rank__fila:focus-visible { outline: 2px solid var(--color-primary-700);
 .s-infra__etq { font-size: var(--font-size-md); }
 .s-infra__val { font-size: var(--font-size-2xl); line-height: 1.2; }
 
+/* ===== Personal: mismo formato que infraestructura, con todas las categorías ===== */
+.s-panel--personal { display: grid; grid-template-columns: minmax(0, 1.2fr) repeat(7, minmax(0, 1fr)); align-items: center; gap: var(--space-5); padding: var(--space-6); min-height: 128px; }
+.s-pers__titulo { min-width: 0; gap: var(--space-4); }
+.s-pers__titulo .s-icono-circ--personal { width: 64px; height: 64px; background: var(--color-sky-500); }
+.s-pers__titulo .s-icono-circ--personal svg { width: 30px; height: 30px; }
+.s-pers__titulo .s-ind__etq { font-size: var(--font-size-lg); color: var(--color-neutral-600); }
+.s-pers__total { font-size: var(--font-size-2xl); font-weight: var(--font-weight-semibold); color: var(--color-neutral-700); line-height: 1.2; }
+.s-pers__datos { grid-column: span 7; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: var(--space-4); }
+.s-pers__dato { display: flex; flex-direction: column; gap: 2px; min-width: 0; padding: 0; background: transparent; }
+.s-pers__val { font-size: var(--font-size-xl); font-weight: var(--font-weight-semibold); color: var(--color-sky-700); line-height: 1.2; }
+.s-pers__dato .s-infra__etq { font-size: var(--font-size-md); line-height: 1.3; }
+@container (max-width: 900px) {
+  .s-panel--personal { grid-template-columns: minmax(0, 1fr); }
+  .s-pers__datos { grid-column: auto; grid-template-columns: repeat(4, minmax(0, 1fr)); }
+}
+@container (max-width: 640px) {
+  .s-pers__datos { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+.s-panel--personal { grid-template-columns: minmax(0, 1.7fr) repeat(7, minmax(0, 1fr)); gap: var(--space-5) var(--space-4); }
+.s-pers__datos { gap: var(--space-4) var(--space-5); }
+
 /* Versión delegado: a todo el ancho */
 .s-contenido { max-width: none; margin: 0; }
 
@@ -1842,7 +1863,8 @@ button.s-rank__fila:focus-visible { outline: 2px solid var(--color-primary-700);
     const sel = ui.drawer && ui.drawer.k === 't-res' && ui.drawer.id === 'pl';
     return `<section class="s-panel s-panel--personal s-resumen" aria-label="Personal">
       <button class="s-bloque__abrir" type="button" id="card-pl" data-drawer="t-res" data-id="pl" aria-pressed="${!!sel}" aria-label="Ver detalle del personal"></button>
-      <div class="s-ind__filas">${filaInd('s-ind--personal', I.personas, 'Personal', pl.total, [['Médicos', pl.medicos], ['Enfermeras', pl.EN]])}</div>
+      <div class="s-ind s-pers__titulo"><span class="s-icono-circ s-icono-circ--personal" aria-hidden="true">${I.personas}</span><div class="s-ind__txt"><p class="s-ind__etq">Personal</p><p class="s-pers__total s-num">${fmt(pl.total)}</p></div></div>
+      <div class="s-infra__datos s-pers__datos">${[['Médicos', pl.medicos], ['Enfermeras', pl.EN], ['Residentes', pl.RE], ['Paramédicos', pl.PA], ['Técnicos', pl.TE], ['Administrativas', pl.AD], ['Limpieza e higiene', pl.LI]].map(([t, v]) => `<div class="s-infra__dato s-pers__dato"><span class="s-infra__etq">${t}</span><span class="s-pers__val s-num">${fmt(v)}</span></div>`).join('')}</div>
     </section>`;
   }
   function panelPlantilla(idv, v, nodos, o) {
