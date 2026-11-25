@@ -1078,13 +1078,30 @@ button.s-rank__fila:focus-visible { outline: 2px solid var(--color-primary-700);
 .s-panel--personal .s-ind__filas .s-ind__subs dd { font-size: var(--font-size-xl); }
 .s-ind--real .s-ind__subs dd, .s-ind--plan .s-ind__subs dd { font-size: var(--font-size-xl); }
 
-/* Productividad acumulada: si no caben las dos filas lado a lado en el espacio disponible, se apilan */
-.s-contenido { container-type: inline-size; }
-@container (max-width: 1080px) {
-  .s-ind__filas:has(.s-ind--apilable) { flex-direction: column; align-items: stretch; gap: var(--space-3); }
-  .s-ind__filas:has(.s-ind--apilable) > .s-ind__sep { display: none; }
-  .s-ind__filas:has(.s-ind--apilable) > .s-ind--plan { padding-top: var(--space-3); border-top: 1px solid var(--color-teal-100); }
+/* ===== Estructura usable: título arriba, datos abajo en cuadrícula, sin amontonar ni dejar aire ===== */
+/* Productividad acumulada: dos columnas iguales (real | planeada), cada una con su total y sus desgloses */
+.s-panel--prod .s-ind__filas { display: grid; grid-template-columns: minmax(0, 1fr) 1px minmax(0, 1fr); gap: var(--space-5); align-items: stretch; }
+.s-panel--prod .s-ind__filas > .s-ind__sep { width: 1px; align-self: stretch; background: var(--color-teal-500); }
+.s-ind--apilable { flex-wrap: wrap; align-items: center; row-gap: var(--space-3); }
+.s-ind--apilable .s-ind__subs { flex-basis: 100%; display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 200px)); justify-content: start; gap: var(--space-3) var(--space-6); margin: 0; padding-left: 52px; }
+.s-ind--apilable .s-ind__subs > div { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+/* Infraestructura: título arriba, tres datos en columnas iguales */
+.s-panel--infra { display: flex; flex-direction: column; align-items: stretch; gap: var(--space-4); }
+.s-infra__datos { display: grid; grid-template-columns: repeat(3, minmax(0, 200px)); justify-content: start; gap: var(--space-4) var(--space-6); }
+.s-infra__dato { min-width: 0; }
+/* Pantallas angostas: columnas se apilan */
+@container (max-width: 900px) {
+  .s-panel--prod .s-ind__filas { grid-template-columns: minmax(0, 1fr); }
+  .s-panel--prod .s-ind__filas > .s-ind__sep { display: none; }
+  .s-panel--prod .s-ind__filas > .s-ind--plan { padding-top: var(--space-3); border-top: 1px solid var(--color-teal-100); }
 }
+@media (max-width: 640px) {
+  .s-infra__datos { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .s-ind--apilable .s-ind__subs { padding-left: 0; }
+}
+
+.s-panel--personal .s-ind { align-items: center; }
+.s-panel--personal .s-ind__subs { gap: var(--space-6); }
 
   </style>
 </head>
