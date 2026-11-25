@@ -869,3 +869,19 @@ button.s-rank__fila:focus-visible { outline: 2px solid var(--color-primary-700);
   .s-acu__val { font-size: var(--font-size-xl); }
 }
 .s-contenido { container-type: inline-size; }
+
+/* ===== Infraestructura médica: formato de referencia (título a la izquierda, tres cifras en columnas iguales) ===== */
+.s-panel--infra { display: grid; grid-template-columns: minmax(0, 1.2fr) repeat(3, minmax(0, 1fr)); align-items: center; gap: var(--space-5); padding: var(--space-5); }
+.s-panel--infra .s-ind { min-width: 0; gap: var(--space-4); }
+.s-panel--infra .s-icono-circ--infra { width: 56px; height: 56px; background: var(--color-lavender-400); }
+.s-panel--infra .s-icono-circ--infra svg { width: 26px; height: 26px; }
+.s-panel--infra .s-ind__etq { font-size: var(--font-size-md); color: var(--color-neutral-600); white-space: normal; }
+.s-infra__datos { grid-column: span 3; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-4); }
+.s-infra__dato { display: flex; flex-direction: column; gap: 2px; padding: 0; background: transparent; }
+.s-infra__dato:hover { background: transparent; }
+.s-infra__etq { font-size: var(--font-size-md); color: var(--color-neutral-500); }
+.s-infra__val { font-size: var(--font-size-xl); font-weight: var(--font-weight-semibold); color: var(--color-lavender-700); }
+@container (max-width: 640px) {
+  .s-panel--infra { grid-template-columns: minmax(0, 1fr); }
+  .s-infra__datos { grid-column: auto; grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
