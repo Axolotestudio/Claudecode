@@ -1427,7 +1427,7 @@ button.s-rank__fila:focus-visible { outline: 2px solid var(--color-primary-700);
   function filaInd(clase, icono, etiq, valor, subs) {
     return `<div class="s-ind ${clase}"><span class="s-icono-circ s-icono-circ--${clase.includes('personal') ? 'personal' : clase.includes('infra') ? 'infra' : 'prod'}" aria-hidden="true">${icono}</span>
       <div class="s-ind__txt"><p class="s-ind__etq">${etiq}</p>${valor == null ? '' : `<p class="s-ind__valor s-num">${fmt(valor)}</p>`}</div>
-      ${subs.length ? `<dl class="s-ind__subs">${subs.map(([t, v, p]) => `<div><dt>${t}</dt><dd class="s-num">${fmt(v)}</dd>${p == null ? '' : `<dd class="s-ind__pct"><span class="s-tag s-tag--${nivel(p)}"><i aria-hidden="true"></i>${p} %</span></dd>`}</div>`).join('')}</dl>` : ''}</div>`;
+      ${subs.length ? `<dl class="s-ind__subs">${subs.map(([t, v, p]) => `<div><dt>${t}</dt><dd class="s-num">${fmt(v)}</dd>${p == null ? '' : `<dd class="s-ind__pct"><span class="s-tag s-tag--${nivel(p)}"><i aria-hidden="true"></i>Cumpl. ${p} %</span></dd>`}</div>`).join('')}</dl>` : ''}</div>`;
   }
   /* Resumen de productividad: una card con real, planeado, cumplimiento y brecha */
   function indicadores(items, noun) {
