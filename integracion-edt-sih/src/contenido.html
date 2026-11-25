@@ -657,7 +657,7 @@
     return `<section class="s-panel s-panel--personal s-resumen" aria-label="Personal">
       <button class="s-bloque__abrir" type="button" id="card-pl" data-drawer="t-res" data-id="pl" aria-pressed="${!!sel}" aria-label="Ver detalle del personal"></button>
       <div class="s-ind s-pers__titulo"><span class="s-icono-circ s-icono-circ--personal" aria-hidden="true">${I.personas}</span><div class="s-ind__txt"><p class="s-ind__etq">Personal</p><p class="s-pers__total s-num">${fmt(pl.total)}</p></div></div>
-      <div class="s-infra__datos s-pers__datos">${[['Médicos', pl.medicos], ['Enfermeras', pl.EN], ['Residentes', pl.RE], ['Paramédicos', pl.PA], ['Técnicos', pl.TE], ['Administrativas', pl.AD], ['Limpieza e higiene', pl.LI]].map(([t, v]) => `<div class="s-infra__dato s-pers__dato"><span class="s-infra__etq">${t}</span><span class="s-pers__val s-num">${fmt(v)}</span></div>`).join('')}</div>
+      <div class="s-infra__datos s-pers__datos">${[['Médicos especialistas', pl.ME], ['Médicos familiares', pl.MF], ['Otros médicos', pl.OM], ['Enfermeras', pl.EN], ['Residentes', pl.RE], ['Paramédicos', pl.PA], ['Técnicos', pl.TE], ['Administrativas', pl.AD], ['Limpieza e higiene', pl.LI]].map(([t, v]) => `<div class="s-infra__dato s-pers__dato"><span class="s-infra__etq">${t}</span><span class="s-pers__val s-num">${fmt(v)}</span></div>`).join('')}</div>
     </section>`;
   }
   function panelPlantilla(idv, v, nodos, o) {
@@ -665,7 +665,7 @@
     ctx.tema = 'plant'; ctx.temaNodos = nodos; ctx.temaHijos = !!o.hijos;
     let html = `<section class="s-seccion" aria-labelledby="t-pl"><div class="s-seccion__cab"><h2 id="t-pl" class="s-seccion__h" tabindex="-1">Plantilla <strong>${al}</strong></h2><p class="s-periodo">Atenciones de la semana <mark class="s-num">${ui.semana}</mark></p></div>
       ${resumenPlantilla(pl, u)}
-      <section class="s-card s-seccion s-cats-card" aria-labelledby="t-cat-${idv}"><h3 id="t-cat-${idv}" class="s-seccion__h">Personal por categoría</h3>${graficaCategorias(pl)}</section></section>`;
+      </section>`;
     if (o.personas) return html + listaPersonal(idv, v, o.personas);
     if (!o.hijos) return html;
     const filas = nodos.map(h => { const p = plantilla(h), x = usoDe([h], ui.semana); return { n: h, nombre: h.nombre, tot: p.total, med: p.medicos, res: p.RE, enf: p.EN, otr: p.otras, apm: p.medicos ? x.at / p.medicos : null }; });

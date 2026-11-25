@@ -955,6 +955,9 @@ button.s-rank__fila:focus-visible { outline: 2px solid var(--color-primary-700);
 @container (max-width: 640px) {
   .s-pers__datos { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
+.s-pers__datos { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+@container (max-width: 900px) { .s-pers__datos { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+@container (max-width: 640px) { .s-pers__datos { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 
 /* Versión delegado: a todo el ancho */
 .s-contenido { max-width: none; margin: 0; }
