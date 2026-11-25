@@ -1222,6 +1222,11 @@ button.s-rank__fila:focus-visible { outline: 2px solid var(--color-primary-700);
 /* Versión delegado: a todo el ancho */
 .s-contenido { max-width: none; margin: 0; }
 
+/* R-3: referencia nacional bajo cada indicador de capacidad; comparación contra la semana anterior */
+.s-ref { display: block; margin-top: 2px; font-size: var(--font-size-xs); font-weight: var(--font-weight-regular); color: var(--color-neutral-500); white-space: nowrap; }
+.s-ref-nota { margin: 0; font-size: var(--font-size-xs); color: var(--color-neutral-600); }
+.s-delta { font-size: var(--font-size-xs); color: var(--color-neutral-600); white-space: nowrap; }
+
   </style>
 </head>
 <body>
@@ -1410,6 +1415,13 @@ button.s-rank__fila:focus-visible { outline: 2px solid var(--color-primary-700);
   function sumar(a, b) { CLAVES.forEach(c => { a[c] += b[c]; }); return a; }
   function acumulado(n, w) { const t = vacio(); for (let i = 1; i <= w; i++) sumar(t, metricas(n, i)); return t; }
   const totalAt = m => m.cr + m.qr + m.ur + m.hr;
+  /* Comparación contra la semana anterior: diferencia en puntos de cumplimiento */
+  const cumpDe = m => m.cp + m.qp ? Math.round((m.cr + m.qr) / (m.cp + m.qp) * 100) : null;
+  function deltaPts(act, ant) {
+    if (act == null || ant == null || ui.semana <= 1) return '';
+    const d = act - ant;
+    return `<span class="s-delta">${d === 0 ? 'Igual que la' : `${d > 0 ? '+' : '−'}${Math.abs(d)} pts vs`} semana ${ui.semana - 1}</span>`;
+  }
   const nivel = pct => pct == null ? '' : pct >= 95 ? 'alto' : pct >= 80 ? 'medio' : 'bajo';
   const NACIONAL = { id: 'N', tipo: 'nacional', nombre: 'Nivel Nacional', medicos: 0, enfermeria: 0, camas: 0, consultorios: 0, quirofanos: 0 };
 
@@ -1452,7 +1464,8 @@ button.s-rank__fila:focus-visible { outline: 2px solid var(--color-primary-700);
       n: h, id: h.id, nombre: medico ? cap(h.nombre) : h.nombre,
       estado: h.estado || '', titular: h.titular || '', medicos: h.medicos ?? 1,
       area: medico ? h.padre.nombre : '', matricula: medico ? expediente(h).matricula : '',
-      tipoU: h.tipoUnidad || '', real, plan, cump: plan ? Math.round(real / plan * 100) : null, brecha: plan - real, m
+      tipoU: h.tipoUnidad || '', real, plan, cump: plan ? Math.round(real / plan * 100) : null, brecha: plan - real, m,
+      ant: w > 1 ? cumpDe(metricas(h, w - 1)) : null
     };
   }
   function agregar(items) {
@@ -1592,11 +1605,9 @@ button.s-rank__fila:focus-visible { outline: 2px solid var(--color-primary-700);
     const r = a.acu, sel = ui.drawer && ui.drawer.k === 'acu';
     const real = r.cr + r.qr, plan = r.cp + r.qp, pct = plan ? Math.round(real / plan * 100) : null, falta = plan - real;
     const sm = a.sem, sReal = sm.cr + sm.qr, sPlan = sm.cp + sm.qp, sPct = sPlan ? Math.round(sReal / sPlan * 100) : null, sFalta = sPlan - sReal;
-    const anterior = ui.semana > 1 ? (() => { const t = vacio(); items.forEach(it => sumar(t, metricas(it.n, ui.semana - 1))); return t.cp + t.qp ? Math.round((t.cr + t.qr) / (t.cp + t.qp) * 100) : null; })() : null;
-    const dif = pct != null && anterior != null ? pct - anterior : null;
-    const tendTxt = dif == null ? '' : dif === 0 ? 'Sin cambio vs semana anterior' : `${dif > 0 ? '+' : '−'}${Math.abs(dif)} pts vs semana anterior`;
+    const anterior = ui.semana > 1 ? (() => { const t = vacio(); items.forEach(it => sumar(t, metricas(it.n, ui.semana - 1))); return cumpDe(t); })() : null;
     const cump = pct == null ? '' : `<div class="s-resumen__cump"><div class="s-resumen__cump-cab">${tagCump(pct)}<span class="s-bloque__meta">${falta > 0 ? `Faltan <strong class="s-num">${fmt(falta)}</strong>` : 'Meta cumplida'}</span></div></div>`;
-    const semana = sPlan ? `<p class="s-resumen__sem">Semana ${ui.semana}: real <strong class="s-num">${fmt(sReal)}</strong> de <strong class="s-num">${fmt(sPlan)}</strong> planeados · cumplimiento <strong class="s-num">${sPct} %</strong> · faltan <strong class="s-num">${fmt(sFalta)}</strong></p>` : '';
+    const semana = sPlan ? `<p class="s-resumen__sem">Semana ${ui.semana}: cumplimiento <strong class="s-num">${sPct} %</strong>${anterior == null ? '' : ` · ${deltaPts(sPct, anterior)}`}</p>` : '';
     return `<section class="s-seccion" aria-labelledby="t-acu"><div class="s-seccion__cab"><h2 id="t-acu" class="s-seccion__h" tabindex="-1">Productividad acumulada <strong>${al}</strong></h2><p class="s-periodo">Periodo comprendido de la semana <mark class="s-num">1</mark> a la semana <mark class="s-num">${ui.semana}</mark></p></div>
       <section class="s-panel s-panel--prod s-resumen" aria-label="Resumen de productividad acumulada">
         <button class="s-bloque__abrir" type="button" id="card-acu" data-drawer="acu" aria-pressed="${!!sel}" aria-label="Ver detalle de la productividad acumulada"></button>
@@ -1610,7 +1621,7 @@ button.s-rank__fila:focus-visible { outline: 2px solid var(--color-primary-700);
             <div class="s-acu__cab"><span class="s-icono-circ s-icono-circ--prod" aria-hidden="true">${I.calendario}</span><div><p class="s-acu__etq">Productividad planeada acumulada</p><p class="s-acu__val s-num">${fmt(plan)}</p></div></div>
             <dl class="s-acu__datos"><div><dt>Consultas</dt><dd class="s-num">${fmt(r.cp)}</dd></div><div><dt>Cirugías</dt><dd class="s-num">${fmt(r.qp)}</dd></div><div><dt>Hospitalizaciones</dt><dd class="s-acu__sinmeta">Sin meta</dd></div></dl>
           </div>
-        </div>
+        </div>${semana}
           </section></section>`;
   }
 
@@ -1625,7 +1636,7 @@ button.s-rank__fila:focus-visible { outline: 2px solid var(--color-primary-700);
     return `<div class="s-fila__metricas">
       <div class="s-fila__dato"><span class="s-fila__etq">Consultas: real de planeadas</span><span class="s-num"><b>${fmt(m.cr)}</b> de ${fmt(m.cp)}</span></div>
       <div class="s-fila__dato"><span class="s-fila__etq">Cirugías: real de planeadas</span><span class="s-num"><b>${fmt(m.qr)}</b> de ${fmt(m.qp)}</span></div>
-      <div class="s-fila__dato"><span class="s-fila__etq">Cumplimiento</span>${cumpFila(it.cump)}</div>
+      <div class="s-fila__dato"><span class="s-fila__etq">Cumplimiento</span>${cumpFila(it.cump)}${deltaPts(it.cump, it.ant)}</div>
       <div class="s-fila__dato"><span class="s-fila__etq">Faltan</span><span class="s-num ${it.brecha > 0 && it.plan > 0 ? 's-brecha' : ''}">${brechaTxt(it)}</span></div></div>`;
   }
   /* Único CTA de la fila: el nombre abre el drawer con el detalle */
@@ -1732,7 +1743,7 @@ button.s-rank__fila:focus-visible { outline: 2px solid var(--color-primary-700);
     if (d.k === 't-fila') {
       const n = ctx.temaNodos.find(x => x.id === d.id); if (!n) { ui.drawer = null; return ''; }
       titulo = n.nombre;
-      cuerpo = (ctx.tema === 'infra' ? tendenciaUso([n]) : tablaPlantilla(plantilla(n)))
+      cuerpo = (ctx.tema === 'infra' ? bloqueRef(n) + tendenciaUso([n]) : tablaPlantilla(plantilla(n)))
         + bloqueProd(n) + `<a class="s-btn s-btn--outlined" href="#/e/${n.id}?tab=${ctx.tema}">${I.doc}Abrir detalle</a>`;
     } else if (ctx.tema === 'infra' && RECURSO[d.id]) {
       const [t, , i, etq] = RECURSO[d.id], nodos = ctx.temaNodos;
@@ -1845,6 +1856,29 @@ button.s-rank__fila:focus-visible { outline: 2px solid var(--color-primary-700);
     t.hpc = t.cam ? t.hr / t.cam : null;
     return t;
   }
+  /* R-3. Referencia de capacidad: promedio nacional ponderado del mismo tipo (OOAD, UMAE, tipo de unidad o servicio) */
+  const grupoRef = h => h.tipo === 'ooad' ? 'ooad' : h.tipo === 'umae' ? 'umae' : h.tipo === 'unidad' ? 'u|' + h.tipoUnidad : h.tipo === 'area' ? 'a|' + h.nombre : null;
+  const grupoTxt = h => h.tipo === 'ooad' ? 'las OOAD' : h.tipo === 'umae' ? 'las UMAE' : h.tipo === 'unidad' ? 'las ' + h.tipoUnidad : h.nombre;
+  const refCache = {};
+  function refsSemana(w) {
+    if (refCache[w]) return refCache[w];
+    const unidades = RAICES.filter(h => h.tipo === 'ooad').flatMap(hijos);
+    const areas = RAICES.filter(h => h.tipo === 'umae').concat(unidades).flatMap(hijos);
+    const grupos = {};
+    RAICES.concat(unidades, areas).forEach(h => { const g = grupoRef(h); (grupos[g] = grupos[g] || []).push(h); });
+    const out = {}; Object.keys(grupos).forEach(g => { out[g] = usoDe(grupos[g], w); });
+    return (refCache[w] = out);
+  }
+  const refDe = (h, w) => { const g = grupoRef(h); return g ? refsSemana(w)[g] : null; };
+  const celdaRef = (v, ref) => `<td class="s-der s-num">${fmt1(v)}${ref == null ? '' : `<span class="s-ref">Prom. nac. ${fmt1(ref)}</span>`}</td>`;
+  function bloqueRef(n) {
+    const u = usoDe([n], ui.semana), r = refDe(n, ui.semana); if (!r) return '';
+    const dif = (v, x) => { if (v == null || !x) return '—'; const p = Math.round((v / x - 1) * 100); return p === 0 ? '0 %' : `${p > 0 ? '+' : '−'}${Math.abs(p)} %`; };
+    const fila = (t, k) => `<tr><td>${t}</td><td class="s-der s-num">${fmt1(u[k])}</td><td class="s-der s-num">${fmt1(r[k])}</td><td class="s-der s-num">${dif(u[k], r[k])}</td></tr>`;
+    return `<section class="s-drawer__bloque"><h3>Semana ${ui.semana} contra el promedio nacional de ${esc(grupoTxt(n))}</h3><div class="s-tabla-scroll" role="region" aria-label="Uso contra el promedio nacional" tabindex="0"><table class="s-tabla"><caption class="s-sr">Uso de la capacidad contra el promedio nacional del mismo tipo</caption>
+      <thead><tr><th scope="col">Indicador</th><th scope="col" class="s-der">Valor</th><th scope="col" class="s-der">Prom. nac.</th><th scope="col" class="s-der">Dif.</th></tr></thead>
+      <tbody>${fila('Consultas por consultorio', 'cpc')}${fila('Cirugías por quirófano', 'cpq')}${fila('Hospitalización por cama', 'hpc')}</tbody></table></div></section>`;
+  }
 
   function pestanasTema(idv, actual) {
     return `<div class="s-subtabs" role="tablist" aria-label="Tema de consulta">${TEMAS.map(([k, t, ic]) => `<button class="s-subtab" type="button" role="tab" id="tab-${idv}-${k}" data-vista="${idv}" data-tab="${k}" aria-selected="${k === actual}" aria-controls="panel-${idv}" tabindex="${k === actual ? 0 : -1}">${I[ic]}<span>${t}</span></button>`).join('')}</div>`;
@@ -1884,14 +1918,14 @@ button.s-rank__fila:focus-visible { outline: 2px solid var(--color-primary-700);
         <div class="s-infra__datos">${[['cama', 'Camas', u.cam], ['cons', 'Consultorios', u.con], ['quir', 'Quirófanos', u.qui]].map(([k, t, v]) => `<button class="s-infra__dato" type="button" data-drawer="t-res" data-id="${k}" aria-label="Ver detalle de ${t}"><span class="s-infra__etq">${t}</span><span class="s-infra__val s-num">${fmt(v)}</span></button>`).join('')}</div>
       </section></section>`;
     if (!o.hijos) return html;
-    const filas = nodos.map(h => { const x = usoDe([h], ui.semana); return { n: h, nombre: h.nombre, cam: x.cam, qui: x.qui, con: x.con, cpc: x.cpc, cpq: x.cpq, hpc: x.hpc }; });
+    const filas = nodos.map(h => { const x = usoDe([h], ui.semana); return { n: h, nombre: h.nombre, cam: x.cam, qui: x.qui, con: x.con, cpc: x.cpc, cpq: x.cpq, hpc: x.hpc, r: refDe(h, ui.semana) || {} }; });
     const ord = ordenar(filas, v.ordenI), pag = paginar(v, ord);
     ui.conteo = ord.length;
     const cuerpo = pag.length ? pag.map(f => `<tr><td>${botonTema(f.n, o.sub ? o.sub(f.n) : '')}</td><td class="s-der s-num">${fmt(f.cam)}</td><td class="s-der s-num">${fmt(f.qui)}</td><td class="s-der s-num">${fmt(f.con)}</td>
-      <td class="s-der s-num">${fmt1(f.cpc)}</td><td class="s-der s-num">${fmt1(f.cpq)}</td><td class="s-der s-num">${fmt1(f.hpc)}</td></tr>`).join('')
+      ${celdaRef(f.cpc, f.r.cpc)}${celdaRef(f.cpq, f.r.cpq)}${celdaRef(f.hpc, f.r.hpc)}</tr>`).join('')
       : '<tr><td colspan="7" class="s-vacio">Sin resultados con los filtros actuales.</td></tr>';
     return html + `<section class="s-seccion" aria-labelledby="t-${idv}">
-      <div class="s-lista__barra"><h2 id="t-${idv}" class="s-seccion__h" tabindex="-1">${o.titulo} <span class="s-pill s-num">${fmt(ord.length)}</span></h2></div>
+      <div class="s-lista__barra"><h2 id="t-${idv}" class="s-seccion__h" tabindex="-1">${o.titulo} <span class="s-pill s-num">${fmt(ord.length)}</span></h2><p class="s-ref-nota">Prom. nac.: promedio nacional de su mismo tipo (OOAD, UMAE, UMF, HGZ, HGR o el mismo servicio), semana ${ui.semana}.</p></div>
       <div class="s-card s-tabla-card"><div class="s-tabla-scroll" role="region" aria-labelledby="t-${idv}" tabindex="0"><table class="s-tabla s-tabla--ord"><caption class="s-sr">${o.titulo}: capacidad instalada y uso en la semana ${ui.semana}</caption>
         <thead><tr><th scope="col">${o.columna}</th>${thOrden(idv, v, 'ordenI', 'cam', 'Camas', 1)}${thOrden(idv, v, 'ordenI', 'qui', 'Quirófanos', 1)}${thOrden(idv, v, 'ordenI', 'con', 'Consultorios', 1)}
           ${thOrden(idv, v, 'ordenI', 'cpc', 'Consultas por consultorio al día', 1)}${thOrden(idv, v, 'ordenI', 'cpq', 'Cirugías por quirófano al día', 1)}${thOrden(idv, v, 'ordenI', 'hpc', 'Hospitalización por cama', 1)}</tr></thead>

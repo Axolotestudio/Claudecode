@@ -969,3 +969,8 @@ button.s-rank__fila:focus-visible { outline: 2px solid var(--color-primary-700);
 .s-tabla-card { margin-top: var(--space-4); padding: var(--space-4) var(--space-5); }
 .s-tabla-card .s-seccion__cab { display: flex; align-items: baseline; justify-content: space-between; gap: var(--space-3); margin-bottom: var(--space-3); }
 .s-tabla-card .s-seccion__h { margin: 0; }
+
+/* R-3: referencia nacional bajo cada indicador de capacidad; comparación contra la semana anterior */
+.s-ref { display: block; margin-top: 2px; font-size: var(--font-size-xs); font-weight: var(--font-weight-regular); color: var(--color-neutral-500); white-space: nowrap; }
+.s-ref-nota { margin: 0; font-size: var(--font-size-xs); color: var(--color-neutral-600); }
+.s-delta { font-size: var(--font-size-xs); color: var(--color-neutral-600); white-space: nowrap; }
