@@ -1173,6 +1173,30 @@ button.s-rank__fila:focus-visible { outline: 2px solid var(--color-primary-700);
 .s-panel--personal { grid-template-columns: minmax(0, 1.7fr) repeat(7, minmax(0, 1fr)); gap: var(--space-5) var(--space-4); }
 .s-pers__datos { gap: var(--space-4) var(--space-5); }
 
+/* ===== Personal en dos líneas: total arriba, categorías abajo con su color ===== */
+.s-panel--personal { display: flex; flex-direction: column; align-items: stretch; gap: var(--space-5); padding: var(--space-5) var(--space-6); grid-template-columns: none; min-height: 0; }
+.s-pers__titulo { display: flex; align-items: center; gap: var(--space-4); }
+.s-pers__titulo .s-ind__txt { display: flex; align-items: baseline; gap: var(--space-4); flex-wrap: wrap; }
+.s-pers__titulo .s-ind__etq { font-size: var(--font-size-lg); color: var(--color-neutral-600); }
+.s-pers__total { font-size: var(--font-size-2xl) !important; }
+.s-pers__datos { grid-column: auto; display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: var(--space-4); }
+.s-pers__dato { padding: var(--space-3) 0 0; border-top: 3px solid var(--pers-color, var(--color-sky-500)); }
+.s-pers__dato:nth-child(1) { --pers-color: var(--color-sky-500); }
+.s-pers__dato:nth-child(2) { --pers-color: var(--color-teal-500); }
+.s-pers__dato:nth-child(3) { --pers-color: var(--color-lavender-500); }
+.s-pers__dato:nth-child(4) { --pers-color: var(--color-cornflower-500); }
+.s-pers__dato:nth-child(5) { --pers-color: var(--color-sage-500); }
+.s-pers__dato:nth-child(6) { --pers-color: var(--color-pollen-500); }
+.s-pers__dato:nth-child(7) { --pers-color: var(--color-rust-500); }
+.s-pers__dato .s-infra__etq { font-size: var(--font-size-md); }
+.s-pers__val { font-size: var(--font-size-xl); color: var(--color-neutral-700); }
+@container (max-width: 900px) {
+  .s-pers__datos { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+}
+@container (max-width: 640px) {
+  .s-pers__datos { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
 /* Versión delegado: a todo el ancho */
 .s-contenido { max-width: none; margin: 0; }
 
