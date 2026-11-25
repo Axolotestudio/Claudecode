@@ -798,4 +798,9 @@ a.s-celda-nombre:hover .s-celda-nombre__t { color: var(--color-primary-800); }
 .s-rank__fila--fija { cursor: default; }
 .s-rank__fila--fija:hover { background: transparent; }
 .s-niveles .s-rank__fila { grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr) minmax(0, .6fr); }
-.s-contenido { margin: 0 auto; }
+button.s-rank__fila { width: 100%; border: 0; background: transparent; font: inherit; text-align: left; cursor: pointer; }
+button.s-rank__fila:hover { background: var(--color-neutral-50); }
+button.s-rank__fila:focus-visible { outline: 2px solid var(--color-primary-700); outline-offset: -2px; }
+
+/* Versión delegado: a todo el ancho */
+.s-contenido { max-width: none; margin: 0; }

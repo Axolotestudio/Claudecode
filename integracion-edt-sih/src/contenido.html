@@ -500,7 +500,7 @@
     if (d.k === 'sem') { titulo = 'Semana ' + ui.semana; sub = rangoSemana(ui.semana).corto; m = ctx.agg.sem; }
     else if (d.k === 'acu') { titulo = 'Acumulado'; sub = `Semanas 1 a ${ui.semana}`; m = ctx.agg.acu; }
     else {
-      it = ctx.items.find(x => x.id === d.id); if (!it) { ui.drawer = null; return ''; }
+      it = ctx.items.find(x => x.id === d.id) || (obtener(d.id) ? item(obtener(d.id), ui.semana) : null); if (!it) { ui.drawer = null; return ''; }
       titulo = it.nombre; sub = 'Semana ' + ui.semana + ' · ' + rangoSemana(ui.semana).corto; m = it.m; set = [it];
     }
     const fila = (n, r, pl) => { const pct = pl ? Math.round(r / pl * 100) : null; return `<tr><td>${n}</td><td class="s-der s-num">${fmt(r)}</td><td class="s-der s-num">${pl == null ? 'Sin meta' : fmt(pl)}</td><td class="s-der">${pct == null ? 'Sin meta' : tagCump(pct)}</td></tr>`; };
@@ -750,10 +750,10 @@
     const padreTxt = h => h.tipo === 'ooad' || h.tipo === 'umae' ? '' : h.tipo === 'unidad' ? h.padre.nombre : h.padre.nombre;
     const filas = top.map(it => {
       const h = it.n, sub = [estadoDe(h), padreTxt(h)].filter(Boolean).join(' · ');
-      return `<li><a class="s-rank__fila" href="#/e/${h.id}">
+      return `<li><button class="s-rank__fila" type="button" data-drawer="fila" data-id="${h.id}">
         <span class="s-rank__nombre">${esc(h.nombre)}<span class="s-rank__sub">${esc(sub)}</span></span>
         <span class="s-rank__cump">${tagCump(it.cump)}<span class="s-barra s-barra--${nivel(it.cump)}" role="img" aria-label="Cumplimiento ${it.cump} %"><span style="width:${Math.min(100, it.cump)}%"></span></span></span>
-        <span class="s-rank__falta s-num">${it.brecha > 0 ? `Faltan ${fmt(it.brecha)}` : 'Cumple'}</span></a></li>`;
+        <span class="s-rank__falta s-num">${it.brecha > 0 ? `Faltan ${fmt(it.brecha)}` : 'Cumple'}</span></button></li>`;
     }).join('');
     return `<section class="s-card s-rank" aria-labelledby="t-rank">
       <div class="s-rank__cab"><div><h2 id="t-rank" class="s-seccion__h">Más lejos de la meta</h2>
