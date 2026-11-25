@@ -919,7 +919,8 @@
       if (v.q) act.push(['q', `Buscar: “${v.q}”`]);
       noun = 'médicos'; titulo = 'Médicos'; etiqueta = 'Productividad por médico'; medico = true;
     }
-    return conTema(idv, v, cab, barra(idv, campos, act) + indicadores(items, noun) + listado(idv, v, items, { titulo, etiqueta, medico, columna: 'Servicio' }));
+    const aviso = n.id === UNIDAD_DIRECTOR ? avisoBajoMeta(idv, areas.filter(a => a.tipo === 'area'), 'servicios', 'servicio') : '';
+    return conTema(idv, v, cab, barra(idv, campos, act) + aviso + indicadores(items, noun) + listado(idv, v, items, { titulo, etiqueta, medico, columna: 'Servicio' }));
   }
   function vArea(n) {
     const idv = n.id, v = vista(idv, { orden: { k: 'cump', dir: 1 } }), tema = temaValido(v);
@@ -1003,29 +1004,62 @@
     return encabezado(m, '') + prod + ficha + tarjetas;
   }
 
-  /* ---------- Alerta de sistema (Cartillas): flotante bajo el header, se retira sola a los 4 s ---------- */
+  /* ---------- Avisos y alertas (patrón de los perfiles CPM) ----------
+     · Aviso fijo: condición que sigue vigente (unidades bajo meta). Vive en la página, no desaparece.
+     · Alerta de sistema flotante: solo confirma una acción del usuario. Bajo el header, 4 s,
+       se pausa con el puntero o el foco, hasta 3 apiladas, con cerrar y acción opcional (Deshacer). */
   const ICONO_ALERTA = svg('<path d="M12 4 21 20H3z"/><path d="M12 10v4"/><path d="M12 17h.01"/>');
-  const alertasVistas = new Set();
+  const ICONO_OK = svg('<circle cx="12" cy="12" r="9"/><path d="m8 12 3 3 5-6"/>');
+  const ALERTA_MS = 4000, ALERTA_MS_ACCION = 10000, ALERTAS_MAX = 3; /* con acción (Deshacer) dura más para alcanzarla */
+  function capaAlertas() {
+    let c = document.getElementById('s-alertas');
+    if (!c) { c = document.createElement('div'); c.id = 's-alertas'; c.className = 's-alertas'; c.setAttribute('aria-live', 'polite'); c.setAttribute('aria-label', 'Mensajes del sistema'); document.body.appendChild(c); }
+    return c;
+  }
   function mostrarAlerta(a) {
-    const prev = document.getElementById('s-alerta'); if (prev) prev.remove();
-    const el = document.createElement('div');
-    el.id = 's-alerta'; el.className = 's-alerta s-alerta--' + a.tipo; el.setAttribute('role', 'status');
-    el.innerHTML = `<span class="s-alerta__icono">${ICONO_ALERTA}</span><div class="s-alerta__texto"><strong>${esc(a.titulo)}</strong><span>${esc(a.mensaje)}</span></div><button class="s-alerta__cerrar" type="button" aria-label="Cerrar alerta">${I.cerrar}</button>`;
-    el.querySelector('button').addEventListener('click', () => el.remove());
-    document.body.appendChild(el);
-    setTimeout(() => { el.classList.add('s-alerta--sale'); setTimeout(() => el.remove(), 200); }, 4000);
+    const capa = capaAlertas(), el = document.createElement('div');
+    el.className = 's-alerta s-alerta--' + a.tipo; /* el anuncio lo hace la capa (aria-live), sin rol propio para no repetirlo */
+    el.innerHTML = `<span class="s-alerta__icono">${a.tipo === 'success' ? ICONO_OK : ICONO_ALERTA}</span><div class="s-alerta__texto"><strong>${esc(a.titulo)}</strong>${a.mensaje ? `<span>${esc(a.mensaje)}</span>` : ''}</div>`
+      + (a.accion ? `<button class="s-btn s-btn--text s-alerta__accion" type="button" data-accion>${esc(a.accion.texto)}</button>` : '')
+      + `<button class="s-alerta__cerrar" type="button" aria-label="Cerrar mensaje">${I.cerrar}</button>`;
+    capa.appendChild(el);
+    while (capa.children.length > ALERTAS_MAX) capa.firstElementChild.remove();
+    let resta = a.accion ? ALERTA_MS_ACCION : ALERTA_MS, inicio = Date.now(), t = null;
+    const devolverFoco = () => { const r = a.retorno && a.retorno(); if (r && el.contains(document.activeElement)) r.focus(); };
+    const cerrar = () => { clearTimeout(t); devolverFoco(); el.classList.add('s-alerta--sale'); setTimeout(() => el.remove(), 180); };
+    const correr = () => { clearTimeout(t); if (el.contains(document.activeElement) || el.matches(':hover')) return; inicio = Date.now(); t = setTimeout(cerrar, resta); };
+    const pausar = () => { clearTimeout(t); resta = Math.max(800, resta - (Date.now() - inicio)); };
+    el.addEventListener('mouseenter', pausar); el.addEventListener('mouseleave', correr);
+    el.addEventListener('focusin', pausar); el.addEventListener('focusout', correr);
+    el.querySelector('.s-alerta__cerrar').addEventListener('click', cerrar);
+    if (a.accion) el.querySelector('[data-accion]').addEventListener('click', () => { cerrar(); a.accion.fn(); const r = a.retorno && a.retorno(); if (r) r.focus(); });
+    correr();
+    if (a.enfocar && a.accion) el.querySelector('[data-accion]').focus();
   }
   function enLista(xs) { return xs.length < 2 ? xs.join('') : xs.slice(0, -1).join(', ') + ' y ' + xs[xs.length - 1]; }
-  function alertaBajoMeta(nodos, plural, singular) {
+  function avisoBajoMeta(idv, nodos, plural, singular) {
     const bajos = nodos.map(h => item(h, ui.semana)).filter(x => x.cump != null && x.cump < 80).sort((a, b) => a.cump - b.cump);
-    if (!bajos.length) return null;
-    const top = bajos.slice(0, 3).map(x => `${x.nombre} ${x.cump} %`), resto = bajos.length - top.length;
-    return { tipo: 'warning', titulo: `Semana ${ui.semana}: ${bajos.length} ${bajos.length === 1 ? singular : plural} por debajo del 80 % de la meta`,
-      mensaje: (resto > 0 ? `${top.join(', ')} y ${resto} más` : enLista(top)) + '.' };
+    if (!bajos.length) return '';
+    const top = bajos.slice(0, 3).map(x => `${esc(x.nombre)} ${x.cump} %`), resto = bajos.length - top.length;
+    const detalle = (resto > 0 ? `${top.join(', ')} y ${resto} más` : enLista(top)) + '.';
+    return `<div class="s-aviso s-aviso--alerta" role="note"><span class="s-aviso__icono">${ICONO_ALERTA}</span>
+      <p><b>Semana ${ui.semana}: ${bajos.length} ${bajos.length === 1 ? singular : plural} por debajo del 80 % de la meta.</b> ${detalle}</p>
+      <button class="s-btn s-btn--text" type="button" data-ver-bajos="${idv}">Ver en la lista</button></div>`;
   }
-  function alertaPerfil(hash, id) {
-    if (id !== UNIDAD_DIRECTOR) return null;
-    return alertaBajoMeta(hijos(obtener(UNIDAD_DIRECTOR)).filter(a => a.tipo === 'area'), 'servicios', 'servicio');
+  function verBajos(idv) {
+    const v = vista(idv), habia = CAMPOS_FILTRO.some(k => v[k]); CAMPOS_FILTRO.forEach(k => { v[k] = ''; }); v.orden = { k: 'cump', dir: 1 }; v.pagina = 1; if (v.ver) v.ver = 'areas'; render(); /* el aviso cuenta todo el alcance: sin filtros para que se vean */
+    const h = document.getElementById('t-' + idv); if (h) { h.scrollIntoView({ block: 'start' }); h.focus(); }
+    anunciar((habia ? 'Se quitaron los filtros. ' : '') + 'Lista ordenada de menor a mayor cumplimiento');
+  }
+  const CAMPOS_FILTRO = ['q', 'estado', 'tipo', 'tipoU', 'nivelA', 'area', 'cat'];
+  const primerFiltro = idv => document.querySelector(`#panel-${CSS.escape(idv)} .s-filtros input, #panel-${CSS.escape(idv)} .s-filtros select`);
+  function limpiarFiltros(idv, teclado) {
+    const v = vista(idv), antes = {}; CAMPOS_FILTRO.forEach(k => { antes[k] = v[k]; });
+    const n = CAMPOS_FILTRO.filter(k => v[k]).length;
+    CAMPOS_FILTRO.forEach(k => { v[k] = ''; }); v.pagina = 1; render();
+    const f = primerFiltro(idv); if (f) f.focus(); /* Limpiar queda deshabilitado: el foco no se pierde */
+    if (n) mostrarAlerta({ enfocar: teclado, retorno: () => primerFiltro(idv), tipo: 'success', titulo: 'Se limpiaron los filtros', mensaje: `${n} ${n === 1 ? 'filtro quitado' : 'filtros quitados'}`,
+      accion: { texto: 'Deshacer', fn: () => { Object.assign(vista(idv), antes); vista(idv).pagina = 1; render(); anunciar('Filtros restaurados'); } } });
   }
 
   /* ---------- Render y eventos ---------- */
@@ -1078,13 +1112,8 @@
       const el = document.getElementById(focoId); el.focus();
       if (caret != null && el.setSelectionRange) { try { el.setSelectionRange(caret, caret); } catch (e) { /* tipo sin selección */ } }
     }
-    /* Una vez por vista de entrada y semana: al llegar y al cambiar de semana */
-    const clave = hash + '|' + ui.semana, al = alertasVistas.has(clave) ? null : alertaPerfil(hash, id);
-    alertasVistas.add(clave);
-    if (al) mostrarAlerta(al);
   }
   function cambiarSemana(s) {
-    const vieja = document.getElementById('s-alerta'); if (vieja) vieja.remove(); /* la alerta de otra semana no se queda */
     ui.semana = Math.min(SEMANA_ACTUAL, Math.max(1, s)); render();
     const a = document.activeElement; if (!a || a === document.body || a.disabled) document.getElementById('sem-sel').focus();
     anunciar(`Semana ${ui.semana}, ${rangoSemana(ui.semana).voz}`);
@@ -1103,7 +1132,8 @@
     if (b.id === 'sem-sig') return cambiarSemana(ui.semana + 1);
     if (b.dataset.ordenar) { const v = vista(b.dataset.ordenar), k = b.dataset.k, c = b.dataset.campoOrden || 'orden'; v[c] = v[c].k === k ? { k, dir: -v[c].dir } : { k, dir: DIR_INICIAL[k] || 1 }; v.pagina = 1; return render(); }
     if (b.dataset.quitar) { const v = vista(b.dataset.quitar); v[b.dataset.campo] = ''; v.pagina = 1; return render(); }
-    if (b.dataset.limpiar) { const v = vista(b.dataset.limpiar); v.q = ''; v.estado = ''; v.tipo = ''; v.tipoU = ''; v.nivelA = ''; v.area = ''; v.cat = ''; v.pagina = 1; return render(); }
+    if (b.dataset.limpiar) return limpiarFiltros(b.dataset.limpiar, ev.detail === 0);
+    if (b.dataset.verBajos) return verBajos(b.dataset.verBajos);
     if (b.dataset.abrir) { const v = vista(b.dataset.vista); v.abiertos[b.dataset.abrir] = !v.abiertos[b.dataset.abrir]; return render(); }
     if (b.dataset.pag) {
       const v = vista(b.dataset.vista); v.pagina = +b.dataset.pag; render();
@@ -1134,6 +1164,7 @@
     ev.preventDefault(); todos[j].click();
     const nuevo = $app.querySelector(`[data-tab="${todos[j].dataset.tab}"][data-vista="${todos[j].dataset.vista}"]`); if (nuevo) nuevo.focus();
   });
+  capaAlertas(); /* la región viva existe antes del primer mensaje */
   window.addEventListener('hashchange', () => render({ url: true }));
   render({ inicial: true });
 })();
