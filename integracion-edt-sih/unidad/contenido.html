@@ -310,6 +310,8 @@
     const atras = padre ? `<a class="s-btn-atras" href="${padre.h}" aria-label="Regresar a ${esc(padre.t)}">${I.flecha}</a>` : '';
     return `${ruta(n)}<div class="s-encabezado"><div class="s-encabezado__izq">${atras}<div class="s-titulo"><h1 tabindex="-1" id="titulo">${esc(titulo)}</h1>${nombre}${meta ? `<span class="s-titulo__meta">${meta}</span>` : ''}</div></div>${periodo()}</div><!--tabs-->`;
   }
+  /* Cumplimiento en listas: cifra legible con el color de su nivel */
+  function pctCump(pct) { return `<span class="s-pct s-pct--${nivel(pct)}"><span class="s-sr">Cumplimiento </span>${pct} %</span>`; }
   function tagCump(pct, prefijo = 'Cumplimiento ') { return `<span class="s-tag s-tag--${nivel(pct)}"><i aria-hidden="true"></i>${prefijo}${pct} %</span>`; }
   function selectCampo(idv, campo, etiqueta, opciones, valor) {
     return `<div class="s-field"><label for="f-${campo}-${idv}">${etiqueta}</label><span class="s-control"><select class="s-select" id="f-${campo}-${idv}" data-vista="${idv}" data-campo="${campo}">${opciones.map(([val, t]) => `<option value="${esc(val)}"${val === valor ? ' selected' : ''}>${esc(t)}</option>`).join('')}</select><span class="s-control__icono s-control__icono--der">${I.abajo}</span></span></div>`;
@@ -354,16 +356,17 @@
     return `<section class="s-seccion" aria-labelledby="t-acu"><div class="s-seccion__cab"><h2 id="t-acu" class="s-seccion__h" tabindex="-1">Productividad acumulada <strong>${al}</strong></h2><p class="s-periodo">Periodo comprendido de la semana <mark class="s-num">1</mark> a la semana <mark class="s-num">${ui.semana}</mark></p></div>
       <section class="s-panel s-panel--prod s-resumen" aria-label="Resumen de productividad acumulada">
         <button class="s-bloque__abrir" type="button" id="card-acu" data-drawer="acu" aria-pressed="${!!sel}" aria-label="Ver detalle de la productividad acumulada"></button>
-        <div class="s-acu">
-          <div class="s-acu__col">
-            <div class="s-acu__cab"><span class="s-icono-circ s-icono-circ--prod" aria-hidden="true">${I.pulso}</span><div><p class="s-acu__etq">Productividad real acumulada</p><p class="s-acu__val s-num">${fmt(real)}</p></div></div>
-            <dl class="s-acu__datos"><div><dt>Consultas</dt><dd class="s-num">${fmt(r.cr)}</dd></div><div><dt>Cirugías</dt><dd class="s-num">${fmt(r.qr)}</dd></div><div><dt>Hospitalizaciones</dt><dd class="s-num">${fmt(r.hr)}</dd></div></dl>
+        <div class="s-hoja">
+          <div class="s-hoja__heroe">
+            <p class="s-hoja__etq"><span class="s-hoja__icono" aria-hidden="true">${I.pulso}</span>Productividad real acumulada</p>
+            <p class="s-hoja__num s-num">${fmt(real)}</p>
+            <p class="s-hoja__de">de <strong class="s-num">${fmt(plan)}</strong> planeadas</p>
           </div>
-          <span class="s-acu__sep" aria-hidden="true"></span>
-          <div class="s-acu__col">
-            <div class="s-acu__cab"><span class="s-icono-circ s-icono-circ--prod" aria-hidden="true">${I.calendario}</span><div><p class="s-acu__etq">Productividad planeada acumulada</p><p class="s-acu__val s-num">${fmt(plan)}</p></div></div>
-            <dl class="s-acu__datos"><div><dt>Consultas</dt><dd class="s-num">${fmt(r.cp)}</dd></div><div><dt>Cirugías</dt><dd class="s-num">${fmt(r.qp)}</dd></div><div><dt>Hospitalizaciones</dt><dd class="s-acu__sinmeta">Sin meta</dd></div></dl>
-          </div>
+          <table class="s-hoja__tabla"><caption class="s-sr">Real y planeado acumulados por tipo de atención</caption>
+            <thead><tr><th scope="col"><span class="s-sr">Tipo de atención</span></th><th scope="col">Real</th><th scope="col">Planeado</th></tr></thead>
+            <tbody><tr><th scope="row">Consultas</th><td class="s-num">${fmt(r.cr)}</td><td class="s-num">${fmt(r.cp)}</td></tr>
+              <tr><th scope="row">Cirugías</th><td class="s-num">${fmt(r.qr)}</td><td class="s-num">${fmt(r.qp)}</td></tr>
+              <tr><th scope="row">Hospitalizaciones</th><td class="s-num">${fmt(r.hr)}</td><td class="s-hoja__sinmeta">Sin meta</td></tr></tbody></table>
         </div>${semana}
           </section></section>`;
   }
@@ -657,7 +660,7 @@
     ctx.tema = 'infra'; ctx.temaNodos = nodos; ctx.temaHijos = !!o.hijos;
     let html = `<section class="s-seccion" aria-labelledby="t-inf"><div class="s-seccion__cab"><h2 id="t-inf" class="s-seccion__h" tabindex="-1">Capacidad instalada <strong>${al}</strong></h2><p class="s-periodo">Uso calculado con la semana <mark class="s-num">${ui.semana}</mark></p></div>
       <section class="s-panel s-panel--infra s-resumen" aria-label="Infraestructura médica">
-        <div class="s-ind s-ind--infra"><span class="s-icono-circ s-icono-circ--infra" aria-hidden="true">${I.hospital}</span><div class="s-ind__txt"><p class="s-ind__etq">Infraestructura médica</p></div></div>
+        <p class="s-hoja__etq s-hoja__etq--infra"><span class="s-hoja__icono" aria-hidden="true">${I.hospital}</span>Infraestructura médica</p>
         <div class="s-infra__datos">${[['cama', 'Camas', u.cam], ['cons', 'Consultorios', u.con], ['quir', 'Quirófanos', u.qui]].map(([k, t, v]) => `<button class="s-infra__dato" type="button" data-drawer="t-res" data-id="${k}" aria-label="Ver detalle de ${t}"><span class="s-infra__etq">${t}</span><span class="s-infra__val s-num">${fmt(v)}</span></button>`).join('')}</div>
       </section></section>`;
     if (!o.hijos) return html;
@@ -686,7 +689,7 @@
     const sel = ui.drawer && ui.drawer.k === 't-res' && ui.drawer.id === 'pl';
     return `<section class="s-panel s-panel--personal s-resumen" aria-label="Personal">
       <button class="s-bloque__abrir" type="button" id="card-pl" data-drawer="t-res" data-id="pl" aria-pressed="${!!sel}" aria-label="Ver detalle del personal"></button>
-      <div class="s-ind s-pers__titulo"><span class="s-icono-circ s-icono-circ--personal" aria-hidden="true">${I.personas}</span><div class="s-ind__txt"><p class="s-ind__etq">Personal</p><p class="s-pers__total s-num">${fmt(pl.total)}</p></div></div>
+      <div class="s-hoja__heroe s-hoja__heroe--pers"><p class="s-hoja__etq"><span class="s-hoja__icono" aria-hidden="true">${I.personas}</span>Personal</p><p class="s-hoja__num s-num">${fmt(pl.total)}</p></div>
       <div class="s-infra__datos s-pers__datos">${[['Médicos especialistas', pl.ME], ['Médicos familiares', pl.MF], ['Otros médicos', pl.OM], ['Enfermeras', pl.EN], ['Residentes', pl.RE], ['Paramédicos', pl.PA], ['Técnicos', pl.TE], ['Administrativas', pl.AD], ['Limpieza e higiene', pl.LI]].map(([t, v]) => `<div class="s-infra__dato s-pers__dato"><span class="s-infra__etq">${t}</span><span class="s-pers__val s-num">${fmt(v)}</span></div>`).join('')}</div>
     </section>`;
   }
@@ -782,14 +785,14 @@
       const h = it.n, sub = [estadoDe(h), padreTxt(h)].filter(Boolean).join(' · ');
       return `<li><button class="s-rank__fila" type="button" data-drawer="fila" data-id="${h.id}">
         <span class="s-rank__nombre">${esc(h.nombre)}<span class="s-rank__sub">${esc(sub)}</span></span>
-        <span class="s-rank__cump">${tagCump(it.cump)}<span class="s-barra s-barra--${nivel(it.cump)}" role="img" aria-label="Cumplimiento ${it.cump} %"><span style="width:${Math.min(100, it.cump)}%"></span></span></span>
+        <span class="s-rank__cump">${pctCump(it.cump)}<span class="s-barra s-barra--${nivel(it.cump)}" role="img" aria-label="Cumplimiento ${it.cump} %"><span style="width:${Math.min(100, it.cump)}%"></span></span></span>
         <span class="s-rank__falta s-num">${it.brecha > 0 ? `Faltan ${fmt(it.brecha)}` : 'Cumple'}</span></button></li>`;
     }).join('');
     return `<section class="s-card s-rank" aria-labelledby="t-rank">
       <div class="s-rank__cab"><div><h2 id="t-rank" class="s-seccion__h">Más lejos de la meta</h2>
         <p class="s-rank__sub">Semana ${ui.semana} · las 5 con menor cumplimiento${est ? ' · ' + esc(est) : ''} · ${fmt(conMeta.length)} con meta</p></div>
         <div class="s-rank__filtros">${selectCampo('N', 'rnivel', 'Nivel', NIVELES_RANK, nivelSel)}</div></div>
-      ${top.length ? `<ol class="s-rank__lista">${filas}</ol>` : '<p class="s-vacio-bloque">Sin resultados con este filtro.</p>'}
+      ${top.length ? `<div class="s-rank__th" aria-hidden="true"><span></span><span>Cumplimiento</span><span>Faltante</span></div><ol class="s-rank__lista">${filas}</ol>` : '<p class="s-vacio-bloque">Sin resultados con este filtro.</p>'}
     </section>`;
   }
   /* Tarjeta «Por nivel de atención»: una fila por nivel, con cumplimiento y faltante. Respeta el filtro de estado. */
@@ -801,13 +804,13 @@
       const etq = k === 'p1' ? 'UMF' : k === 'p2' ? 'HGZ y HGR' : 'UMAE';
       return `<li class="s-rank__fila s-rank__fila--fija">
         <span class="s-rank__nombre">${NIVEL_LABEL[k]}<span class="s-rank__sub">${etq} · ${fmt(x.n)} ${k === 'p3' ? 'UMAE' : 'unidades'}</span></span>
-        <span class="s-rank__cump">${pct == null ? '<span class="s-sinmeta">Sin meta</span>' : `${tagCump(pct)}<span class="s-barra s-barra--${nivel(pct)}" role="img" aria-label="Cumplimiento ${pct} %"><span style="width:${Math.min(100, pct)}%"></span></span>`}</span>
+        <span class="s-rank__cump">${pct == null ? '<span class="s-sinmeta">Sin meta</span>' : `${pctCump(pct)}<span class="s-barra s-barra--${nivel(pct)}" role="img" aria-label="Cumplimiento ${pct} %"><span style="width:${Math.min(100, pct)}%"></span></span>`}</span>
         <span class="s-rank__falta s-num">${pct == null ? '' : falta > 0 ? `Faltan ${fmt(falta)}` : 'Cumple'}</span></li>`;
     }).join('');
     return `<section class="s-card s-rank s-niveles" aria-labelledby="t-niv">
       <div class="s-rank__cab"><div><h2 id="t-niv" class="s-seccion__h">Por nivel de atención</h2>
         <p class="s-rank__sub">Semana ${ui.semana}${titulo ? ' · ' + esc(titulo) : ''}</p></div></div>
-      <ol class="s-rank__lista">${filas}</ol>
+      <div class="s-rank__th" aria-hidden="true"><span></span><span>Cumplimiento</span><span>Faltante</span></div><ol class="s-rank__lista">${filas}</ol>
     </section>`;
   }
   function vNacional() {
@@ -906,7 +909,7 @@
     return `<section class="s-card s-tabla-card" aria-labelledby="t-aus"><div class="s-seccion__cab"><h2 id="t-aus" class="s-seccion__h">Ausentismo por servicio</h2><span class="s-sinmeta">Acumulado ${ANIO}</span></div>
       <div class="s-tabla-scroll" role="region" aria-labelledby="t-aus" tabindex="0"><table class="s-tabla"><caption class="s-sr">Ausentismo por servicio, acumulado ${ANIO}</caption>
       <thead><tr><th scope="col">Servicio</th><th scope="col" class="s-der">Médicos</th><th scope="col" class="s-der">Programada (días)</th><th scope="col" class="s-der">No programada (días)</th><th scope="col" class="s-der">No programada por médico</th><th scope="col" class="s-der">Frente a la unidad</th></tr></thead>
-      <tbody>${filas.map(f => { const d = f.noPorMedico - prom; return `<tr><td>${esc(f.a.nombre)}</td><td class="s-der s-num">${fmt(f.n)}</td><td class="s-der s-num">${fmt(f.prog)}</td><td class="s-der s-num">${fmt(f.no)}</td><td class="s-der s-num">${fmt1(f.noPorMedico)}</td><td class="s-der s-num ${d > 0 ? 's-brecha' : ''}">${d > 0 ? '+' : ''}${fmt1(d)}</td></tr>`; }).join('')}</tbody></table></div></section>`;
+      <tbody>${filas.map(f => { const d = Math.round((f.noPorMedico - prom) * 10) / 10; return `<tr><td>${esc(f.a.nombre)}</td><td class="s-der s-num">${fmt(f.n)}</td><td class="s-der s-num">${fmt(f.prog)}</td><td class="s-der s-num">${fmt(f.no)}</td><td class="s-der s-num">${fmt1(f.noPorMedico)}</td><td class="s-der s-num ${d > 0 ? 's-brecha' : ''}">${d > 0 ? '+' : d < 0 ? '−' : ''}${fmt1(Math.abs(d))}</td></tr>`; }).join('')}</tbody></table></div></section>`;
   }
   function tablaMedicosAus(n) {
     const medicos = hijos(n).filter(a => a.tipo === 'area').flatMap(a => hijos(a).filter(m => m.tipo === 'medico').map(m => ({ m, a })));
@@ -1031,7 +1034,7 @@
       <div class="s-ficha2__izq">
         <div class="s-ficha2__par">${tarjeta('notas', 'Notas', 't-not', par([['Mérito', e.merito], ['Demérito', e.demerito]]))}${tarjeta('cap', 'Capacitación', 't-capa', `<p class="s-tarjeta__unico s-num">${e.capacitacion}</p>`)}</div>
         ${tarjeta('aus', 'Ausentismos', 't-aus', `<div class="s-tabla-scroll"><table class="s-tarjeta__tabla"><caption class="s-sr">Días de ausentismo</caption><thead><tr><th scope="col">Año</th><th scope="col">Programada</th><th scope="col">No programada</th></tr></thead><tbody><tr><td class="s-num">${ANIO}</td><td class="s-num">${e.ausProg}</td><td class="s-num">${e.ausNoProg}</td></tr></tbody></table></div>`)}
-        ${tarjeta('hx', 'Horas extras', 't-hx', par([[`Semana ${w}`, `${e.horas(w)} h`], [`Acumulado ${ANIO}`, `${hAn} h`], [`Acumulado ${ANIO} (h)`, `${hAn} h`]]))}
+        ${tarjeta('hx', 'Horas extras', 't-hx', par([[`Semana ${w}`, `${e.horas(w)} h`], [`Acumulado ${ANIO}`, `${hAn} h`]]))}
       </div>
       <section class="s-card s-trayectoria" aria-labelledby="t-tray"><h2 id="t-tray" class="s-seccion__h">Movimientos - Trayectoria</h2>
         <ol class="s-trayectoria__lista">${e.movimientos.slice().reverse().map(x => `<li><dl>${campo('Fecha movimiento', x.fecha)}${campo('Tipo de movimiento', x.tipo)}${campo('Tipo de contratación', x.contrato)}<div class="s-ficha2__campo s-trayectoria__adsc"><dt>Adscripción</dt><dd>${esc(x.adsc)}</dd></div></dl></li>`).join('')}</ol></section>

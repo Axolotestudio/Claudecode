@@ -1224,6 +1224,148 @@ button.s-rank__fila:focus-visible { outline: 2px solid var(--color-primary-700);
 .s-ref-nota { margin: 0; font-size: var(--font-size-xs); color: var(--color-neutral-600); }
 .s-delta { font-size: var(--font-size-xs); color: var(--color-neutral-600); white-space: nowrap; }
 
+/* ===== Revisión de cards (frontend-design dentro de Cartillas): jerarquía, legibilidad y sin encimados ===== */
+/* Títulos que reciben el foco por programa (para lector de pantalla): sin recuadro al cargar la vista */
+h1[tabindex="-1"]:focus, h2[tabindex="-1"]:focus { outline: none; }
+
+/* Infraestructura médica: el título se ajusta en dos líneas en vez de encimarse con «Camas»; con el panel abierto o en pantallas medianas, título arriba y cifras abajo */
+.s-panel--infra .s-ind__txt { flex: 1 1 auto; min-width: 0; }
+.s-panel--infra .s-ind__etq { white-space: normal; overflow-wrap: break-word; }
+@container (max-width: 900px) {
+  .s-panel--infra { grid-template-columns: minmax(0, 1fr); gap: var(--space-4); padding: var(--space-5); }
+  .s-infra__datos { grid-column: auto; grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+
+/* Personal: las etiquetas ya no se enciman entre columnas; 5 columnas solo si caben, si no 3 (3 × 3) y en móvil 2 */
+.s-pers__dato .s-infra__etq { white-space: normal; overflow-wrap: break-word; }
+@container (max-width: 1140px) { .s-pers__datos { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+@container (max-width: 640px) { .s-pers__datos { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+/* Toda la card abre el detalle: las cifras no bloquean el clic */
+.s-panel--personal .s-pers__datos { pointer-events: none; }
+
+/* Productividad acumulada en una columna: separación visible entre real y planeado */
+@container (max-width: 900px) { .s-acu__col + .s-acu__col { border-top-color: var(--color-teal-200); } }
+
+/* Por nivel de atención y Más lejos de la meta: la barra de cumplimiento ocupa su columna completa; sin hueco al centro */
+@media (min-width: 641px) {
+  .s-rank__fila, .s-niveles .s-rank__fila { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(128px, auto); gap: var(--space-6); padding: var(--space-2) var(--space-3); }
+}
+.s-rank__cump .s-barra { max-width: none; }
+.s-rank__falta { font-weight: var(--font-weight-semibold); color: var(--color-neutral-800); font-variant-numeric: tabular-nums; }
+.s-rank__cab { align-items: center; }
+
+/* Tablas con orden: el nombre y su subtítulo se ajustan en varias líneas para que las cifras quepan (sobre todo con el panel abierto) */
+.s-tabla--ord td:first-child { min-width: 180px; white-space: normal; }
+.s-tabla--ord th, .s-tabla--ord td { padding: var(--space-2); }
+.s-tabla--ord .s-ref { white-space: normal; }
+.s-tabla--ord .s-celda-nombre__s { overflow-wrap: break-word; }
+/* Si aun así no cabe (panel abierto en 1280–1440 px): barra de desplazamiento visible y la columna del nombre fija al desplazar */
+.s-tabla-card .s-tabla-scroll { scrollbar-width: thin; scrollbar-color: var(--color-neutral-300) transparent; }
+.s-tabla--ord th:first-child, .s-tabla--ord td:first-child { position: sticky; left: 0; z-index: 1; box-shadow: inset -1px 0 0 var(--color-neutral-100); }
+
+/* ===================================================================================
+   Acomodo nuevo de las cards (skill frontend-design) con el estilo visual original:
+   fondos tintados y degradados de cada tema, iconos en círculo de color, sin rieles.
+   La cifra principal sube a 36 px; los desgloses van en renglones con filetes finos.
+   =================================================================================== */
+.s-panel--prod, .s-panel--infra, .s-panel--personal {
+  --tinta: var(--color-teal-600); --circulo: var(--color-teal-400);
+  padding: var(--space-6); min-height: 0;
+}
+.s-panel--infra { --tinta: var(--color-lavender-700); --circulo: var(--color-lavender-400); }
+.s-panel--personal { --tinta: var(--color-cornflower-600); --circulo: var(--color-sky-300); }
+
+/* Etiqueta con icono en círculo de color (como antes) y cifra principal */
+.s-hoja__etq { display: flex; align-items: center; gap: var(--space-3); margin: 0; font-size: var(--font-size-md); line-height: 1.3; color: var(--color-neutral-600); }
+.s-hoja__icono { display: grid; place-content: center; flex: none; width: 40px; height: 40px; border-radius: 50%; background: var(--circulo); color: var(--color-surface); }
+.s-hoja__icono svg { width: 22px; height: 22px; }
+.s-hoja__num { margin: var(--space-3) 0 0; font-size: calc(var(--font-size-2xl) * 1.5); font-weight: var(--font-weight-semibold); line-height: 1.1; letter-spacing: -0.01em; color: var(--color-neutral-700); }
+.s-hoja__de { margin: var(--space-2) 0 0; font-size: var(--font-size-md); line-height: 1.4; color: var(--color-neutral-600); }
+.s-hoja__de strong { font-weight: var(--font-weight-semibold); color: var(--color-neutral-700); }
+
+/* Productividad: cifra real a la izquierda; libro real contra planeado a la derecha */
+.s-hoja { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr); gap: var(--space-6); align-items: center; }
+.s-hoja__heroe { min-width: 0; padding-right: var(--space-6); border-right: 1px solid var(--color-neutral-100); }
+.s-hoja__tabla { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
+.s-hoja__tabla th, .s-hoja__tabla td { padding: var(--space-2) 0 var(--space-2) var(--space-5); border-bottom: 1px solid var(--color-neutral-100); text-align: right; white-space: nowrap; }
+.s-hoja__tabla tr > :first-child { padding-left: 0; text-align: left; white-space: normal; }
+.s-hoja__tabla thead th { padding-top: 0; font-size: var(--font-size-xs); font-weight: var(--font-weight-medium); line-height: 1.3; color: var(--color-neutral-500); }
+.s-hoja__tabla tbody th { font-size: var(--font-size-md); font-weight: var(--font-weight-regular); color: var(--color-neutral-600); }
+.s-hoja__tabla tbody td { font-size: var(--font-size-xl); font-weight: var(--font-weight-semibold); line-height: 1.2; color: var(--tinta); }
+
+.s-hoja__tabla tbody tr:last-child > * { border-bottom: 0; }
+.s-hoja__tabla .s-hoja__sinmeta { font-size: var(--font-size-sm); font-weight: var(--font-weight-regular); color: var(--color-neutral-500); }
+.s-panel--prod .s-resumen__sem { margin: var(--space-1) 0 0; padding-top: var(--space-4); border-top: 1px solid var(--color-neutral-100); font-size: var(--font-size-sm); color: var(--color-neutral-600); }
+@container (max-width: 760px) {
+  .s-hoja { grid-template-columns: minmax(0, 1fr); gap: var(--space-5); }
+  .s-hoja__heroe { padding: 0 0 var(--space-5); border-right: 0; border-bottom: 1px solid var(--color-neutral-100); }
+}
+@container (max-width: 480px) {
+  .s-panel--prod, .s-panel--infra, .s-panel--personal { padding: var(--space-5) var(--space-4); }
+  .s-hoja__num { font-size: calc(var(--font-size-2xl) * 1.25); }
+  .s-hoja__tabla tbody td { font-size: var(--font-size-md); }
+  .s-hoja__tabla th, .s-hoja__tabla td { padding-left: var(--space-3); }
+}
+
+/* Infraestructura: tres lecturas grandes separadas por filetes */
+.s-panel--infra { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--space-5); }
+.s-panel--infra .s-infra__datos { grid-column: auto; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0; }
+.s-panel--infra .s-infra__dato { display: flex; flex-direction: column; align-items: flex-start; gap: var(--space-1); padding: 0 var(--space-6); border: 0; border-left: 1px solid var(--color-neutral-100); border-radius: 0; background: transparent; text-align: left; cursor: pointer; font: inherit; }
+.s-panel--infra .s-infra__dato:first-child { padding-left: 0; border-left: 0; }
+.s-panel--infra .s-infra__etq { font-size: var(--font-size-md); color: var(--color-neutral-600); }
+.s-panel--infra .s-infra__val { font-size: calc(var(--font-size-2xl) * 1.5); font-weight: var(--font-weight-semibold); line-height: 1.1; letter-spacing: -0.01em; color: var(--tinta); }
+.s-panel--infra .s-infra__dato:hover .s-infra__etq { color: var(--color-primary-700); text-decoration: underline; text-underline-offset: 2px; }
+@container (max-width: 640px) {
+  .s-panel--infra .s-infra__datos { grid-template-columns: minmax(0, 1fr); }
+  .s-panel--infra .s-infra__dato { flex-direction: row; justify-content: space-between; align-items: baseline; padding: var(--space-3) 0; border-left: 0; border-top: 1px solid var(--color-neutral-100); }
+  .s-panel--infra .s-infra__dato:first-child { border-top: 0; padding-top: 0; }
+  .s-panel--infra .s-infra__val { font-size: var(--font-size-2xl); }
+}
+
+/* Personal: total a la izquierda; nueve categorías en un libro de tres columnas */
+.s-panel--personal { display: grid; grid-template-columns: minmax(200px, 260px) minmax(0, 1fr); gap: var(--space-6); align-items: center; }
+.s-hoja__heroe--pers { display: flex; flex-direction: column; justify-content: center; align-self: stretch; }
+.s-panel--personal .s-pers__datos { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0 var(--space-6); }
+.s-panel--personal .s-pers__dato { display: flex; flex-direction: row; justify-content: space-between; align-items: baseline; gap: var(--space-3); padding: var(--space-3) 0; border-top: 0; border-bottom: 1px solid var(--color-neutral-100); }
+.s-panel--personal .s-pers__dato:nth-last-child(-n+3) { border-bottom: 0; }
+.s-panel--personal .s-pers__dato .s-infra__etq { font-size: var(--font-size-sm); line-height: 1.3; color: var(--color-neutral-600); white-space: normal; }
+.s-panel--personal .s-pers__val { font-size: var(--font-size-lg); font-weight: var(--font-weight-semibold); line-height: 1.2; color: var(--tinta); }
+@container (max-width: 900px) {
+  .s-panel--personal { grid-template-columns: minmax(0, 1fr); gap: var(--space-4); }
+  .s-hoja__heroe--pers { padding: 0 0 var(--space-4); border-right: 0; border-bottom: 1px solid var(--color-neutral-100); }
+}
+@container (max-width: 640px) {
+  .s-panel--personal .s-pers__datos { grid-template-columns: minmax(0, 1fr); }
+  .s-panel--personal .s-pers__dato:nth-last-child(-n+3) { border-bottom: 1px solid var(--color-neutral-100); }
+  .s-panel--personal .s-pers__dato:last-child { border-bottom: 0; }
+}
+
+/* Listas de cumplimiento: porcentaje legible con su color, barra delgada y faltante alineado */
+.s-rank { padding: var(--space-6); }
+.s-rank__cab { margin-bottom: var(--space-4); }
+.s-rank__th { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(128px, auto); gap: var(--space-6); padding: 0 var(--space-3) var(--space-2); font-size: var(--font-size-xs); color: var(--color-neutral-500); }
+.s-rank__th span:last-child { text-align: right; }
+.s-rank__nombre { font-size: var(--font-size-md); font-weight: var(--font-weight-medium); }
+.s-rank__cump { flex-direction: row; align-items: center; gap: var(--space-3); }
+.s-rank__cump .s-barra { flex: 1 1 auto; height: 6px; }
+.s-pct { flex: none; min-width: 4em; font-size: var(--font-size-lg); font-weight: var(--font-weight-semibold); line-height: 1.2; font-variant-numeric: tabular-nums; }
+.s-pct--bajo { color: var(--color-rust-500); }
+.s-pct--medio { color: var(--color-pollen-800); }
+.s-pct--alto { color: var(--color-sage-700); }
+.s-rank__falta { font-size: var(--font-size-md); }
+@media (max-width: 640px) {
+  .s-rank { padding: var(--space-4); }
+  .s-rank__th { display: none; }
+  .s-rank__fila, .s-niveles .s-rank__fila { grid-template-columns: minmax(0, 1fr); gap: var(--space-2); }
+  .s-rank__falta { justify-self: start; }
+}
+
+
+/* Ficha del trabajador: estilo original (franja de color con el título centrado); cifras más grandes */
+.s-tarjeta .s-tarjeta__pares dd, .s-tarjeta .s-tarjeta__unico { font-weight: var(--font-weight-semibold); }
+/* Nacional: horas extras incluye el importe; cifras un paso más chicas para que quepan las tres */
+.s-tarjeta--hx .s-tarjeta__pares dd { font-size: var(--font-size-xl); }
+
   </style>
 </head>
 <body>
@@ -1563,6 +1705,8 @@ button.s-rank__fila:focus-visible { outline: 2px solid var(--color-primary-700);
     const atras = padre ? `<a class="s-btn-atras" href="${padre.h}" aria-label="Regresar a ${esc(padre.t)}">${I.flecha}</a>` : '';
     return `${ruta(n)}<div class="s-encabezado"><div class="s-encabezado__izq">${atras}<div class="s-titulo"><h1 tabindex="-1" id="titulo">${esc(titulo)}</h1>${nombre}${meta ? `<span class="s-titulo__meta">${meta}</span>` : ''}</div></div>${periodo()}</div><!--tabs-->`;
   }
+  /* Cumplimiento en listas: cifra legible con el color de su nivel */
+  function pctCump(pct) { return `<span class="s-pct s-pct--${nivel(pct)}"><span class="s-sr">Cumplimiento </span>${pct} %</span>`; }
   function tagCump(pct, prefijo = 'Cumplimiento ') { return `<span class="s-tag s-tag--${nivel(pct)}"><i aria-hidden="true"></i>${prefijo}${pct} %</span>`; }
   function selectCampo(idv, campo, etiqueta, opciones, valor) {
     return `<div class="s-field"><label for="f-${campo}-${idv}">${etiqueta}</label><span class="s-control"><select class="s-select" id="f-${campo}-${idv}" data-vista="${idv}" data-campo="${campo}">${opciones.map(([val, t]) => `<option value="${esc(val)}"${val === valor ? ' selected' : ''}>${esc(t)}</option>`).join('')}</select><span class="s-control__icono s-control__icono--der">${I.abajo}</span></span></div>`;
@@ -1607,16 +1751,17 @@ button.s-rank__fila:focus-visible { outline: 2px solid var(--color-primary-700);
     return `<section class="s-seccion" aria-labelledby="t-acu"><div class="s-seccion__cab"><h2 id="t-acu" class="s-seccion__h" tabindex="-1">Productividad acumulada <strong>${al}</strong></h2><p class="s-periodo">Periodo comprendido de la semana <mark class="s-num">1</mark> a la semana <mark class="s-num">${ui.semana}</mark></p></div>
       <section class="s-panel s-panel--prod s-resumen" aria-label="Resumen de productividad acumulada">
         <button class="s-bloque__abrir" type="button" id="card-acu" data-drawer="acu" aria-pressed="${!!sel}" aria-label="Ver detalle de la productividad acumulada"></button>
-        <div class="s-acu">
-          <div class="s-acu__col">
-            <div class="s-acu__cab"><span class="s-icono-circ s-icono-circ--prod" aria-hidden="true">${I.pulso}</span><div><p class="s-acu__etq">Productividad real acumulada</p><p class="s-acu__val s-num">${fmt(real)}</p></div></div>
-            <dl class="s-acu__datos"><div><dt>Consultas</dt><dd class="s-num">${fmt(r.cr)}</dd></div><div><dt>Cirugías</dt><dd class="s-num">${fmt(r.qr)}</dd></div><div><dt>Hospitalizaciones</dt><dd class="s-num">${fmt(r.hr)}</dd></div></dl>
+        <div class="s-hoja">
+          <div class="s-hoja__heroe">
+            <p class="s-hoja__etq"><span class="s-hoja__icono" aria-hidden="true">${I.pulso}</span>Productividad real acumulada</p>
+            <p class="s-hoja__num s-num">${fmt(real)}</p>
+            <p class="s-hoja__de">de <strong class="s-num">${fmt(plan)}</strong> planeadas</p>
           </div>
-          <span class="s-acu__sep" aria-hidden="true"></span>
-          <div class="s-acu__col">
-            <div class="s-acu__cab"><span class="s-icono-circ s-icono-circ--prod" aria-hidden="true">${I.calendario}</span><div><p class="s-acu__etq">Productividad planeada acumulada</p><p class="s-acu__val s-num">${fmt(plan)}</p></div></div>
-            <dl class="s-acu__datos"><div><dt>Consultas</dt><dd class="s-num">${fmt(r.cp)}</dd></div><div><dt>Cirugías</dt><dd class="s-num">${fmt(r.qp)}</dd></div><div><dt>Hospitalizaciones</dt><dd class="s-acu__sinmeta">Sin meta</dd></div></dl>
-          </div>
+          <table class="s-hoja__tabla"><caption class="s-sr">Real y planeado acumulados por tipo de atención</caption>
+            <thead><tr><th scope="col"><span class="s-sr">Tipo de atención</span></th><th scope="col">Real</th><th scope="col">Planeado</th></tr></thead>
+            <tbody><tr><th scope="row">Consultas</th><td class="s-num">${fmt(r.cr)}</td><td class="s-num">${fmt(r.cp)}</td></tr>
+              <tr><th scope="row">Cirugías</th><td class="s-num">${fmt(r.qr)}</td><td class="s-num">${fmt(r.qp)}</td></tr>
+              <tr><th scope="row">Hospitalizaciones</th><td class="s-num">${fmt(r.hr)}</td><td class="s-hoja__sinmeta">Sin meta</td></tr></tbody></table>
         </div>${semana}
           </section></section>`;
   }
@@ -1910,7 +2055,7 @@ button.s-rank__fila:focus-visible { outline: 2px solid var(--color-primary-700);
     ctx.tema = 'infra'; ctx.temaNodos = nodos; ctx.temaHijos = !!o.hijos;
     let html = `<section class="s-seccion" aria-labelledby="t-inf"><div class="s-seccion__cab"><h2 id="t-inf" class="s-seccion__h" tabindex="-1">Capacidad instalada <strong>${al}</strong></h2><p class="s-periodo">Uso calculado con la semana <mark class="s-num">${ui.semana}</mark></p></div>
       <section class="s-panel s-panel--infra s-resumen" aria-label="Infraestructura médica">
-        <div class="s-ind s-ind--infra"><span class="s-icono-circ s-icono-circ--infra" aria-hidden="true">${I.hospital}</span><div class="s-ind__txt"><p class="s-ind__etq">Infraestructura médica</p></div></div>
+        <p class="s-hoja__etq s-hoja__etq--infra"><span class="s-hoja__icono" aria-hidden="true">${I.hospital}</span>Infraestructura médica</p>
         <div class="s-infra__datos">${[['cama', 'Camas', u.cam], ['cons', 'Consultorios', u.con], ['quir', 'Quirófanos', u.qui]].map(([k, t, v]) => `<button class="s-infra__dato" type="button" data-drawer="t-res" data-id="${k}" aria-label="Ver detalle de ${t}"><span class="s-infra__etq">${t}</span><span class="s-infra__val s-num">${fmt(v)}</span></button>`).join('')}</div>
       </section></section>`;
     if (!o.hijos) return html;
@@ -1939,7 +2084,7 @@ button.s-rank__fila:focus-visible { outline: 2px solid var(--color-primary-700);
     const sel = ui.drawer && ui.drawer.k === 't-res' && ui.drawer.id === 'pl';
     return `<section class="s-panel s-panel--personal s-resumen" aria-label="Personal">
       <button class="s-bloque__abrir" type="button" id="card-pl" data-drawer="t-res" data-id="pl" aria-pressed="${!!sel}" aria-label="Ver detalle del personal"></button>
-      <div class="s-ind s-pers__titulo"><span class="s-icono-circ s-icono-circ--personal" aria-hidden="true">${I.personas}</span><div class="s-ind__txt"><p class="s-ind__etq">Personal</p><p class="s-pers__total s-num">${fmt(pl.total)}</p></div></div>
+      <div class="s-hoja__heroe s-hoja__heroe--pers"><p class="s-hoja__etq"><span class="s-hoja__icono" aria-hidden="true">${I.personas}</span>Personal</p><p class="s-hoja__num s-num">${fmt(pl.total)}</p></div>
       <div class="s-infra__datos s-pers__datos">${[['Médicos especialistas', pl.ME], ['Médicos familiares', pl.MF], ['Otros médicos', pl.OM], ['Enfermeras', pl.EN], ['Residentes', pl.RE], ['Paramédicos', pl.PA], ['Técnicos', pl.TE], ['Administrativas', pl.AD], ['Limpieza e higiene', pl.LI]].map(([t, v]) => `<div class="s-infra__dato s-pers__dato"><span class="s-infra__etq">${t}</span><span class="s-pers__val s-num">${fmt(v)}</span></div>`).join('')}</div>
     </section>`;
   }
@@ -2035,14 +2180,14 @@ button.s-rank__fila:focus-visible { outline: 2px solid var(--color-primary-700);
       const h = it.n, sub = [estadoDe(h), padreTxt(h)].filter(Boolean).join(' · ');
       return `<li><button class="s-rank__fila" type="button" data-drawer="fila" data-id="${h.id}">
         <span class="s-rank__nombre">${esc(h.nombre)}<span class="s-rank__sub">${esc(sub)}</span></span>
-        <span class="s-rank__cump">${tagCump(it.cump)}<span class="s-barra s-barra--${nivel(it.cump)}" role="img" aria-label="Cumplimiento ${it.cump} %"><span style="width:${Math.min(100, it.cump)}%"></span></span></span>
+        <span class="s-rank__cump">${pctCump(it.cump)}<span class="s-barra s-barra--${nivel(it.cump)}" role="img" aria-label="Cumplimiento ${it.cump} %"><span style="width:${Math.min(100, it.cump)}%"></span></span></span>
         <span class="s-rank__falta s-num">${it.brecha > 0 ? `Faltan ${fmt(it.brecha)}` : 'Cumple'}</span></button></li>`;
     }).join('');
     return `<section class="s-card s-rank" aria-labelledby="t-rank">
       <div class="s-rank__cab"><div><h2 id="t-rank" class="s-seccion__h">Más lejos de la meta</h2>
         <p class="s-rank__sub">Semana ${ui.semana} · las 5 con menor cumplimiento${est ? ' · ' + esc(est) : ''} · ${fmt(conMeta.length)} con meta</p></div>
         <div class="s-rank__filtros">${selectCampo('N', 'rnivel', 'Nivel', NIVELES_RANK, nivelSel)}</div></div>
-      ${top.length ? `<ol class="s-rank__lista">${filas}</ol>` : '<p class="s-vacio-bloque">Sin resultados con este filtro.</p>'}
+      ${top.length ? `<div class="s-rank__th" aria-hidden="true"><span></span><span>Cumplimiento</span><span>Faltante</span></div><ol class="s-rank__lista">${filas}</ol>` : '<p class="s-vacio-bloque">Sin resultados con este filtro.</p>'}
     </section>`;
   }
   /* Tarjeta «Por nivel de atención»: una fila por nivel, con cumplimiento y faltante. Respeta el filtro de estado. */
@@ -2054,13 +2199,13 @@ button.s-rank__fila:focus-visible { outline: 2px solid var(--color-primary-700);
       const etq = k === 'p1' ? 'UMF' : k === 'p2' ? 'HGZ y HGR' : 'UMAE';
       return `<li class="s-rank__fila s-rank__fila--fija">
         <span class="s-rank__nombre">${NIVEL_LABEL[k]}<span class="s-rank__sub">${etq} · ${fmt(x.n)} ${k === 'p3' ? 'UMAE' : 'unidades'}</span></span>
-        <span class="s-rank__cump">${pct == null ? '<span class="s-sinmeta">Sin meta</span>' : `${tagCump(pct)}<span class="s-barra s-barra--${nivel(pct)}" role="img" aria-label="Cumplimiento ${pct} %"><span style="width:${Math.min(100, pct)}%"></span></span>`}</span>
+        <span class="s-rank__cump">${pct == null ? '<span class="s-sinmeta">Sin meta</span>' : `${pctCump(pct)}<span class="s-barra s-barra--${nivel(pct)}" role="img" aria-label="Cumplimiento ${pct} %"><span style="width:${Math.min(100, pct)}%"></span></span>`}</span>
         <span class="s-rank__falta s-num">${pct == null ? '' : falta > 0 ? `Faltan ${fmt(falta)}` : 'Cumple'}</span></li>`;
     }).join('');
     return `<section class="s-card s-rank s-niveles" aria-labelledby="t-niv">
       <div class="s-rank__cab"><div><h2 id="t-niv" class="s-seccion__h">Por nivel de atención</h2>
         <p class="s-rank__sub">Semana ${ui.semana}${titulo ? ' · ' + esc(titulo) : ''}</p></div></div>
-      <ol class="s-rank__lista">${filas}</ol>
+      <div class="s-rank__th" aria-hidden="true"><span></span><span>Cumplimiento</span><span>Faltante</span></div><ol class="s-rank__lista">${filas}</ol>
     </section>`;
   }
   function vNacional() {
