@@ -348,9 +348,9 @@
       <section class="s-panel s-panel--prod s-resumen" aria-label="Resumen de productividad acumulada">
         <button class="s-bloque__abrir" type="button" id="card-acu" data-drawer="acu" aria-pressed="${!!sel}" aria-label="Ver detalle de la productividad acumulada"></button>
         <div class="s-ind__filas">
-          ${filaInd('s-ind--real', I.pulso, 'Productividad real acumulada', real, [['Consultas', r.cr], ['Cirugías', r.qr], ['Hospitalizaciones', r.hr]])}
+          ${filaInd('s-ind--real s-ind--apilable', I.pulso, 'Productividad real acumulada', real, [['Consultas', r.cr], ['Cirugías', r.qr], ['Hospitalizaciones', r.hr]])}
           <span class="s-ind__sep" aria-hidden="true"></span>
-          ${filaInd('s-ind--plan', I.calendario, 'Productividad planeada acumulada', plan, [['Consultas', r.cp], ['Cirugías', r.qp]])}
+          ${filaInd('s-ind--plan s-ind--apilable', I.calendario, 'Productividad planeada acumulada', plan, [['Consultas', r.cp], ['Cirugías', r.qp]])}
         </div>
           </section></section>`;
   }

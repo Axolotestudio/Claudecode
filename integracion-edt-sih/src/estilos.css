@@ -818,3 +818,11 @@ button.s-rank__fila:focus-visible { outline: 2px solid var(--color-primary-700);
 .s-infra__val { font-size: var(--font-size-xl); font-weight: var(--font-weight-semibold); color: var(--color-lavender-600); }
 .s-panel--personal .s-ind__filas .s-ind__subs dd { font-size: var(--font-size-xl); }
 .s-ind--real .s-ind__subs dd, .s-ind--plan .s-ind__subs dd { font-size: var(--font-size-xl); }
+
+/* Productividad acumulada: si no caben las dos filas lado a lado en el espacio disponible, se apilan */
+.s-contenido { container-type: inline-size; }
+@container (max-width: 1080px) {
+  .s-ind__filas:has(.s-ind--apilable) { flex-direction: column; align-items: stretch; gap: var(--space-3); }
+  .s-ind__filas:has(.s-ind--apilable) > .s-ind__sep { display: none; }
+  .s-ind__filas:has(.s-ind--apilable) > .s-ind--plan { padding-top: var(--space-3); border-top: 1px solid var(--color-teal-100); }
+}
