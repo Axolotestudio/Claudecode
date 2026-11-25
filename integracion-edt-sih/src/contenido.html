@@ -331,7 +331,7 @@
   function filaInd(clase, icono, etiq, valor, subs) {
     return `<div class="s-ind ${clase}"><span class="s-icono-circ s-icono-circ--${clase.includes('personal') ? 'personal' : clase.includes('infra') ? 'infra' : 'prod'}" aria-hidden="true">${icono}</span>
       <div class="s-ind__txt"><p class="s-ind__etq">${etiq}</p>${valor == null ? '' : `<p class="s-ind__valor s-num">${fmt(valor)}</p>`}</div>
-      ${subs.length ? `<dl class="s-ind__subs">${subs.map(([t, v]) => `<div><dt>${t}</dt><dd class="s-num">${fmt(v)}</dd></div>`).join('')}</dl>` : ''}</div>`;
+      ${subs.length ? `<dl class="s-ind__subs">${subs.map(([t, v, p]) => `<div><dt>${t}</dt><dd class="s-num">${fmt(v)}</dd>${p == null ? '' : `<dd class="s-ind__pct"><span class="s-tag s-tag--${nivel(p)}"><i aria-hidden="true"></i>${p} %</span></dd>`}</div>`).join('')}</dl>` : ''}</div>`;
   }
   /* Resumen de productividad: una card con real, planeado, cumplimiento y brecha */
   function indicadores(items, noun) {
@@ -349,9 +349,9 @@
       <section class="s-panel s-panel--prod s-resumen" aria-label="Resumen de productividad acumulada">
         <button class="s-bloque__abrir" type="button" id="card-acu" data-drawer="acu" aria-pressed="${!!sel}" aria-label="Ver detalle de la productividad acumulada"></button>
         <div class="s-ind__filas">
-          ${filaInd('s-ind--real', I.pulso, 'Productividad real acumulada', real, [])}
+          ${filaInd('s-ind--real s-ind--apilado', I.pulso, 'Productividad real acumulada', real, [['Consultas', r.cr], ['Cirugías', r.qr]])}
           <span class="s-ind__sep" aria-hidden="true"></span>
-          ${filaInd('s-ind--plan', I.calendario, 'Productividad planeada acumulada', plan, [])}
+          ${filaInd('s-ind--plan s-ind--apilado', I.calendario, 'Productividad planeada acumulada', plan, [['Consultas', r.cp, r.cp ? Math.round(r.cr / r.cp * 100) : null], ['Cirugías', r.qp, r.qp ? Math.round(r.qr / r.qp * 100) : null]])}
           ${cump}
         </div>
         ${semana}
