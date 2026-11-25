@@ -885,3 +885,10 @@ button.s-rank__fila:focus-visible { outline: 2px solid var(--color-primary-700);
   .s-panel--infra { grid-template-columns: minmax(0, 1fr); }
   .s-infra__datos { grid-column: auto; grid-template-columns: repeat(3, minmax(0, 1fr)); }
 }
+/* Infraestructura médica: más aire vertical y cifras más grandes (ajuste pedido por el usuario) */
+.s-panel--infra { padding: var(--space-6) var(--space-6); min-height: 128px; }
+.s-panel--infra .s-icono-circ--infra { width: 64px; height: 64px; }
+.s-panel--infra .s-icono-circ--infra svg { width: 30px; height: 30px; }
+.s-panel--infra .s-ind__etq { font-size: var(--font-size-lg); }
+.s-infra__etq { font-size: var(--font-size-md); }
+.s-infra__val { font-size: var(--font-size-2xl); line-height: 1.2; }

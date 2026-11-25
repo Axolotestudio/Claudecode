@@ -5,7 +5,7 @@
 3. **Tamaños (tokens Cartillas):**
    - Etiqueta: 16 px regular, `neutral-600`.
    - Cifra principal: 28 px semibold, `neutral-700`.
-   - Desglose: etiqueta 16 px `neutral-500`; cifra 20 px semibold, `teal-600` (productividad) o el color de su categoría.
+   - Desglose: etiqueta 16 px `neutral-500`; cifra 20 px semibold (24 px en la tarjeta de infraestructura, ajuste pedido), `teal-600` (productividad) o el color de su categoría.
    - Espacios: 8, 12, 16, 20, 24 px. Nada de valores sueltos.
 4. **Sin aire ni amontonado:** las columnas tienen el mismo ancho; ningún bloque deja más de un tercio de su ancho vacío; ninguna cifra se encima con otra.
 5. **Sin datos inventados.** Si un dato no existe en el sistema (por ejemplo, planeado de hospitalizaciones), se marca «Sin meta» o «—», nunca se rellena.
