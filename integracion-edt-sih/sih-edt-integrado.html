@@ -1264,26 +1264,22 @@ h1[tabindex="-1"]:focus, h2[tabindex="-1"]:focus { outline: none; }
 .s-tabla--ord th:first-child, .s-tabla--ord td:first-child { position: sticky; left: 0; z-index: 1; box-shadow: inset -1px 0 0 var(--color-neutral-100); }
 
 /* ===================================================================================
-   Rediseño de cards (skill frontend-design): «hoja de control»
-   Superficie blanca con borde fino y un riel de color por tema (productividad teal,
-   infraestructura lavanda, personal azul). La cifra principal manda (36 px); los
-   desgloses van en un libro con filetes finos. Sin degradados ni círculos de color.
+   Acomodo nuevo de las cards (skill frontend-design) con el estilo visual original:
+   fondos tintados y degradados de cada tema, iconos en círculo de color, sin rieles.
+   La cifra principal sube a 36 px; los desgloses van en renglones con filetes finos.
    =================================================================================== */
 .s-panel--prod, .s-panel--infra, .s-panel--personal {
-  --riel: var(--color-teal-500); --tinta: var(--color-teal-700); --fondo-icono: var(--color-teal-50);
-  background: var(--color-surface); border: 1px solid var(--color-neutral-100); border-radius: var(--radius-lg);
-  box-shadow: inset 4px 0 0 var(--riel); padding: var(--space-6) var(--space-6) var(--space-6) calc(var(--space-6) + var(--space-1)); min-height: 0;
+  --tinta: var(--color-teal-600); --circulo: var(--color-teal-400);
+  padding: var(--space-6); min-height: 0;
 }
-.s-panel--infra { --riel: var(--color-lavender-500); --tinta: var(--color-lavender-700); --fondo-icono: var(--color-lavender-50); }
-.s-panel--personal { --riel: var(--color-sky-500); --tinta: var(--color-sky-700); --fondo-icono: var(--color-sky-50); }
-.s-panel--prod:hover, .s-panel--personal:hover { box-shadow: inset 4px 0 0 var(--riel), 0 0 0 1px var(--color-primary-200); }
-.s-panel--prod:has(.s-bloque__abrir[aria-pressed="true"]), .s-panel--personal:has(.s-bloque__abrir[aria-pressed="true"]) { box-shadow: inset 4px 0 0 var(--riel), 0 0 0 2px var(--color-primary-500); }
+.s-panel--infra { --tinta: var(--color-lavender-700); --circulo: var(--color-lavender-400); }
+.s-panel--personal { --tinta: var(--color-cornflower-600); --circulo: var(--color-sky-300); }
 
-/* Etiqueta con icono en mosaico y cifra principal */
-.s-hoja__etq { display: flex; align-items: center; gap: var(--space-2); margin: 0; font-size: var(--font-size-sm); font-weight: var(--font-weight-medium); line-height: 1.3; color: var(--color-neutral-600); }
-.s-hoja__icono { display: grid; place-content: center; flex: none; width: 28px; height: 28px; border-radius: var(--radius-md); background: var(--fondo-icono); color: var(--tinta); }
-.s-hoja__icono svg { width: 18px; height: 18px; }
-.s-hoja__num { margin: var(--space-3) 0 0; font-size: calc(var(--font-size-2xl) * 1.5); font-weight: var(--font-weight-semibold); line-height: 1.1; letter-spacing: -0.01em; color: var(--color-neutral-800); }
+/* Etiqueta con icono en círculo de color (como antes) y cifra principal */
+.s-hoja__etq { display: flex; align-items: center; gap: var(--space-3); margin: 0; font-size: var(--font-size-md); line-height: 1.3; color: var(--color-neutral-600); }
+.s-hoja__icono { display: grid; place-content: center; flex: none; width: 40px; height: 40px; border-radius: 50%; background: var(--circulo); color: var(--color-surface); }
+.s-hoja__icono svg { width: 22px; height: 22px; }
+.s-hoja__num { margin: var(--space-3) 0 0; font-size: calc(var(--font-size-2xl) * 1.5); font-weight: var(--font-weight-semibold); line-height: 1.1; letter-spacing: -0.01em; color: var(--color-neutral-700); }
 .s-hoja__de { margin: var(--space-2) 0 0; font-size: var(--font-size-md); line-height: 1.4; color: var(--color-neutral-600); }
 .s-hoja__de strong { font-weight: var(--font-weight-semibold); color: var(--color-neutral-700); }
 
@@ -1296,16 +1292,16 @@ h1[tabindex="-1"]:focus, h2[tabindex="-1"]:focus { outline: none; }
 .s-hoja__tabla thead th { padding-top: 0; font-size: var(--font-size-xs); font-weight: var(--font-weight-medium); line-height: 1.3; color: var(--color-neutral-500); }
 .s-hoja__tabla tbody th { font-size: var(--font-size-md); font-weight: var(--font-weight-regular); color: var(--color-neutral-600); }
 .s-hoja__tabla tbody td { font-size: var(--font-size-xl); font-weight: var(--font-weight-semibold); line-height: 1.2; color: var(--tinta); }
-.s-hoja__tabla tbody td + td { font-weight: var(--font-weight-regular); color: var(--color-neutral-700); }
+
 .s-hoja__tabla tbody tr:last-child > * { border-bottom: 0; }
-.s-hoja__tabla .s-hoja__sinmeta { font-size: var(--font-size-sm); color: var(--color-neutral-500); }
+.s-hoja__tabla .s-hoja__sinmeta { font-size: var(--font-size-sm); font-weight: var(--font-weight-regular); color: var(--color-neutral-500); }
 .s-panel--prod .s-resumen__sem { margin: var(--space-1) 0 0; padding-top: var(--space-4); border-top: 1px solid var(--color-neutral-100); font-size: var(--font-size-sm); color: var(--color-neutral-600); }
 @container (max-width: 760px) {
   .s-hoja { grid-template-columns: minmax(0, 1fr); gap: var(--space-5); }
   .s-hoja__heroe { padding: 0 0 var(--space-5); border-right: 0; border-bottom: 1px solid var(--color-neutral-100); }
 }
 @container (max-width: 480px) {
-  .s-panel--prod, .s-panel--infra, .s-panel--personal { padding: var(--space-5) var(--space-4) var(--space-5) calc(var(--space-4) + var(--space-1)); }
+  .s-panel--prod, .s-panel--infra, .s-panel--personal { padding: var(--space-5) var(--space-4); }
   .s-hoja__num { font-size: calc(var(--font-size-2xl) * 1.25); }
   .s-hoja__tabla tbody td { font-size: var(--font-size-md); }
   .s-hoja__tabla th, .s-hoja__tabla td { padding-left: var(--space-3); }
@@ -1333,7 +1329,7 @@ h1[tabindex="-1"]:focus, h2[tabindex="-1"]:focus { outline: none; }
 .s-panel--personal .s-pers__dato { display: flex; flex-direction: row; justify-content: space-between; align-items: baseline; gap: var(--space-3); padding: var(--space-3) 0; border-top: 0; border-bottom: 1px solid var(--color-neutral-100); }
 .s-panel--personal .s-pers__dato:nth-last-child(-n+3) { border-bottom: 0; }
 .s-panel--personal .s-pers__dato .s-infra__etq { font-size: var(--font-size-sm); line-height: 1.3; color: var(--color-neutral-600); white-space: normal; }
-.s-panel--personal .s-pers__val { font-size: var(--font-size-lg); font-weight: var(--font-weight-semibold); line-height: 1.2; color: var(--color-neutral-800); }
+.s-panel--personal .s-pers__val { font-size: var(--font-size-lg); font-weight: var(--font-weight-semibold); line-height: 1.2; color: var(--tinta); }
 @container (max-width: 900px) {
   .s-panel--personal { grid-template-columns: minmax(0, 1fr); gap: var(--space-4); }
   .s-hoja__heroe--pers { padding: 0 0 var(--space-4); border-right: 0; border-bottom: 1px solid var(--color-neutral-100); }
@@ -1345,7 +1341,7 @@ h1[tabindex="-1"]:focus, h2[tabindex="-1"]:focus { outline: none; }
 }
 
 /* Listas de cumplimiento: porcentaje legible con su color, barra delgada y faltante alineado */
-.s-rank { padding: var(--space-6); border: 1px solid var(--color-neutral-100); box-shadow: none; }
+.s-rank { padding: var(--space-6); }
 .s-rank__cab { margin-bottom: var(--space-4); }
 .s-rank__th { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(128px, auto); gap: var(--space-6); padding: 0 var(--space-3) var(--space-2); font-size: var(--font-size-xs); color: var(--color-neutral-500); }
 .s-rank__th span:last-child { text-align: right; }
@@ -1364,23 +1360,9 @@ h1[tabindex="-1"]:focus, h2[tabindex="-1"]:focus { outline: none; }
   .s-rank__falta { justify-self: start; }
 }
 
-/* Alertas (director de unidad): mismo lenguaje de card con riel */
-.s-alertas { border: 1px solid var(--color-neutral-100); box-shadow: inset 4px 0 0 var(--color-rust-400); padding: var(--space-5) var(--space-6) var(--space-5) calc(var(--space-6) + var(--space-1)); }
 
-/* Ficha del trabajador: tarjetas con riel superior de su color, título a la izquierda y cifras grandes */
-.s-tarjeta { --riel: var(--color-neutral-300); border: 1px solid var(--color-neutral-100); box-shadow: inset 0 4px 0 var(--riel); }
-.s-tarjeta--notas { --riel: var(--color-cornflower-400); }
-.s-tarjeta--cap { --riel: var(--color-teal-400); }
-.s-tarjeta--aus { --riel: var(--color-pollen-500); }
-.s-tarjeta--hx { --riel: var(--color-lavender-400); }
-.s-tarjeta .s-tarjeta__cab { padding: var(--space-5) var(--space-5) 0; background: transparent; text-align: left; font-size: var(--font-size-md); font-weight: var(--font-weight-semibold); color: var(--color-neutral-700); }
-.s-tarjeta .s-tarjeta__pares { gap: var(--space-5); padding: var(--space-3) var(--space-5) var(--space-5); }
-.s-tarjeta .s-tarjeta__pares div { align-items: flex-start; text-align: left; }
-.s-tarjeta .s-tarjeta__pares dd { font-size: calc(var(--font-size-2xl) * 1.25); font-weight: var(--font-weight-semibold); line-height: 1.1; }
-.s-tarjeta .s-tarjeta__unico { padding: var(--space-3) var(--space-5) var(--space-5); text-align: left; font-size: calc(var(--font-size-2xl) * 1.25); font-weight: var(--font-weight-semibold); line-height: 1.1; }
-.s-tarjeta .s-tarjeta__tabla { margin: var(--space-2) 0 var(--space-3); }
-.s-tarjeta .s-tarjeta__tabla th { padding: var(--space-2) var(--space-5); background: transparent; text-align: left; font-size: var(--font-size-sm); color: var(--color-neutral-600); }
-.s-tarjeta .s-tarjeta__tabla td { padding: var(--space-1) var(--space-5) var(--space-3); text-align: left; font-size: calc(var(--font-size-2xl) * 1.25); font-weight: var(--font-weight-semibold); line-height: 1.1; }
+/* Ficha del trabajador: estilo original (franja de color con el título centrado); cifras más grandes */
+.s-tarjeta .s-tarjeta__pares dd, .s-tarjeta .s-tarjeta__unico { font-weight: var(--font-weight-semibold); }
 /* Nacional: horas extras incluye el importe; cifras un paso más chicas para que quepan las tres */
 .s-tarjeta--hx .s-tarjeta__pares dd { font-size: var(--font-size-xl); }
 
