@@ -347,10 +347,16 @@
     return `<section class="s-seccion" aria-labelledby="t-acu"><div class="s-seccion__cab"><h2 id="t-acu" class="s-seccion__h" tabindex="-1">Productividad acumulada <strong>${al}</strong></h2><p class="s-periodo">Periodo comprendido de la semana <mark class="s-num">1</mark> a la semana <mark class="s-num">${ui.semana}</mark></p></div>
       <section class="s-panel s-panel--prod s-resumen" aria-label="Resumen de productividad acumulada">
         <button class="s-bloque__abrir" type="button" id="card-acu" data-drawer="acu" aria-pressed="${!!sel}" aria-label="Ver detalle de la productividad acumulada"></button>
-        <div class="s-ind__filas">
-          ${filaInd('s-ind--real s-ind--apilable', I.pulso, 'Productividad real acumulada', real, [['Consultas', r.cr], ['Cirugías', r.qr], ['Hospitalizaciones', r.hr]])}
-          <span class="s-ind__sep" aria-hidden="true"></span>
-          ${filaInd('s-ind--plan s-ind--apilable', I.calendario, 'Productividad planeada acumulada', plan, [['Consultas', r.cp], ['Cirugías', r.qp]])}
+        <div class="s-acu">
+          <div class="s-acu__col">
+            <div class="s-acu__cab"><span class="s-icono-circ s-icono-circ--prod" aria-hidden="true">${I.pulso}</span><div><p class="s-acu__etq">Productividad real acumulada</p><p class="s-acu__val s-num">${fmt(real)}</p></div></div>
+            <dl class="s-acu__datos"><div><dt>Consultas</dt><dd class="s-num">${fmt(r.cr)}</dd></div><div><dt>Cirugías</dt><dd class="s-num">${fmt(r.qr)}</dd></div><div><dt>Hospitalizaciones</dt><dd class="s-num">${fmt(r.hr)}</dd></div></dl>
+          </div>
+          <span class="s-acu__sep" aria-hidden="true"></span>
+          <div class="s-acu__col">
+            <div class="s-acu__cab"><span class="s-icono-circ s-icono-circ--prod" aria-hidden="true">${I.calendario}</span><div><p class="s-acu__etq">Productividad planeada acumulada</p><p class="s-acu__val s-num">${fmt(plan)}</p></div></div>
+            <dl class="s-acu__datos"><div><dt>Consultas</dt><dd class="s-num">${fmt(r.cp)}</dd></div><div><dt>Cirugías</dt><dd class="s-num">${fmt(r.qp)}</dd></div><div><dt>Hospitalizaciones</dt><dd class="s-acu__sinmeta">Sin meta</dd></div></dl>
+          </div>
         </div>
           </section></section>`;
   }

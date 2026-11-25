@@ -1103,6 +1103,32 @@ button.s-rank__fila:focus-visible { outline: 2px solid var(--color-primary-700);
 .s-panel--personal .s-ind { align-items: center; }
 .s-panel--personal .s-ind__subs { gap: var(--space-6); }
 
+/* ===== Productividad acumulada: formato de referencia (dos columnas, cifra principal, desgloses en fila) ===== */
+.s-acu { display: grid; grid-template-columns: minmax(0, 1fr) 1px minmax(0, 1fr); gap: var(--space-5); align-items: stretch; }
+.s-acu__sep { width: 1px; background: var(--color-teal-600); }
+.s-acu__col { display: flex; flex-direction: column; gap: var(--space-5); min-width: 0; }
+.s-acu__cab { display: flex; align-items: center; gap: var(--space-4); }
+.s-acu__cab .s-icono-circ { width: 56px; height: 56px; }
+.s-acu__cab .s-icono-circ svg { width: 26px; height: 26px; }
+.s-acu__etq { font-size: var(--font-size-md); line-height: 1.3; color: var(--color-neutral-600); }
+.s-acu__val { font-size: var(--font-size-2xl); font-weight: var(--font-weight-semibold); line-height: 1.2; color: var(--color-neutral-700); }
+.s-acu__datos { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-4); margin: 0; }
+.s-acu__datos > div { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.s-acu__datos dt { font-size: var(--font-size-md); line-height: 1.3; color: var(--color-neutral-500); }
+.s-acu__datos dd { margin: 0; font-size: var(--font-size-xl); font-weight: var(--font-weight-semibold); line-height: 1.2; color: var(--color-teal-600); }
+.s-acu__sinmeta { font-size: var(--font-size-sm) !important; font-weight: var(--font-weight-regular) !important; color: var(--color-neutral-500) !important; padding-top: 6px; }
+@container (max-width: 900px) {
+  .s-acu { grid-template-columns: minmax(0, 1fr); }
+  .s-acu__sep { display: none; }
+  .s-acu__col + .s-acu__col { padding-top: var(--space-4); border-top: 1px solid var(--color-teal-100); }
+}
+@container (max-width: 480px) {
+  .s-acu__datos { grid-template-columns: repeat(2, minmax(0, 1fr)); row-gap: var(--space-4); }
+  .s-acu__datos dd { font-size: var(--font-size-lg); }
+  .s-acu__val { font-size: var(--font-size-xl); }
+}
+.s-contenido { container-type: inline-size; }
+
 /* Versión delegado: a todo el ancho */
 .s-contenido { max-width: none; margin: 0; }
 
@@ -1484,10 +1510,16 @@ button.s-rank__fila:focus-visible { outline: 2px solid var(--color-primary-700);
     return `<section class="s-seccion" aria-labelledby="t-acu"><div class="s-seccion__cab"><h2 id="t-acu" class="s-seccion__h" tabindex="-1">Productividad acumulada <strong>${al}</strong></h2><p class="s-periodo">Periodo comprendido de la semana <mark class="s-num">1</mark> a la semana <mark class="s-num">${ui.semana}</mark></p></div>
       <section class="s-panel s-panel--prod s-resumen" aria-label="Resumen de productividad acumulada">
         <button class="s-bloque__abrir" type="button" id="card-acu" data-drawer="acu" aria-pressed="${!!sel}" aria-label="Ver detalle de la productividad acumulada"></button>
-        <div class="s-ind__filas">
-          ${filaInd('s-ind--real s-ind--apilable', I.pulso, 'Productividad real acumulada', real, [['Consultas', r.cr], ['Cirugías', r.qr], ['Hospitalizaciones', r.hr]])}
-          <span class="s-ind__sep" aria-hidden="true"></span>
-          ${filaInd('s-ind--plan s-ind--apilable', I.calendario, 'Productividad planeada acumulada', plan, [['Consultas', r.cp], ['Cirugías', r.qp]])}
+        <div class="s-acu">
+          <div class="s-acu__col">
+            <div class="s-acu__cab"><span class="s-icono-circ s-icono-circ--prod" aria-hidden="true">${I.pulso}</span><div><p class="s-acu__etq">Productividad real acumulada</p><p class="s-acu__val s-num">${fmt(real)}</p></div></div>
+            <dl class="s-acu__datos"><div><dt>Consultas</dt><dd class="s-num">${fmt(r.cr)}</dd></div><div><dt>Cirugías</dt><dd class="s-num">${fmt(r.qr)}</dd></div><div><dt>Hospitalizaciones</dt><dd class="s-num">${fmt(r.hr)}</dd></div></dl>
+          </div>
+          <span class="s-acu__sep" aria-hidden="true"></span>
+          <div class="s-acu__col">
+            <div class="s-acu__cab"><span class="s-icono-circ s-icono-circ--prod" aria-hidden="true">${I.calendario}</span><div><p class="s-acu__etq">Productividad planeada acumulada</p><p class="s-acu__val s-num">${fmt(plan)}</p></div></div>
+            <dl class="s-acu__datos"><div><dt>Consultas</dt><dd class="s-num">${fmt(r.cp)}</dd></div><div><dt>Cirugías</dt><dd class="s-num">${fmt(r.qp)}</dd></div><div><dt>Hospitalizaciones</dt><dd class="s-acu__sinmeta">Sin meta</dd></div></dl>
+          </div>
         </div>
           </section></section>`;
   }
