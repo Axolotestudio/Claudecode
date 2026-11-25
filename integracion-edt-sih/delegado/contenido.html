@@ -1004,7 +1004,7 @@
       <div class="s-ficha2__izq">
         <div class="s-ficha2__par">${tarjeta('notas', 'Notas', 't-not', par([['Mérito', e.merito], ['Demérito', e.demerito]]))}${tarjeta('cap', 'Capacitación', 't-capa', `<p class="s-tarjeta__unico s-num">${e.capacitacion}</p>`)}</div>
         ${tarjeta('aus', 'Ausentismos', 't-aus', `<div class="s-tabla-scroll"><table class="s-tarjeta__tabla"><caption class="s-sr">Días de ausentismo</caption><thead><tr><th scope="col">Año</th><th scope="col">Programada</th><th scope="col">No programada</th></tr></thead><tbody><tr><td class="s-num">${ANIO}</td><td class="s-num">${e.ausProg}</td><td class="s-num">${e.ausNoProg}</td></tr></tbody></table></div>`)}
-        ${tarjeta('hx', 'Horas extras', 't-hx', par([[`Semana ${w}`, `${e.horas(w)} h`], [`Acumulado ${ANIO}`, `${hAn} h`], [`Acumulado ${ANIO} (h)`, `${hAn} h`]]))}
+        ${tarjeta('hx', 'Horas extras', 't-hx', par([[`Semana ${w}`, `${e.horas(w)} h`], [`Acumulado ${ANIO}`, `${hAn} h`]]))}
       </div>
       <section class="s-card s-trayectoria" aria-labelledby="t-tray"><h2 id="t-tray" class="s-seccion__h">Movimientos - Trayectoria</h2>
         <ol class="s-trayectoria__lista">${e.movimientos.slice().reverse().map(x => `<li><dl>${campo('Fecha movimiento', x.fecha)}${campo('Tipo de movimiento', x.tipo)}${campo('Tipo de contratación', x.contrato)}<div class="s-ficha2__campo s-trayectoria__adsc"><dt>Adscripción</dt><dd>${esc(x.adsc)}</dd></div></dl></li>`).join('')}</ol></section>

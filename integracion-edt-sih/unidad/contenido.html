@@ -906,7 +906,7 @@
     return `<section class="s-card s-tabla-card" aria-labelledby="t-aus"><div class="s-seccion__cab"><h2 id="t-aus" class="s-seccion__h">Ausentismo por servicio</h2><span class="s-sinmeta">Acumulado ${ANIO}</span></div>
       <div class="s-tabla-scroll" role="region" aria-labelledby="t-aus" tabindex="0"><table class="s-tabla"><caption class="s-sr">Ausentismo por servicio, acumulado ${ANIO}</caption>
       <thead><tr><th scope="col">Servicio</th><th scope="col" class="s-der">Médicos</th><th scope="col" class="s-der">Programada (días)</th><th scope="col" class="s-der">No programada (días)</th><th scope="col" class="s-der">No programada por médico</th><th scope="col" class="s-der">Frente a la unidad</th></tr></thead>
-      <tbody>${filas.map(f => { const d = f.noPorMedico - prom; return `<tr><td>${esc(f.a.nombre)}</td><td class="s-der s-num">${fmt(f.n)}</td><td class="s-der s-num">${fmt(f.prog)}</td><td class="s-der s-num">${fmt(f.no)}</td><td class="s-der s-num">${fmt1(f.noPorMedico)}</td><td class="s-der s-num ${d > 0 ? 's-brecha' : ''}">${d > 0 ? '+' : ''}${fmt1(d)}</td></tr>`; }).join('')}</tbody></table></div></section>`;
+      <tbody>${filas.map(f => { const d = Math.round((f.noPorMedico - prom) * 10) / 10; return `<tr><td>${esc(f.a.nombre)}</td><td class="s-der s-num">${fmt(f.n)}</td><td class="s-der s-num">${fmt(f.prog)}</td><td class="s-der s-num">${fmt(f.no)}</td><td class="s-der s-num">${fmt1(f.noPorMedico)}</td><td class="s-der s-num ${d > 0 ? 's-brecha' : ''}">${d > 0 ? '+' : d < 0 ? '−' : ''}${fmt1(Math.abs(d))}</td></tr>`; }).join('')}</tbody></table></div></section>`;
   }
   function tablaMedicosAus(n) {
     const medicos = hijos(n).filter(a => a.tipo === 'area').flatMap(a => hijos(a).filter(m => m.tipo === 'medico').map(m => ({ m, a })));
@@ -1031,7 +1031,7 @@
       <div class="s-ficha2__izq">
         <div class="s-ficha2__par">${tarjeta('notas', 'Notas', 't-not', par([['Mérito', e.merito], ['Demérito', e.demerito]]))}${tarjeta('cap', 'Capacitación', 't-capa', `<p class="s-tarjeta__unico s-num">${e.capacitacion}</p>`)}</div>
         ${tarjeta('aus', 'Ausentismos', 't-aus', `<div class="s-tabla-scroll"><table class="s-tarjeta__tabla"><caption class="s-sr">Días de ausentismo</caption><thead><tr><th scope="col">Año</th><th scope="col">Programada</th><th scope="col">No programada</th></tr></thead><tbody><tr><td class="s-num">${ANIO}</td><td class="s-num">${e.ausProg}</td><td class="s-num">${e.ausNoProg}</td></tr></tbody></table></div>`)}
-        ${tarjeta('hx', 'Horas extras', 't-hx', par([[`Semana ${w}`, `${e.horas(w)} h`], [`Acumulado ${ANIO}`, `${hAn} h`], [`Acumulado ${ANIO} (h)`, `${hAn} h`]]))}
+        ${tarjeta('hx', 'Horas extras', 't-hx', par([[`Semana ${w}`, `${e.horas(w)} h`], [`Acumulado ${ANIO}`, `${hAn} h`]]))}
       </div>
       <section class="s-card s-trayectoria" aria-labelledby="t-tray"><h2 id="t-tray" class="s-seccion__h">Movimientos - Trayectoria</h2>
         <ol class="s-trayectoria__lista">${e.movimientos.slice().reverse().map(x => `<li><dl>${campo('Fecha movimiento', x.fecha)}${campo('Tipo de movimiento', x.tipo)}${campo('Tipo de contratación', x.contrato)}<div class="s-ficha2__campo s-trayectoria__adsc"><dt>Adscripción</dt><dd>${esc(x.adsc)}</dd></div></dl></li>`).join('')}</ol></section>

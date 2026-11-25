@@ -974,3 +974,44 @@ button.s-rank__fila:focus-visible { outline: 2px solid var(--color-primary-700);
 .s-ref { display: block; margin-top: 2px; font-size: var(--font-size-xs); font-weight: var(--font-weight-regular); color: var(--color-neutral-500); white-space: nowrap; }
 .s-ref-nota { margin: 0; font-size: var(--font-size-xs); color: var(--color-neutral-600); }
 .s-delta { font-size: var(--font-size-xs); color: var(--color-neutral-600); white-space: nowrap; }
+
+/* ===== Revisión de cards (frontend-design dentro de Cartillas): jerarquía, legibilidad y sin encimados ===== */
+/* Títulos que reciben el foco por programa (para lector de pantalla): sin recuadro al cargar la vista */
+h1[tabindex="-1"]:focus, h2[tabindex="-1"]:focus { outline: none; }
+
+/* Infraestructura médica: el título se ajusta en dos líneas en vez de encimarse con «Camas»; con el panel abierto o en pantallas medianas, título arriba y cifras abajo */
+.s-panel--infra .s-ind__txt { flex: 1 1 auto; min-width: 0; }
+.s-panel--infra .s-ind__etq { white-space: normal; overflow-wrap: break-word; }
+@container (max-width: 900px) {
+  .s-panel--infra { grid-template-columns: minmax(0, 1fr); gap: var(--space-4); padding: var(--space-5); }
+  .s-infra__datos { grid-column: auto; grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+
+/* Personal: las etiquetas ya no se enciman entre columnas; 5 columnas solo si caben, si no 3 (3 × 3) y en móvil 2 */
+.s-pers__dato .s-infra__etq { white-space: normal; overflow-wrap: break-word; }
+@container (max-width: 1140px) { .s-pers__datos { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+@container (max-width: 640px) { .s-pers__datos { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+/* Toda la card abre el detalle: las cifras no bloquean el clic */
+.s-panel--personal .s-pers__datos { pointer-events: none; }
+
+/* Productividad acumulada en una columna: separación visible entre real y planeado */
+@container (max-width: 900px) { .s-acu__col + .s-acu__col { border-top-color: var(--color-teal-200); } }
+
+/* Por nivel de atención y Más lejos de la meta: la barra de cumplimiento ocupa su columna completa; sin hueco al centro */
+@media (min-width: 641px) {
+  .s-rank__fila, .s-niveles .s-rank__fila { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(128px, auto); gap: var(--space-6); padding: var(--space-2) var(--space-3); }
+}
+.s-rank__cump .s-barra { max-width: none; }
+.s-rank__falta { font-weight: var(--font-weight-semibold); color: var(--color-neutral-800); font-variant-numeric: tabular-nums; }
+.s-rank__cab { align-items: center; }
+
+/* Tablas con orden: el nombre y su subtítulo se ajustan en varias líneas para que las cifras quepan (sobre todo con el panel abierto) */
+.s-tabla--ord td:first-child { min-width: 180px; white-space: normal; }
+.s-tabla--ord th, .s-tabla--ord td { padding: var(--space-2); }
+.s-tabla--ord .s-ref { white-space: normal; }
+.s-tabla--ord .s-celda-nombre__s { overflow-wrap: break-word; }
+/* Si aun así no cabe (panel abierto en 1280–1440 px): barra de desplazamiento visible y la columna del nombre fija al desplazar */
+.s-tabla-card .s-tabla-scroll { scrollbar-width: thin; scrollbar-color: var(--color-neutral-300) transparent; }
+.s-tabla--ord th:first-child, .s-tabla--ord td:first-child { position: sticky; left: 0; z-index: 1; box-shadow: inset -1px 0 0 var(--color-neutral-100); }
+/* Horas extras sin importe en este perfil: cifras al mismo tamaño que Notas y Ausentismos */
+.s-tarjeta--hx .s-tarjeta__pares dd { font-size: var(--font-size-2xl); }
