@@ -2549,7 +2549,7 @@ h1[tabindex="-1"]:focus, h2[tabindex="-1"]:focus { outline: none; }
     $app.classList.toggle('s-app--drawer', !!dr);
     $app.classList.toggle('s-app--colapsado', !!ui.navColapsado);
     $app.classList.toggle('s-app--nav-abierto', !!ui.navAbierto);
-    $app.innerHTML = navLateral(sec) + '<div class="s-nav-fondo" data-nav-fondo></div><div class="s-contenido"><button class="s-nav-abrir" type="button" data-nav="abrir" aria-controls="nav-lateral" aria-expanded="' + !!ui.navAbierto + '">' + I.hamburguesa + '<span>Secciones</span></button>' + html + '</div>' + dr;
+    $app.innerHTML = '<div class="s-contenido">' + html + '</div>' + dr; /* sin menú lateral: los tres perfiles comparten la misma estructura */
     ui.pendiente = null; sincronizarURL();
     document.title = `${nombre} · SIH`;
     const cambioRuta = ultimaRuta !== hash; ultimaRuta = hash;

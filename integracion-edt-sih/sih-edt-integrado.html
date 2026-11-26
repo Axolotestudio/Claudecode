@@ -1399,6 +1399,11 @@ h1[tabindex="-1"]:focus, h2[tabindex="-1"]:focus { outline: none; }
 .s-malerta__vacio { padding: var(--space-6) var(--space-5); font-size: var(--font-size-sm); color: var(--color-neutral-500); text-align: center; }
 .s-malerta__pie { margin: 0; padding: var(--space-3) var(--space-4); border-top: 1px solid var(--color-neutral-100); background: var(--color-neutral-50); font-size: var(--font-size-xs); line-height: 1.5; color: var(--color-neutral-500); }
 
+/* Sin menú lateral (igual que OOAD y Unidad): contenido a todo el ancho */
+.s-contenido { max-width: none; margin: 0; }
+.s-acceso-personal { display: flex; justify-content: flex-end; margin: var(--space-4) 0; }
+.s-acceso-personal .s-btn svg { width: 20px; height: 20px; }
+
   </style>
 </head>
 <body>
@@ -2247,9 +2252,11 @@ h1[tabindex="-1"]:focus, h2[tabindex="-1"]:focus { outline: none; }
     const estados = [...new Set(RAICES.filter(h => !tipo || h.tipo === tipo).map(h => h.estado))].sort((a, b) => a.localeCompare(b, 'es'));
     const q = norm(v.q.trim());
     const sel = RAICES.filter(h => (!tipo || h.tipo === tipo) && (!v.estado || h.estado === v.estado) && (!q || norm(`${h.nombre} ${h.titular} ${h.estado}`).includes(q)));
-    const campos = selectCampo(idv, 'estado', 'Estado', [['', 'Todos'], ...estados.map(e => [e, e])], v.estado)
+    const campos = selectCampo(idv, 'tipo', 'Tipo', [['', 'OOAD y UMAE'], ['ooad', 'OOAD'], ['umae', 'UMAE']], tipo || '')
+      + selectCampo(idv, 'estado', 'Estado', [['', 'Todos'], ...estados.map(e => [e, e])], v.estado)
       + campoBuscar(idv, v, 'Buscar', 'Nombre, titular o estado');
     const act = [];
+    if (tipo) act.push(['tipo', `Tipo: ${etiq}`]);
     if (v.estado) act.push(['estado', `Estado: ${v.estado}`]);
     if (v.q) act.push(['q', `Buscar: “${v.q}”`]);
     const titulo = tipo ? etiq : 'OOAD y UMAE';
@@ -2259,8 +2266,8 @@ h1[tabindex="-1"]:focus, h2[tabindex="-1"]:focus { outline: none; }
       const nodosNiv = [...(tipo === 'umae' ? [] : RAICES.filter(h => h.tipo === 'ooad' && (!v.estado || estadoDe(h) === v.estado)).flatMap(hijos)), ...(tipo === 'ooad' ? [] : RAICES.filter(h => h.tipo === 'umae' && (!v.estado || estadoDe(h) === v.estado)))];
       cuerpo += indicadores(items, titulo) + tarjetaNiveles(v.estado || (tipo ? etiq : ''), nodosNiv) + (tipo ? '' : tarjetaLejos(v)) + listado(idv, v, items, { titulo, etiqueta: 'Atención médica por ' + titulo, medico: false, columna: 'OOAD o UMAE' });
     } else if (tema === 'infra') cuerpo += panelInfra(idv, v, sel, { hijos: true, titulo: 'Capacidad por ' + titulo, columna: 'OOAD o UMAE', sub: subEntidad });
-    else cuerpo += panelPlantilla(idv, v, sel, { hijos: true, titulo: 'Plantilla por ' + titulo, columna: 'OOAD o UMAE', sub: subEntidad });
-    return conTema(idv, v, encabezado({ tipo: 'vista', nombre: etiq }, null), cuerpo);
+    else cuerpo += `<p class="s-acceso-personal"><a class="s-btn s-btn--outlined" href="#/p">${I.personas}Buscar personal por estado</a></p>` + panelPlantilla(idv, v, sel, { hijos: true, titulo: 'Plantilla por ' + titulo, columna: 'OOAD o UMAE', sub: subEntidad });
+    return conTema(idv, v, encabezado({ tipo: 'vista', nombre: 'Todo el país' }, null), cuerpo);
   }
   /* Personal: solo por estado, para no cargar más de 100 000 médicos a la vez */
   function medicosDe(n) { return n.tipo === 'medico' ? [n] : hijos(n).flatMap(medicosDe); }
@@ -2277,7 +2284,7 @@ h1[tabindex="-1"]:focus, h2[tabindex="-1"]:focus { outline: none; }
     if (v.estado) act.push(['estado', `Estado: ${v.estado}`]);
     if (v.cat) act.push(['cat', `Categoría: ${NOMBRE_CAT[v.cat]}`]);
     if (v.q) act.push(['q', `Buscar: “${v.q}”`]);
-    const cab = encabezado({ tipo: 'vista', nombre: 'Personal' }, null) + barra(idv, campos, act);
+    const cab = encabezado({ tipo: 'vista', nombre: 'Personal' }, null).replace('<div class="s-titulo">', '<a class="s-btn-atras" href="#/" aria-label="Regresar a Nivel nacional">' + I.flecha + '</a><div class="s-titulo">') + barra(idv, campos, act);
     if (!v.estado) return cab + '<p class="s-vacio-bloque">Elige un estado para ver su personal.</p>';
     const todas = RAICES.filter(h => h.estado === v.estado).flatMap(areasDe).flatMap(personalArea);
     const personas = todas.filter(p => (!v.cat || p.cat === v.cat) && (!q || norm(`${p.nombre} ${p.matricula}`).includes(q)));
@@ -2504,12 +2511,13 @@ h1[tabindex="-1"]:focus, h2[tabindex="-1"]:focus { outline: none; }
     ctx.items = []; ctx.agg = null; ctx.tema = null; ctx.temaNodos = []; ctx.temaHijos = false;
     const n = id ? obtener(id) : NACIONAL;
     if (id && !n) { location.hash = '#/'; return; }
-    ctx.alcance = hash === '#/p' ? 'Personal' : !id ? ({ todo: 'Nivel Nacional', ooad: 'OOAD', umae: 'UMAE' }[RUTAS_SECCION[hash] || 'todo']) : n.nombre;
+    ctx.alcance = hash === '#/p' ? 'Personal' : !id ? ({ ooad: 'OOAD', umae: 'UMAE' }[vista('N').tipo] || 'Nivel Nacional') : n.nombre;
+    if (RUTAS_SECCION[hash]) { const v = vista('N'); v.tipo = RUTAS_SECCION[hash]; v.pagina = 1; location.replace('#/?tipo=' + v.tipo); return; } /* enlaces viejos del menú: ahora son el filtro Tipo */
     if (!id && !(hash in RUTAS_SECCION) && hash !== '#/p') { location.hash = '#/'; return; }
     const act = document.activeElement, focoId = act && act.id && $app.contains(act) ? act.id : null, caret = act && act.selectionStart;
     let html, sec, nombre;
     if (hash === '#/p') { sec = 'personal'; html = vPersonal(); nombre = 'Personal'; }
-    else if (!id) { vista('N').tipo = RUTAS_SECCION[hash]; sec = RUTAS_SECCION[hash] || 'todo'; html = vNacional(); nombre = sec === 'todo' ? 'Todo el país' : sec.toUpperCase(); }
+    else if (!id) { sec = 'todo'; html = vNacional(); nombre = 'Nivel nacional'; }
     else {
       sec = cadena(n)[0].tipo === 'umae' ? 'umae' : 'ooad';
       if (n.tipo === 'medico' || n.tipo === 'persona') html = vMedico(n);
@@ -2530,7 +2538,7 @@ h1[tabindex="-1"]:focus, h2[tabindex="-1"]:focus { outline: none; }
     $app.classList.toggle('s-app--drawer', !!dr);
     $app.classList.toggle('s-app--colapsado', !!ui.navColapsado);
     $app.classList.toggle('s-app--nav-abierto', !!ui.navAbierto);
-    $app.innerHTML = navLateral(sec) + '<div class="s-nav-fondo" data-nav-fondo></div><div class="s-contenido"><button class="s-nav-abrir" type="button" data-nav="abrir" aria-controls="nav-lateral" aria-expanded="' + !!ui.navAbierto + '">' + I.hamburguesa + '<span>Secciones</span></button>' + html + '</div>' + dr;
+    $app.innerHTML = '<div class="s-contenido">' + html + '</div>' + dr; /* sin menú lateral: los tres perfiles comparten la misma estructura */
     ui.pendiente = null; sincronizarURL();
     document.title = `${nombre} · SIH`;
     const cambioRuta = ultimaRuta !== hash; ultimaRuta = hash;
