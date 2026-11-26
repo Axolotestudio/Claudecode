@@ -1001,62 +1001,68 @@
     return encabezado(m, '') + prod + ficha + tarjetas;
   }
 
-  /* ---------- Alertas de sistema flotantes · réplica del patrón de los perfiles CPM 2027 ----------
-     Mismo componente que CPM (alerta Cartillas: borde 2, radio 4, icono 24 en caja 56, cerrar 56×42),
-     misma capa (8 px bajo el header, ancho máx. 930, hasta 3 apiladas), 4 s, pausa con puntero o foco, cerrar con ×.
-     Clases con prefijo s- para no chocar con .alert de gob.mx. */
-  const svA = d => `<svg viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false"><path d="${d}" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
-  const IC_ALERTA = {
-    success: svA('M8 12.5l2.5 2.5L16 9.5M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z'),
-    error: svA('M12 8v5M12 16h.01M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z'),
-    warning: svA('M12 9v4M12 17h.01M10.3 3.9 2.4 18a2 2 0 0 0 1.7 3h15.8a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z'),
-    info: svA('M12 11v6M12 7h.01M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z'),
-    x: svA('M6 6l12 12M18 6 6 18')
-  };
-  const ALERTA_MS = 4000, ALERTAS_MAX = 3, alertasVistas = new Set();
-  let capaToast = null;
-  function colocarCapa() {
-    if (!capaToast) return; const h = document.querySelector('.sdn-user-bar');
-    const want = Math.max(8, (h ? h.getBoundingClientRect().bottom : 0) + 8);
-    capaToast.style.top = want + 'px'; const r = capaToast.getBoundingClientRect();
-    if (Math.abs(r.top - want) > 1) capaToast.style.top = (2 * want - r.top) + 'px'; /* el visor puede transformar la página */
+  /* ---------- Mis alertas (patrón CPM): campana en el header con contador y panel Pendientes / Revisadas ----------
+     Cada OOAD, unidad o servicio por debajo del 80 % de la meta en la semana elegida es una alerta pendiente.
+     Al seleccionarla pasa a Revisadas y lleva a la lista filtrada por ese nombre. */
+  const ALERTAS_PERFIL = { ruta: '#/', idv: 'N', nodos: () => RAICES };
+  const IC_CAMPANA = '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false"><path d="M18 8a6 6 0 1 0-12 0c0 7-3 9-3 9h18s-3-2-3-9M13.7 21a2 2 0 0 1-3.4 0" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+  const IC_ADMIRA = '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false"><path d="M12 7v6M12 17h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>';
+  const IC_REVISADA = '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false"><path d="m7 12.5 3 3 7-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+  const alertasRevisadas = new Set(), alertasUI = { abierto: false, tab: 'pend' };
+  function alertasSemana() {
+    return ALERTAS_PERFIL.nodos().map(h => item(h, ui.semana)).filter(x => x.cump != null && x.cump < 80).sort((a, b) => a.cump - b.cump)
+      .map(x => ({ id: ui.semana + '|' + x.nombre, nombre: x.nombre, titulo: 'Productividad bajo meta', texto: `${x.nombre}: ${x.cump} % de cumplimiento de la meta.`, meta: `Semana ${ui.semana} · Simulación` }));
   }
-  function capaAlertas() {
-    if (capaToast && capaToast.isConnected) return capaToast;
-    capaToast = document.createElement('div'); capaToast.id = 'cpm-toasts'; capaToast.className = 's-toasts';
-    capaToast.setAttribute('aria-live', 'polite'); capaToast.setAttribute('aria-label', 'Mensajes del sistema');
-    document.body.appendChild(capaToast); colocarCapa();
-    window.addEventListener('scroll', colocarCapa, { passive: true, capture: true }); window.addEventListener('resize', colocarCapa);
-    return capaToast;
+  function filaAlerta(a, rev) {
+    return `<li><button class="s-malerta__item${rev ? ' is-revisada' : ''}" type="button" data-alerta="${esc(a.id)}"><span class="s-malerta__ic">${rev ? IC_REVISADA : IC_ADMIRA}</span>
+      <span class="s-malerta__txt"><strong>${esc(a.titulo)}</strong><span>${esc(a.texto)}</span><small>${esc(a.meta)}</small></span></button></li>`;
   }
-  function mostrarAlerta(a) {
-    const L = capaAlertas(), t = document.createElement('div');
-    t.className = 's-toast'; if (a.grupo) t.dataset.grupo = a.grupo;
-    t.innerHTML = `<div class="s-alert s-alert--${a.tipo}" role="${a.tipo === 'error' || a.tipo === 'warning' ? 'alert' : 'status'}"><span class="s-alert__icon">${IC_ALERTA[a.tipo]}</span><div class="s-alert__text"><strong>${esc(a.titulo)}</strong>${a.mensaje ? `<span>${esc(a.mensaje)}</span>` : ''}</div><button class="s-alert__close" type="button" aria-label="Cerrar mensaje">${IC_ALERTA.x}</button></div>`;
-    L.append(t);
-    while (L.children.length > ALERTAS_MAX) L.firstElementChild.remove(); /* máximo 3 a la vez */
-    let left = ALERTA_MS, start = Date.now(), timer = null;
-    const close = () => { clearTimeout(timer); t.classList.add('out'); setTimeout(() => t.remove(), 180); };
-    const run = () => { start = Date.now(); timer = setTimeout(close, left); };
-    const pause = () => { clearTimeout(timer); left = Math.max(800, left - (Date.now() - start)); };
-    t.addEventListener('mouseenter', pause); t.addEventListener('mouseleave', run);
-    t.addEventListener('focusin', pause); t.addEventListener('focusout', run);
-    t.querySelector('.s-alert__close').addEventListener('click', close);
-    run();
+  function pintarAlertas() {
+    const user = document.querySelector('.sdn-user-bar__user'); if (!user) return;
+    const todas = alertasSemana(), pend = todas.filter(a => !alertasRevisadas.has(a.id)), rev = todas.filter(a => alertasRevisadas.has(a.id));
+    let btn = document.getElementById('s-campana');
+    if (!btn) {
+      btn = document.createElement('button'); btn.id = 's-campana'; btn.type = 'button'; btn.className = 's-campana';
+      btn.setAttribute('aria-controls', 's-malerta');
+      const av = document.createElement('span'); av.className = 's-avatar'; av.setAttribute('aria-hidden', 'true');
+      av.innerHTML = '<svg viewBox="0 0 24 24" fill="none" focusable="false"><circle cx="12" cy="8" r="4" stroke="currentColor" stroke-width="1.6"/><path d="M4 20a8 8 0 0 1 16 0" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>';
+      user.append(av, btn);
+      btn.addEventListener('click', ev => { ev.stopPropagation(); alertasUI.abierto = !alertasUI.abierto; pintarAlertas(); if (alertasUI.abierto) document.querySelector('#s-malerta [aria-selected="true"]').focus(); });
+    }
+    btn.innerHTML = IC_CAMPANA + (pend.length ? `<span class="s-campana__n" aria-hidden="true">${pend.length}</span>` : '');
+    btn.setAttribute('aria-label', `Mis alertas, ${pend.length} ${pend.length === 1 ? 'pendiente' : 'pendientes'}`);
+    btn.setAttribute('aria-expanded', String(alertasUI.abierto));
+    let p = document.getElementById('s-malerta');
+    if (!alertasUI.abierto) { if (p) p.remove(); return; }
+    if (!p) { p = document.createElement('section'); p.id = 's-malerta'; p.className = 's-malerta'; p.setAttribute('role', 'dialog'); p.setAttribute('aria-labelledby', 's-malerta-t'); document.body.appendChild(p); p.addEventListener('click', clicPanel); }
+    const r = btn.getBoundingClientRect(); p.style.top = Math.round(r.bottom + 8) + 'px';
+    const lista = alertasUI.tab === 'pend' ? pend : rev;
+    const tab = (k, t, n) => `<button class="s-malerta__tab" type="button" role="tab" id="s-malerta-tab-${k}" aria-selected="${alertasUI.tab === k}" aria-controls="s-malerta-lista" tabindex="${alertasUI.tab === k ? 0 : -1}" data-mtab="${k}">${t} <span class="s-malerta__cnt">${n}</span></button>`;
+    p.innerHTML = `<header class="s-malerta__h"><h2 id="s-malerta-t">Mis alertas</h2><span>${pend.length} ${pend.length === 1 ? 'pendiente' : 'pendientes'} · ${rev.length} ${rev.length === 1 ? 'revisada' : 'revisadas'}</span></header>
+      <div class="s-malerta__tabs" role="tablist" aria-label="Estado de las alertas">${tab('pend', 'Pendientes', pend.length)}${tab('rev', 'Revisadas', rev.length)}</div>
+      <ul class="s-malerta__lista" id="s-malerta-lista" role="tabpanel" aria-labelledby="s-malerta-tab-${alertasUI.tab}">${lista.length ? lista.map(a => filaAlerta(a, alertasUI.tab === 'rev')).join('') : `<li class="s-malerta__vacio">${alertasUI.tab === 'pend' ? 'Sin alertas pendientes esta semana.' : 'Aún no revisas ninguna alerta.'}</li>`}</ul>
+      <p class="s-malerta__pie">Alertas calculadas con ejemplos simulados. Selecciona una para ver su detalle.</p>`;
   }
-  function quitarAlertas(grupo) { document.querySelectorAll(`#cpm-toasts [data-grupo="${grupo}"]`).forEach(n => n.remove()); }
-  function enLista(xs) { return xs.length < 2 ? xs.join('') : xs.slice(0, -1).join(', ') + ' y ' + xs[xs.length - 1]; }
-  function alertaBajoMeta(nodos, plural, singular) {
-    const bajos = nodos.map(h => item(h, ui.semana)).filter(x => x.cump != null && x.cump < 80).sort((a, b) => a.cump - b.cump);
-    if (!bajos.length) return null;
-    const top = bajos.slice(0, 3).map(x => `${x.nombre} ${x.cump} %`), resto = bajos.length - top.length;
-    return { tipo: 'warning', grupo: 'meta', titulo: `Semana ${ui.semana}: ${bajos.length} ${bajos.length === 1 ? singular : plural} por debajo del 80 % de la meta`,
-      mensaje: (resto > 0 ? `${top.join(', ')} y ${resto} más` : enLista(top)) + '.' };
+  function cerrarAlertas(devolver) { if (!alertasUI.abierto) return; alertasUI.abierto = false; pintarAlertas(); if (devolver) document.getElementById('s-campana').focus(); }
+  function clicPanel(ev) {
+    ev.stopPropagation();
+    const t = ev.target.closest('[data-mtab]');
+    if (t) { alertasUI.tab = t.dataset.mtab; pintarAlertas(); document.getElementById('s-malerta-tab-' + alertasUI.tab).focus(); return; }
+    const b = ev.target.closest('[data-alerta]'); if (!b) return;
+    const a = alertasSemana().find(x => x.id === b.dataset.alerta); if (!a) return;
+    alertasRevisadas.add(a.id); alertasUI.abierto = false;
+    const v = vista(ALERTAS_PERFIL.idv); ['estado', 'tipo', 'tipoU', 'nivelA', 'area', 'cat'].forEach(k => { v[k] = ''; });
+    v.q = a.nombre; v.tab = 'prod'; v.pagina = 1; if (v.ver) v.ver = 'areas';
+    const ir = () => { const h = document.getElementById('t-' + ALERTAS_PERFIL.idv); if (h) { h.scrollIntoView({ block: 'start' }); h.focus(); } anunciar(`Lista filtrada: ${a.nombre}`); };
+    if (location.hash.split('?')[0] !== ALERTAS_PERFIL.ruta) { location.hash = ALERTAS_PERFIL.ruta; setTimeout(ir, 80); } else { render(); ir(); }
   }
-  function alertaPerfil(hash, id) {
-    if (hash !== '#/') return null;
-    return alertaBajoMeta(RAICES, 'OOAD y UMAE', 'OOAD o UMAE');
-  }
+  document.addEventListener('click', ev => { if (alertasUI.abierto && !ev.target.closest('#s-malerta, #s-campana')) cerrarAlertas(false); });
+  document.addEventListener('keydown', ev => {
+    if (!alertasUI.abierto) return;
+    if (ev.key === 'Escape') { ev.preventDefault(); ev.stopPropagation(); return cerrarAlertas(true); }
+    if (ev.target.matches('.s-malerta__tab') && ['ArrowLeft', 'ArrowRight'].includes(ev.key)) { ev.preventDefault(); alertasUI.tab = alertasUI.tab === 'pend' ? 'rev' : 'pend'; pintarAlertas(); document.getElementById('s-malerta-tab-' + alertasUI.tab).focus(); }
+  }, true);
+  window.addEventListener('resize', () => { if (alertasUI.abierto) pintarAlertas(); });
 
   /* ---------- Render y eventos ---------- */
   function rutaActual() { const h = location.hash.split('?')[0].replace(/^#\/?/, ''); return h.startsWith('e/') ? h.slice(2) : ''; }
@@ -1107,13 +1113,9 @@
       const el = document.getElementById(focoId); el.focus();
       if (caret != null && el.setSelectionRange) { try { el.setSelectionRange(caret, caret); } catch (e) { /* tipo sin selección */ } }
     }
-    /* Una vez por vista de entrada y semana: al llegar y al cambiar de semana */
-    const clave = hash + '|' + ui.semana, al = alertasVistas.has(clave) ? null : alertaPerfil(hash, id);
-    alertasVistas.add(clave);
-    if (al) mostrarAlerta(al);
+    pintarAlertas(); /* el contador de la campana sigue la semana elegida */
   }
   function cambiarSemana(s) {
-    quitarAlertas('meta'); /* el mensaje de otra semana no se queda */
     ui.semana = Math.min(SEMANA_ACTUAL, Math.max(1, s)); render();
     const a = document.activeElement; if (!a || a === document.body || a.disabled) document.getElementById('sem-sel').focus();
     anunciar(`Semana ${ui.semana}, ${rangoSemana(ui.semana).voz}`);
