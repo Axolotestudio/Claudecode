@@ -1149,10 +1149,10 @@ h1[tabindex="-1"]:focus, h2[tabindex="-1"]:focus { outline: none; }
 .s-filtros .s-field { gap: 6px; }
 .s-filtros .s-field label { font-size: var(--font-size-sm); line-height: 18px; font-weight: var(--font-weight-semibold); color: var(--color-neutral-800); }
 .s-filtros .s-select { border: 1px solid var(--color-neutral-100); border-radius: var(--radius-sm); }
-.s-filtros .s-select.is-vacio { color: var(--color-neutral-400); }
+.s-filtros .s-select.is-vacio { color: var(--color-neutral-500); }
 .s-filtros .s-select option { color: var(--color-neutral-700); }
 .s-filtros .s-input { border: 1px solid transparent; background: var(--color-neutral-50); }
-.s-filtros .s-input::placeholder { color: var(--color-neutral-400); }
+.s-filtros .s-input::placeholder { color: var(--color-neutral-500); }
 .s-filtros .s-input:hover { border-color: var(--color-neutral-200); }
 .s-filtros__campos > .s-field.s-field--estado { flex: 0 1 288px; }
 .s-filtros__campos > .s-combo { flex: 1 1 480px; width: auto; max-width: none; display: grid; grid-template-columns: 136px minmax(0, 1fr); grid-template-rows: auto 40px; column-gap: 0; row-gap: 6px; }
@@ -1163,4 +1163,4 @@ h1[tabindex="-1"]:focus, h2[tabindex="-1"]:focus { outline: none; }
 .s-filtros .s-combo__in { grid-column: 2; grid-row: 2; padding-left: var(--space-4); border-radius: 0 var(--radius-sm) var(--radius-sm) 0; }
 .s-filtros__acciones .s-btn { min-width: 98px; }
 @media (max-width: 600px) { .s-filtros__campos > .s-combo { grid-template-columns: 128px minmax(0, 1fr); } .s-filtros__campos > .s-field.s-field--estado { flex-basis: 100%; } }
-.s-filtros .s-control__icono { color: var(--color-neutral-400); }
+.s-filtros .s-control__icono { color: var(--color-neutral-500); }
