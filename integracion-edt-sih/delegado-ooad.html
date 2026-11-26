@@ -1403,6 +1403,27 @@ h1[tabindex="-1"]:focus, h2[tabindex="-1"]:focus { outline: none; }
 .s-malerta__vacio { padding: var(--space-6) var(--space-5); font-size: var(--font-size-sm); color: var(--color-neutral-500); text-align: center; }
 .s-malerta__pie { margin: 0; padding: var(--space-3) var(--space-4); border-top: 1px solid var(--color-neutral-100); background: var(--color-neutral-50); font-size: var(--font-size-xs); line-height: 1.5; color: var(--color-neutral-500); }
 
+/* Filtros como en CPM (Nacional y OOAD): etiqueta en negritas, «Seleccionar» en gris, campo combinado sin botón Buscar */
+.s-filtros { padding: var(--space-4); border-radius: var(--radius-lg); }
+.s-filtros .s-field { gap: 6px; }
+.s-filtros .s-field label { font-size: var(--font-size-sm); line-height: 18px; font-weight: var(--font-weight-semibold); color: var(--color-neutral-800); }
+.s-filtros .s-select { border: 1px solid var(--color-neutral-100); border-radius: var(--radius-sm); }
+.s-filtros .s-select.is-vacio { color: var(--color-neutral-400); }
+.s-filtros .s-select option { color: var(--color-neutral-700); }
+.s-filtros .s-input { border: 1px solid transparent; background: var(--color-neutral-50); }
+.s-filtros .s-input::placeholder { color: var(--color-neutral-400); }
+.s-filtros .s-input:hover { border-color: var(--color-neutral-200); }
+.s-filtros__campos > .s-field.s-field--estado { flex: 0 1 288px; }
+.s-filtros__campos > .s-combo { flex: 1 1 480px; width: auto; max-width: none; display: grid; grid-template-columns: 136px minmax(0, 1fr); grid-template-rows: auto 40px; column-gap: 0; row-gap: 6px; }
+.s-combo__l1 { grid-column: 1; grid-row: 1; }
+.s-combo__l2 { grid-column: 2; grid-row: 1; padding-left: var(--space-1); }
+.s-combo__sel { grid-column: 1; grid-row: 2; }
+.s-combo__sel .s-select { border-radius: var(--radius-sm) 0 0 var(--radius-sm); }
+.s-filtros .s-combo__in { grid-column: 2; grid-row: 2; padding-left: var(--space-4); border-radius: 0 var(--radius-sm) var(--radius-sm) 0; }
+.s-filtros__acciones .s-btn { min-width: 98px; }
+@media (max-width: 600px) { .s-filtros__campos > .s-combo { grid-template-columns: 128px minmax(0, 1fr); } .s-filtros__campos > .s-field.s-field--estado { flex-basis: 100%; } }
+.s-filtros .s-control__icono { color: var(--color-neutral-400); }
+
   </style>
 </head>
 <body>
@@ -1748,6 +1769,12 @@ h1[tabindex="-1"]:focus, h2[tabindex="-1"]:focus { outline: none; }
   function tagCump(pct, prefijo = 'Cumplimiento ') { return `<span class="s-tag s-tag--${nivel(pct)}"><i aria-hidden="true"></i>${prefijo}${pct} %</span>`; }
   function selectCampo(idv, campo, etiqueta, opciones, valor) {
     return `<div class="s-field"><label for="f-${campo}-${idv}">${etiqueta}</label><span class="s-control"><select class="s-select" id="f-${campo}-${idv}" data-vista="${idv}" data-campo="${campo}">${opciones.map(([val, t]) => `<option value="${esc(val)}"${val === valor ? ' selected' : ''}>${esc(t)}</option>`).join('')}</select><span class="s-control__icono s-control__icono--der">${I.abajo}</span></span></div>`;
+  }
+  /* Filtro combinado como en CPM: «tipo de búsqueda» + campo «Ingresar» en una sola barra; filtra al cambiar, sin botón Buscar */
+  function campoCombo(idv, v, campo, etiqueta, opciones, valor, etqTexto) {
+    return `<div class="s-field s-combo"><label class="s-combo__l1" for="f-${campo}-${idv}">${etiqueta}</label><label class="s-combo__l2" for="q-${idv}">${esc(etqTexto)}</label>
+      <span class="s-control s-combo__sel"><select class="s-select${valor ? '' : ' is-vacio'}" id="f-${campo}-${idv}" data-vista="${idv}" data-campo="${campo}">${opciones.map(([val, t]) => `<option value="${esc(val)}"${val === valor ? ' selected' : ''}>${esc(t)}</option>`).join('')}</select><span class="s-control__icono s-control__icono--der">${I.abajo}</span></span>
+      <input class="s-input s-combo__in" id="q-${idv}" type="search" data-vista="${idv}" data-campo="q" autocomplete="off" value="${esc(v.q)}" placeholder="Ingresar"></div>`;
   }
   function campoBuscar(idv, v, etiqueta, ph) {
     return `<div class="s-field s-field--busqueda"><label for="q-${idv}">${etiqueta}</label><span class="s-control"><span class="s-control__icono s-control__icono--izq">${I.buscar}</span><input class="s-input" id="q-${idv}" type="search" data-vista="${idv}" data-campo="q" autocomplete="off" value="${esc(v.q)}" placeholder="${esc(ph)}"></span></div>`;
@@ -2324,8 +2351,7 @@ h1[tabindex="-1"]:focus, h2[tabindex="-1"]:focus { outline: none; }
     const idv = n.id, v = vista(idv, { orden: { k: 'cump', dir: 1 } }), tema = temaValido(v);
     const q = norm(v.q.trim());
     const sel = hijos(n).filter(u => (!v.nivelA || nivelDe(u) === v.nivelA) && (!q || norm(u.nombre).includes(q)));
-    const campos = campoBuscar(idv, v, 'Buscar unidad', 'Nombre de la unidad')
-      + selectCampo(idv, 'nivelA', 'Nivel de atención', [['', 'Todos'], ['p1', 'Primer nivel'], ['p2', 'Segundo nivel']], v.nivelA);
+    const campos = campoCombo(idv, v, 'nivelA', 'Nivel de atención', [['', 'Seleccionar'], ['p1', 'Primer nivel'], ['p2', 'Segundo nivel']], v.nivelA, 'Unidad médica');
     const act = [];
     if (v.nivelA) act.push(['nivelA', NIVEL_LABEL[v.nivelA]]);
     if (v.q) act.push(['q', `Buscar: “${v.q}”`]);
@@ -2599,6 +2625,7 @@ h1[tabindex="-1"]:focus, h2[tabindex="-1"]:focus { outline: none; }
   $app.addEventListener('change', ev => {
     const t = ev.target;
     if (t.id === 'sem-sel') return cambiarSemana(+t.value);
+    if (t.matches('input.s-input')) return; /* el texto ya filtra con «input»; el «change» al perder el foco re-pintaba a media actualización */
     if (t.dataset.campo && t.dataset.vista) { const v = vista(t.dataset.vista); v[t.dataset.campo] = t.value; v.pagina = 1; render(); }
   });
   function cerrarDrawer() {

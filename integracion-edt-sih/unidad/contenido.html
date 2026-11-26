@@ -1154,6 +1154,7 @@
   $app.addEventListener('change', ev => {
     const t = ev.target;
     if (t.id === 'sem-sel') return cambiarSemana(+t.value);
+    if (t.matches('input.s-input')) return; /* el texto ya filtra con «input»; el «change» al perder el foco re-pintaba a media actualización */
     if (t.dataset.campo && t.dataset.vista) { const v = vista(t.dataset.vista); v[t.dataset.campo] = t.value; v.pagina = 1; render(); }
   });
   function cerrarDrawer() {

@@ -316,6 +316,12 @@
   function selectCampo(idv, campo, etiqueta, opciones, valor) {
     return `<div class="s-field"><label for="f-${campo}-${idv}">${etiqueta}</label><span class="s-control"><select class="s-select" id="f-${campo}-${idv}" data-vista="${idv}" data-campo="${campo}">${opciones.map(([val, t]) => `<option value="${esc(val)}"${val === valor ? ' selected' : ''}>${esc(t)}</option>`).join('')}</select><span class="s-control__icono s-control__icono--der">${I.abajo}</span></span></div>`;
   }
+  /* Filtro combinado como en CPM: «tipo de búsqueda» + campo «Ingresar» en una sola barra; filtra al cambiar, sin botón Buscar */
+  function campoCombo(idv, v, campo, etiqueta, opciones, valor, etqTexto) {
+    return `<div class="s-field s-combo"><label class="s-combo__l1" for="f-${campo}-${idv}">${etiqueta}</label><label class="s-combo__l2" for="q-${idv}">${esc(etqTexto)}</label>
+      <span class="s-control s-combo__sel"><select class="s-select${valor ? '' : ' is-vacio'}" id="f-${campo}-${idv}" data-vista="${idv}" data-campo="${campo}">${opciones.map(([val, t]) => `<option value="${esc(val)}"${val === valor ? ' selected' : ''}>${esc(t)}</option>`).join('')}</select><span class="s-control__icono s-control__icono--der">${I.abajo}</span></span>
+      <input class="s-input s-combo__in" id="q-${idv}" type="search" data-vista="${idv}" data-campo="q" autocomplete="off" value="${esc(v.q)}" placeholder="Ingresar"></div>`;
+  }
   function campoBuscar(idv, v, etiqueta, ph) {
     return `<div class="s-field s-field--busqueda"><label for="q-${idv}">${etiqueta}</label><span class="s-control"><span class="s-control__icono s-control__icono--izq">${I.buscar}</span><input class="s-input" id="q-${idv}" type="search" data-vista="${idv}" data-campo="q" autocomplete="off" value="${esc(v.q)}" placeholder="${esc(ph)}"></span></div>`;
   }
@@ -891,8 +897,7 @@
     const idv = n.id, v = vista(idv, { orden: { k: 'cump', dir: 1 } }), tema = temaValido(v);
     const q = norm(v.q.trim());
     const sel = hijos(n).filter(u => (!v.nivelA || nivelDe(u) === v.nivelA) && (!q || norm(u.nombre).includes(q)));
-    const campos = campoBuscar(idv, v, 'Buscar unidad', 'Nombre de la unidad')
-      + selectCampo(idv, 'nivelA', 'Nivel de atención', [['', 'Todos'], ['p1', 'Primer nivel'], ['p2', 'Segundo nivel']], v.nivelA);
+    const campos = campoCombo(idv, v, 'nivelA', 'Nivel de atención', [['', 'Seleccionar'], ['p1', 'Primer nivel'], ['p2', 'Segundo nivel']], v.nivelA, 'Unidad médica');
     const act = [];
     if (v.nivelA) act.push(['nivelA', NIVEL_LABEL[v.nivelA]]);
     if (v.q) act.push(['q', `Buscar: “${v.q}”`]);
@@ -1166,6 +1171,7 @@
   $app.addEventListener('change', ev => {
     const t = ev.target;
     if (t.id === 'sem-sel') return cambiarSemana(+t.value);
+    if (t.matches('input.s-input')) return; /* el texto ya filtra con «input»; el «change» al perder el foco re-pintaba a media actualización */
     if (t.dataset.campo && t.dataset.vista) { const v = vista(t.dataset.vista); v[t.dataset.campo] = t.value; v.pagina = 1; render(); }
   });
   function cerrarDrawer() {
