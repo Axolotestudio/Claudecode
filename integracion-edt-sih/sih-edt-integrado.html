@@ -1425,6 +1425,11 @@ h1[tabindex="-1"]:focus, h2[tabindex="-1"]:focus { outline: none; }
 @media (max-width: 600px) { .s-filtros__campos > .s-combo { grid-template-columns: 128px minmax(0, 1fr); } .s-filtros__campos > .s-field.s-field--estado { flex-basis: 100%; } }
 .s-filtros .s-control__icono { color: var(--color-neutral-500); }
 
+/* Plantilla por quincena: meta visible y neutra (sin semáforo hasta que se defina la regla) */
+.s-hoja__meta { margin: var(--space-2) 0 0; font-size: var(--font-size-sm); color: var(--color-neutral-600); }
+.s-hoja__meta strong { color: var(--color-neutral-800); font-weight: var(--font-weight-semibold); }
+.s-periodo__nota { margin-left: var(--space-1); font-size: var(--font-size-xs); font-weight: var(--font-weight-regular); color: var(--color-neutral-600); }
+
   </style>
 </head>
 <body>
@@ -1715,6 +1720,7 @@ h1[tabindex="-1"]:focus, h2[tabindex="-1"]:focus { outline: none; }
     if (i < 0) return null;
     const par = new URLSearchParams(location.hash.slice(i + 1));
     if (par.has('semana')) { const w = +par.get('semana'); if (w >= 1 && w <= SEMANA_ACTUAL) ui.semana = w; }
+    if (par.has('quincena')) { const q = +par.get('quincena'); if (q >= 1 && q <= QUINCENA_ACTUAL) ui.quincena = q; }
     return par;
   }
   function sincronizarURL() {
@@ -1724,6 +1730,7 @@ h1[tabindex="-1"]:focus, h2[tabindex="-1"]:focus { outline: none; }
     CLAVES_URL.forEach(k => { if (v[k] && v[k] !== porDefecto[k]) par.set(k, v[k]); });
     if (v.orden && !(v.orden.k === 'cump' && v.orden.dir === 1)) par.set('orden', `${v.orden.k}|${v.orden.dir}`);
     if (ui.semana !== SEMANA_ACTUAL) par.set('semana', ui.semana);
+    if (ctx.tema === 'plant' && ui.quincena !== QUINCENA_ACTUAL) par.set('quincena', ui.quincena);
     const base = location.hash.split('?')[0], qs = par.toString();
     const nueva = location.pathname + location.search + base + (qs ? '?' + qs : '');
     if (nueva !== location.pathname + location.search + location.hash) history.replaceState(null, '', nueva);
@@ -1744,7 +1751,42 @@ h1[tabindex="-1"]:focus, h2[tabindex="-1"]:focus { outline: none; }
     const items = [{ t: 'Nivel Nacional', h: '#/' }].concat(cadena(n).map(x => ({ t: x.tipo === 'medico' || x.tipo === 'persona' ? cap(x.nombre) : x.nombre, h: '#/e/' + x.id })));
     return `<nav class="s-ruta" aria-label="Ruta de navegación"><ol>${items.map((it, i) => i === items.length - 1 ? `<li><span aria-current="page">${esc(it.t)}</span></li>` : `<li><a href="${it.h}">${esc(it.t)}</a></li>`).join('')}</ol></nav>`;
   }
-  function periodo() {
+  /* ---------- Quincenas: la Plantilla se mide por quincena; la Productividad sigue por semana ----------
+     Cada semana pertenece a la quincena de su miércoles (la semana 1 de 2025 cae en la 1.ª de enero). */
+  function quincenaDeSemana(w) { const d = lunes(w); d.setUTCDate(d.getUTCDate() + 2); return d.getUTCMonth() * 2 + (d.getUTCDate() > 15 ? 2 : 1); }
+  const QUINCENA_ACTUAL = quincenaDeSemana(SEMANA_ACTUAL);
+  ui.quincena = QUINCENA_ACTUAL;
+  function semanasDeQuincena(q) { const r = []; for (let w = 1; w <= SEMANA_ACTUAL; w++) if (quincenaDeSemana(w) === q) r.push(w); return r; }
+  function rangoQuincena(q) {
+    const mes = Math.floor((q - 1) / 2), primera = q % 2 === 1, fin = primera ? 15 : new Date(Date.UTC(ANIO, mes + 1, 0)).getUTCDate();
+    const nombre = `${primera ? '1.ª' : '2.ª'} quincena de ${MESES_LARGO[mes]}`;
+    return { nombre, corto: `${primera ? '1.ª' : '2.ª'} quincena ${MESES[mes]}`, largo: `${primera ? '01' : '16'} al ${fin} ${MESES[mes]} ${ANIO}`, enCurso: q === QUINCENA_ACTUAL };
+  }
+  /* Atenciones de la quincena: suma de sus semanas con datos */
+  function atencionesQ(nodos, q) { return semanasDeQuincena(q).reduce((t, w) => t + usoDe(nodos, w).at, 0); }
+  const apmQ = (nodos, q) => { const med = plantillaDe(nodos).medicos; return med ? atencionesQ(nodos, q) / med : null; };
+  /* META DE PLANTILLA (valor simulado). Aún no está definida la regla con que se marca el cumplimiento:
+     cuando se defina, conectarla en estadoMetaPlantilla(). Mientras devuelva null no hay semáforo, color ni alerta derivada de Plantilla. */
+  function metaPlantilla(nodos) { return nodos.reduce((t, h) => t + Math.round(plantilla(h).total * entre(rng('mp|' + h.id), 1.0, 1.08)), 0); }
+  function estadoMetaPlantilla(real, meta) { return null; }
+  function periodoQuincena() {
+    const q = ui.quincena, opts = Array.from({ length: QUINCENA_ACTUAL }, (_, i) => QUINCENA_ACTUAL - i).map(x => `<option value="${x}"${x === q ? ' selected' : ''}>${rangoQuincena(x).corto}</option>`).join('');
+    const rq = rangoQuincena(q), sem = semanasDeQuincena(q);
+    return `<div class="s-periodo" role="group" aria-label="Periodo de la plantilla">
+      <button class="s-btn-icono" type="button" id="q-ant" aria-label="Quincena anterior"${q <= 1 ? ' disabled' : ''}><span class="s-icono-caja">${I.izq}</span></button>
+      <label class="s-sr" for="q-sel">Quincena</label>
+      <span class="s-control s-control--auto"><select class="s-select" id="q-sel">${opts}</select><span class="s-control__icono s-control__icono--der">${I.abajo}</span></span>
+      <button class="s-btn-icono" type="button" id="q-sig" aria-label="Quincena siguiente"${q >= QUINCENA_ACTUAL ? ' disabled' : ''}><span class="s-icono-caja">${I.der}</span></button>
+      <span class="s-periodo__fechas"><strong>${rq.largo}</strong>${rq.enCurso ? ` <span class="s-periodo__nota">en curso · ${sem.length} de 2 semanas</span>` : ''}</span></div>`;
+  }
+  function cambiarQuincena(q) {
+    ui.quincena = Math.min(QUINCENA_ACTUAL, Math.max(1, q)); render();
+    const a = document.activeElement; if (!a || a === document.body || a.disabled) document.getElementById('q-sel').focus();
+    anunciar(rangoQuincena(ui.quincena).nombre);
+  }
+  /* El encabezado deja un marcador; render() pone el periodo según la pestaña (Plantilla: quincena; lo demás: semana) */
+  function periodo() { return '<!--periodo-->'; }
+  function periodoSemana() {
     const w = ui.semana, opts = Array.from({ length: SEMANA_ACTUAL }, (_, i) => SEMANA_ACTUAL - i).map(s => `<option value="${s}"${s === w ? ' selected' : ''}>Semana ${s}</option>`).join('');
     return `<div class="s-periodo" role="group" aria-label="Periodo">
       <button class="s-btn-icono" type="button" id="sem-ant" aria-label="Semana anterior"${w <= 1 ? ' disabled' : ''}><span class="s-icono-caja">${I.izq}</span></button>
@@ -1862,7 +1904,7 @@ h1[tabindex="-1"]:focus, h2[tabindex="-1"]:focus { outline: none; }
     const m = it.n;
     return `<li class="s-fila s-fila--medico" data-real="${it.real}"><div class="s-fila__linea"><div class="s-fila__id">${avatar(m.persona, 's-avatar--fila')}${botonDrawer(it, `Matrícula ${it.matricula} · ${it.area}`)}</div>${metricasFila(it)}</div></li>`;
   }
-  const DIR_INICIAL = { nombre: 1, cat: 1, cump: 1, brecha: -1, cam: -1, qui: -1, con: -1, cpc: 1, cpq: 1, hpc: 1, tot: -1, med: -1, res: -1, enf: -1, otr: -1, apm: 1 };
+  const DIR_INICIAL = { meta: -1, nombre: 1, cat: 1, cump: 1, brecha: -1, cam: -1, qui: -1, con: -1, cpc: 1, cpq: 1, hpc: 1, tot: -1, med: -1, res: -1, enf: -1, otr: -1, apm: 1 };
   function botonOrden(idv, v, k, texto) {
     const act = v.orden.k === k, dir = act ? (v.orden.dir > 0 ? 'asc' : 'desc') : 'none';
     const aria = act ? (v.orden.dir > 0 ? 'ascending' : 'descending') : 'none';
@@ -1945,7 +1987,7 @@ h1[tabindex="-1"]:focus, h2[tabindex="-1"]:focus { outline: none; }
       : '<p class="s-vacio-bloque">Sin datos para comparar.</p>'}</section>`;
   }
   function drawerTema(d) {
-    let titulo, sub = 'Semana ' + ui.semana + ' · ' + rangoSemana(ui.semana).corto, cuerpo = '';
+    let titulo, sub = ctx.tema === 'plant' ? rangoQuincena(ui.quincena).nombre : 'Semana ' + ui.semana + ' · ' + rangoSemana(ui.semana).corto, cuerpo = '';
     if (d.k === 't-fila') {
       const n = ctx.temaNodos.find(x => x.id === d.id); if (!n) { ui.drawer = null; return ''; }
       titulo = n.nombre;
@@ -1958,7 +2000,7 @@ h1[tabindex="-1"]:focus, h2[tabindex="-1"]:focus { outline: none; }
     } else if (ctx.tema === 'plant' && d.id === 'pl') {
       const nodos = ctx.temaNodos;
       titulo = 'Plantilla'; cuerpo = tablaPlantilla(plantillaDe(nodos));
-      if (ctx.temaHijos) cuerpo += ranking('Menos atenciones por médico', nodos.map(n => { const p = plantilla(n); return { n, v: p.medicos ? usoDe([n], ui.semana).at / p.medicos : null }; }).filter(x => x.v != null).sort((a, b) => a.v - b.v).slice(0, TOP), fmt1);
+      if (ctx.temaHijos) cuerpo += ranking(`Menos atenciones por médico en la ${rangoQuincena(ui.quincena).nombre}`, nodos.map(n => ({ n, v: apmQ([n], ui.quincena) })).filter(x => x.v != null).sort((a, b) => a.v - b.v).slice(0, TOP), fmt1);
     } else { ui.drawer = null; return ''; }
     return `<aside class="s-drawer" role="dialog" aria-modal="false" aria-labelledby="drawer-titulo">
       <header class="s-drawer__cab"><div><h2 id="drawer-titulo" tabindex="-1">${esc(titulo)}</h2><p>${esc(sub)}</p></div>
@@ -2145,31 +2187,34 @@ h1[tabindex="-1"]:focus, h2[tabindex="-1"]:focus { outline: none; }
       <p class="s-par__leyenda"><span class="s-cats__sw s-cats__sw--medida"></span>Con productividad medida <span class="s-cats__sw"></span>Sin productividad medida</p>
       <div class="s-sr"><table><caption>Personal por categoría</caption><thead><tr><th scope="col">Categoría</th><th scope="col">Personas</th><th scope="col">Productividad medida</th></tr></thead><tbody>${CATEGORIAS.map(([k, t]) => `<tr><td>${t}</td><td>${fmt(pl[k])}</td><td>${CAT_MEDIDAS.includes(k) ? 'Sí' : 'No'}</td></tr>`).join('')}</tbody></table></div>`;
   }
-  function resumenPlantilla(pl, u) {
+  function resumenPlantilla(pl, u, meta) {
     const sel = ui.drawer && ui.drawer.k === 't-res' && ui.drawer.id === 'pl';
     return `<section class="s-panel s-panel--personal s-resumen" aria-label="Personal">
       <button class="s-bloque__abrir" type="button" id="card-pl" data-drawer="t-res" data-id="pl" aria-pressed="${!!sel}" aria-label="Ver detalle del personal"></button>
-      <div class="s-hoja__heroe s-hoja__heroe--pers"><p class="s-hoja__etq"><span class="s-hoja__icono" aria-hidden="true">${I.personas}</span>Personal</p><p class="s-hoja__num s-num">${fmt(pl.total)}</p></div>
+      <div class="s-hoja__heroe s-hoja__heroe--pers"><p class="s-hoja__etq"><span class="s-hoja__icono" aria-hidden="true">${I.personas}</span>Personal</p><p class="s-hoja__num s-num">${fmt(pl.total)}</p>${meta ? `<p class="s-hoja__meta">Meta de plantilla <strong class="s-num">${fmt(meta)}</strong></p>` : ''}</div>
       <div class="s-infra__datos s-pers__datos">${[['Médicos especialistas', pl.ME], ['Médicos familiares', pl.MF], ['Otros médicos', pl.OM], ['Enfermeras', pl.EN], ['Residentes', pl.RE], ['Paramédicos', pl.PA], ['Técnicos', pl.TE], ['Administrativas', pl.AD], ['Limpieza e higiene', pl.LI]].map(([t, v]) => `<div class="s-infra__dato s-pers__dato"><span class="s-infra__etq">${t}</span><span class="s-pers__val s-num">${fmt(v)}</span></div>`).join('')}</div>
     </section>`;
   }
   function panelPlantilla(idv, v, nodos, o) {
-    const pl = plantillaDe(nodos), u = usoDe(nodos, ui.semana), al = esc(ctx.alcance || '');
+    const pl = plantillaDe(nodos), u = usoDe(nodos, ui.semana), al = esc(ctx.alcance || ''), q = ui.quincena, rq = rangoQuincena(q);
     ctx.tema = 'plant'; ctx.temaNodos = nodos; ctx.temaHijos = !!o.hijos;
-    let html = `<section class="s-seccion" aria-labelledby="t-pl"><div class="s-seccion__cab"><h2 id="t-pl" class="s-seccion__h" tabindex="-1">Plantilla <strong>${al}</strong></h2><p class="s-periodo">Atenciones de la semana <mark class="s-num">${ui.semana}</mark></p></div>
-      ${resumenPlantilla(pl, u)}
+    /* Comparación contra la quincena anterior (atenciones por médico), nunca contra la semana */
+    const apm = apmQ(nodos, q), apmAnt = q > 1 && !rq.enCurso ? apmQ(nodos, q - 1) : null; /* quincena en curso: no se compara hasta que cierre */
+    const comp = apm == null ? '' : ` · <span class="s-num">${fmt1(apm)}</span> atenciones por médico${rq.enCurso ? ' <span class="s-delta">(quincena en curso; se compara al cerrar)</span>' : apmAnt == null ? '' : ` <span class="s-delta">${Math.abs(apm - apmAnt) < .05 ? 'igual que la' : `${apm > apmAnt ? '+' : '−'}${fmt1(Math.abs(apm - apmAnt))} vs la`} ${rangoQuincena(q - 1).nombre}</span>`}`;
+    let html = `<section class="s-seccion" aria-labelledby="t-pl"><div class="s-seccion__cab"><h2 id="t-pl" class="s-seccion__h" tabindex="-1">Plantilla <strong>${al}</strong></h2><p class="s-periodo">${rq.nombre[0].toUpperCase() + rq.nombre.slice(1)}${comp}</p></div>
+      ${resumenPlantilla(pl, u, metaPlantilla(nodos))}
       </section>`;
     if (o.personas) return html + listaPersonal(idv, v, o.personas);
     if (!o.hijos) return html;
-    const filas = nodos.map(h => { const p = plantilla(h), x = usoDe([h], ui.semana); return { n: h, nombre: h.nombre, tot: p.total, med: p.medicos, res: p.RE, enf: p.EN, otr: p.otras, apm: p.medicos ? x.at / p.medicos : null }; });
+    const filas = nodos.map(h => { const p = plantilla(h); return { n: h, nombre: h.nombre, tot: p.total, meta: metaPlantilla([h]), med: p.medicos, res: p.RE, enf: p.EN, otr: p.otras, apm: apmQ([h], q) }; });
     const ord = ordenar(filas, v.ordenP), pag = paginar(v, ord);
     ui.conteo = ord.length;
-    const cuerpo = pag.length ? pag.map(f => `<tr><td>${botonTema(f.n, o.sub ? o.sub(f.n) : '')}</td><td class="s-der s-num">${fmt(f.tot)}</td><td class="s-der s-num">${fmt(f.med)}</td><td class="s-der s-num">${fmt(f.res)}</td><td class="s-der s-num">${fmt(f.enf)}</td><td class="s-der s-num">${fmt(f.otr)}</td><td class="s-der s-num">${fmt1(f.apm)}</td></tr>`).join('')
-      : '<tr><td colspan="7" class="s-vacio">Sin resultados con los filtros actuales.</td></tr>';
+    const cuerpo = pag.length ? pag.map(f => `<tr><td>${botonTema(f.n, o.sub ? o.sub(f.n) : '')}</td><td class="s-der s-num">${fmt(f.tot)}</td><td class="s-der s-num s-meta-pl">${fmt(f.meta)}</td><td class="s-der s-num">${fmt(f.med)}</td><td class="s-der s-num">${fmt(f.res)}</td><td class="s-der s-num">${fmt(f.enf)}</td><td class="s-der s-num">${fmt(f.otr)}</td><td class="s-der s-num">${fmt1(f.apm)}</td></tr>`).join('')
+      : '<tr><td colspan="8" class="s-vacio">Sin resultados con los filtros actuales.</td></tr>';
     return html + `<section class="s-seccion" aria-labelledby="t-${idv}">
       <div class="s-lista__barra"><h2 id="t-${idv}" class="s-seccion__h" tabindex="-1">${o.titulo} <span class="s-pill s-num">${fmt(ord.length)}</span></h2></div>
-      <div class="s-card s-tabla-card"><div class="s-tabla-scroll" role="region" aria-labelledby="t-${idv}" tabindex="0"><table class="s-tabla s-tabla--ord"><caption class="s-sr">${o.titulo}: plantilla y atenciones por médico en la semana ${ui.semana}</caption>
-        <thead><tr><th scope="col">${o.columna}</th>${thOrden(idv, v, 'ordenP', 'tot', 'Personal total', 1)}${thOrden(idv, v, 'ordenP', 'med', 'Médicos', 1)}${thOrden(idv, v, 'ordenP', 'res', 'Residentes', 1)}${thOrden(idv, v, 'ordenP', 'enf', 'Enfermeras', 1)}${thOrden(idv, v, 'ordenP', 'otr', 'Otras categorías', 1)}${thOrden(idv, v, 'ordenP', 'apm', 'Atenciones por médico', 1)}</tr></thead>
+      <div class="s-card s-tabla-card"><div class="s-tabla-scroll" role="region" aria-labelledby="t-${idv}" tabindex="0"><table class="s-tabla s-tabla--ord"><caption class="s-sr">${o.titulo}: plantilla, meta de plantilla y atenciones por médico en la ${rq.nombre}</caption>
+        <thead><tr><th scope="col">${o.columna}</th>${thOrden(idv, v, 'ordenP', 'tot', 'Personal total', 1)}${thOrden(idv, v, 'ordenP', 'meta', 'Meta de plantilla', 1)}${thOrden(idv, v, 'ordenP', 'med', 'Médicos', 1)}${thOrden(idv, v, 'ordenP', 'res', 'Residentes', 1)}${thOrden(idv, v, 'ordenP', 'enf', 'Enfermeras', 1)}${thOrden(idv, v, 'ordenP', 'otr', 'Otras categorías', 1)}${thOrden(idv, v, 'ordenP', 'apm', 'Atenciones por médico en la quincena', 1)}</tr></thead>
         <tbody>${cuerpo}</tbody></table></div></div>${paginacion(idv, v, ord.length)}</section>`;
   }
   /* Personas del servicio: médicos del EDT (con productividad) y resto de la plantilla del SIH (sin meta) */
@@ -2563,6 +2608,7 @@ h1[tabindex="-1"]:focus, h2[tabindex="-1"]:focus { outline: none; }
     $app.classList.toggle('s-app--drawer', !!dr);
     $app.classList.toggle('s-app--colapsado', !!ui.navColapsado);
     $app.classList.toggle('s-app--nav-abierto', !!ui.navAbierto);
+    html = html.replace('<!--periodo-->', ctx.tema === 'plant' ? periodoQuincena() : periodoSemana());
     $app.innerHTML = '<div class="s-contenido">' + html + '</div>' + dr; /* sin menú lateral: los tres perfiles comparten la misma estructura */
     ui.pendiente = null; sincronizarURL();
     document.title = `${nombre} · SIH`;
@@ -2593,6 +2639,8 @@ h1[tabindex="-1"]:focus, h2[tabindex="-1"]:focus { outline: none; }
     }
     if (b.dataset.cerrar !== undefined) return cerrarDrawer();
     if (b.id === 'sem-ant') return cambiarSemana(ui.semana - 1);
+    if (b.id === 'q-ant') return cambiarQuincena(ui.quincena - 1);
+    if (b.id === 'q-sig') return cambiarQuincena(ui.quincena + 1);
     if (b.id === 'sem-sig') return cambiarSemana(ui.semana + 1);
     if (b.dataset.ordenar) { const v = vista(b.dataset.ordenar), k = b.dataset.k, c = b.dataset.campoOrden || 'orden'; v[c] = v[c].k === k ? { k, dir: -v[c].dir } : { k, dir: DIR_INICIAL[k] || 1 }; v.pagina = 1; return render(); }
     if (b.dataset.quitar) { const v = vista(b.dataset.quitar); v[b.dataset.campo] = ''; v.pagina = 1; return render(); }
@@ -2613,6 +2661,7 @@ h1[tabindex="-1"]:focus, h2[tabindex="-1"]:focus { outline: none; }
   $app.addEventListener('change', ev => {
     const t = ev.target;
     if (t.id === 'sem-sel') return cambiarSemana(+t.value);
+    if (t.id === 'q-sel') return cambiarQuincena(+t.value);
     if (t.matches('input.s-input')) return; /* el texto ya filtra con «input»; el «change» al perder el foco re-pintaba a media actualización */
     if (t.dataset.campo && t.dataset.vista) { const v = vista(t.dataset.vista); v[t.dataset.campo] = t.value; v.pagina = 1; render(); }
   });

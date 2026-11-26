@@ -1165,3 +1165,8 @@ h1[tabindex="-1"]:focus, h2[tabindex="-1"]:focus { outline: none; }
 .s-filtros__acciones .s-btn { min-width: 98px; }
 @media (max-width: 600px) { .s-filtros__campos > .s-combo { grid-template-columns: 128px minmax(0, 1fr); } .s-filtros__campos > .s-field.s-field--estado { flex-basis: 100%; } }
 .s-filtros .s-control__icono { color: var(--color-neutral-500); }
+
+/* Plantilla por quincena: meta visible y neutra (sin semáforo hasta que se defina la regla) */
+.s-hoja__meta { margin: var(--space-2) 0 0; font-size: var(--font-size-sm); color: var(--color-neutral-600); }
+.s-hoja__meta strong { color: var(--color-neutral-800); font-weight: var(--font-weight-semibold); }
+.s-periodo__nota { margin-left: var(--space-1); font-size: var(--font-size-xs); font-weight: var(--font-weight-regular); color: var(--color-neutral-600); }

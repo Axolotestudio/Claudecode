@@ -1172,3 +1172,8 @@ h1[tabindex="-1"]:focus, h2[tabindex="-1"]:focus { outline: none; }
 @media (min-width: 1101px) { .s-seccion--med .s-lista__cab, .s-seccion--med .s-fila__linea { grid-template-columns: minmax(0, 1.6fr) minmax(0, .9fr) minmax(0, .8fr) minmax(0, .8fr) minmax(0, 1.1fr) minmax(0, .8fr); } }
 .s-notas__grupo th { padding-top: var(--space-3); background: var(--color-surface-alt); font-weight: var(--font-weight-semibold); color: var(--color-neutral-800); text-align: left; }
 .s-notas__grupo .s-num { float: right; }
+
+/* Plantilla por quincena: meta visible y neutra (sin semáforo hasta que se defina la regla) */
+.s-hoja__meta { margin: var(--space-2) 0 0; font-size: var(--font-size-sm); color: var(--color-neutral-600); }
+.s-hoja__meta strong { color: var(--color-neutral-800); font-weight: var(--font-weight-semibold); }
+.s-periodo__nota { margin-left: var(--space-1); font-size: var(--font-size-xs); font-weight: var(--font-weight-regular); color: var(--color-neutral-600); }
