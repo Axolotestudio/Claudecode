@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Sistema de Información Hospitalaria</title>
+  <title>Sistema de Información de Unidades Médicas</title>
   <!-- SDN gob.mx (igual que Receta Completa). Va ANTES de Cartillas para que Cartillas prevalezca. -->
   <link href="https://framework-gb.cdn.gob.mx/assets/styles/main.css" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -1447,7 +1447,7 @@ h1[tabindex="-1"]:focus, h2[tabindex="-1"]:focus { outline: none; }
 </svg>
 </span>
         <span class="sdn-user-bar__sep" aria-hidden="true"></span>
-        <span>Sistema de Información Hospitalaria</span>
+        <span>Sistema de Información de Unidades Médicas</span>
       </p>
       <div class="sdn-user-bar__user">
         <div>
@@ -2611,7 +2611,7 @@ h1[tabindex="-1"]:focus, h2[tabindex="-1"]:focus { outline: none; }
     html = html.replace('<!--periodo-->', ctx.tema === 'plant' ? periodoQuincena() : periodoSemana());
     $app.innerHTML = '<div class="s-contenido">' + html + '</div>' + dr; /* sin menú lateral: los tres perfiles comparten la misma estructura */
     ui.pendiente = null; sincronizarURL();
-    document.title = `${nombre} · SIH`;
+    document.title = `${nombre} · Sistema de Información de Unidades Médicas`;
     const cambioRuta = ultimaRuta !== hash; ultimaRuta = hash;
     if (ui.enfocar && document.getElementById('drawer-titulo')) { ui.enfocar = false; document.getElementById('drawer-titulo').focus(); }
     else if (cambioRuta && !opts.inicial) {

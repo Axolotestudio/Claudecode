@@ -1151,7 +1151,7 @@
     html = html.replace('<!--periodo-->', ctx.tema === 'plant' ? periodoQuincena() : periodoSemana());
     $app.innerHTML = '<div class="s-contenido">' + html + '</div>' + dr; /* sin menú lateral: los tres perfiles comparten la misma estructura */
     ui.pendiente = null; sincronizarURL();
-    document.title = `${nombre} · SIH`;
+    document.title = `${nombre} · Sistema de Información de Unidades Médicas`;
     const cambioRuta = ultimaRuta !== hash; ultimaRuta = hash;
     if (ui.enfocar && document.getElementById('drawer-titulo')) { ui.enfocar = false; document.getElementById('drawer-titulo').focus(); }
     else if (cambioRuta && !opts.inicial) {
