@@ -1411,7 +1411,7 @@ h1[tabindex="-1"]:focus, h2[tabindex="-1"]:focus { outline: none; }
 .s-filtros .s-select { border: 1px solid var(--color-neutral-100); border-radius: var(--radius-sm); }
 .s-filtros .s-select.is-vacio { color: var(--color-neutral-500); }
 .s-filtros .s-select option { color: var(--color-neutral-700); }
-.s-filtros .s-input { border: 1px solid transparent; background: var(--color-neutral-50); }
+.s-filtros .s-input { border: 1px solid var(--color-neutral-100); background: var(--color-surface); color: var(--color-neutral-700); }
 .s-filtros .s-input::placeholder { color: var(--color-neutral-500); }
 .s-filtros .s-input:hover { border-color: var(--color-neutral-200); }
 .s-filtros__campos > .s-field.s-field--estado { flex: 0 1 288px; }
@@ -1420,7 +1420,7 @@ h1[tabindex="-1"]:focus, h2[tabindex="-1"]:focus { outline: none; }
 .s-combo__l2 { grid-column: 2; grid-row: 1; padding-left: var(--space-1); }
 .s-combo__sel { grid-column: 1; grid-row: 2; }
 .s-combo__sel .s-select { border-radius: var(--radius-sm) 0 0 var(--radius-sm); }
-.s-filtros .s-combo__in { grid-column: 2; grid-row: 2; padding-left: var(--space-4); border-radius: 0 var(--radius-sm) var(--radius-sm) 0; }
+.s-filtros .s-combo__in { grid-column: 2; grid-row: 2; padding-left: var(--space-4); border-left: 0; border-radius: 0 var(--radius-sm) var(--radius-sm) 0; }
 .s-filtros__acciones .s-btn { min-width: 98px; }
 @media (max-width: 600px) { .s-filtros__campos > .s-combo { grid-template-columns: 128px minmax(0, 1fr); } .s-filtros__campos > .s-field.s-field--estado { flex-basis: 100%; } }
 .s-filtros .s-control__icono { color: var(--color-neutral-500); }
@@ -1480,6 +1480,7 @@ h1[tabindex="-1"]:focus, h2[tabindex="-1"]:focus { outline: none; }
   .s-subtabs > * { flex: none; padding-left: var(--space-2); padding-right: var(--space-2); }
   .s-contenido .s-tabla-card .s-tabla th:first-child, .s-contenido .s-tabla-card .s-tabla td:first-child { padding-left: var(--space-4); }
 }
+.s-filtros .s-input:focus { border-color: var(--color-primary-500); }
 
   </style>
 </head>
