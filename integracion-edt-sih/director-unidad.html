@@ -1437,6 +1437,57 @@ h1[tabindex="-1"]:focus, h2[tabindex="-1"]:focus { outline: none; }
 .s-hoja__meta strong { color: var(--color-neutral-800); font-weight: var(--font-weight-semibold); }
 .s-periodo__nota { margin-left: var(--space-1); font-size: var(--font-size-xs); font-weight: var(--font-weight-regular); color: var(--color-neutral-600); }
 
+/* ===== Cards con el patrón del SIE (Sistema de Información Ejecutiva) =====
+   Encabezado de la card en franja surface-alt con esquinas superiores redondeadas,
+   cuerpo con 24 px laterales, sombra sm y sombra lg al pasar el cursor en lo que se abre.
+   Sin franjas de color laterales. */
+.s-seccion__h { font-size: var(--font-size-xl); line-height: 1.2; color: var(--color-neutral-700); }
+
+/* Cards con título propio (ranking, niveles, tablas con encabezado) */
+.s-rank { margin-top: var(--space-6); padding: 0 0 var(--space-2); overflow: hidden; border-radius: var(--radius-lg); box-shadow: var(--shadow-sm); }
+.s-rank__cab { margin: 0; min-height: 64px; padding: var(--space-4) var(--space-6); background: var(--color-surface-alt); border-radius: var(--radius-lg) var(--radius-lg) 0 0; }
+.s-rank__cab .s-seccion__h { font-size: var(--font-size-xl); }
+.s-rank__th { margin: 0; padding: var(--space-3) var(--space-6) var(--space-2); }
+.s-rank__lista { margin: 0; }
+.s-rank__fila, .s-niveles .s-rank__fila { padding-left: var(--space-6); padding-right: var(--space-6); }
+.s-rank__lista > :last-child, .s-rank__lista > li:last-child > .s-rank__fila { border-bottom: 0; }
+
+/* Listas tipo tabla: encabezado y filas forman una sola card */
+.s-lista__cab { border-radius: var(--radius-lg) var(--radius-lg) 0 0; box-shadow: 0 -1px 3px var(--color-neutral-100), -1px 0 2px var(--color-neutral-100), 1px 0 2px var(--color-neutral-100); }
+.s-lista__cab, .s-fila { padding-left: var(--space-6); padding-right: var(--space-6); }
+.s-lista__cab + .s-lista { border-radius: 0 0 var(--radius-lg) var(--radius-lg); }
+.s-fila:hover { background: var(--color-neutral-50); }
+
+/* Tablas en card: th 44 en surface-alt, td 56, primera columna a 24 px */
+.s-contenido .s-tabla-card { padding: 0; overflow: hidden; border-radius: var(--radius-lg); box-shadow: var(--shadow-sm); }
+.s-contenido .s-tabla-card > .s-seccion__cab { margin: 0; padding: var(--space-4) var(--space-6); background: var(--color-surface-alt); border-bottom: 1px solid var(--color-neutral-100); }
+.s-contenido .s-tabla-card .s-tabla td { height: 56px; }
+.s-contenido .s-tabla-card .s-tabla--ord th { vertical-align: middle; }
+.s-contenido .s-tabla-card .s-tabla th:first-child, .s-contenido .s-tabla-card .s-tabla td:first-child { padding-left: var(--space-6); }
+.s-contenido .s-tabla-card .s-tabla th:last-child, .s-contenido .s-tabla-card .s-tabla td:last-child { padding-right: var(--space-6); }
+.s-contenido .s-tabla-card .s-tabla tr:last-child td { border-bottom: 0; }
+.s-contenido .s-tabla-card .s-tabla tbody tr:hover td { background: var(--color-neutral-50); }
+
+/* Resúmenes que abren detalle: misma sombra base y realce del SIE al pasar el cursor */
+.s-panel--prod, .s-panel--infra, .s-panel--personal { border-radius: var(--radius-lg); box-shadow: var(--shadow-sm); transition: box-shadow .15s ease; }
+.s-panel--prod:hover, .s-panel--personal:hover, .s-panel--infra:hover { box-shadow: var(--shadow-lg); }
+.s-panel--prod:has(.s-bloque__abrir[aria-pressed="true"]), .s-panel--personal:has(.s-bloque__abrir[aria-pressed="true"]) { box-shadow: inset 0 0 0 2px var(--color-primary-500), var(--shadow-sm); }
+.s-filtros { border-radius: var(--radius-lg); box-shadow: var(--shadow-sm); }
+@media (prefers-reduced-motion: reduce) { .s-panel--prod, .s-panel--infra, .s-panel--personal { transition: none; } }
+
+@media (max-width: 1100px) {
+  .s-lista__cab + .s-lista { border-radius: var(--radius-lg); }
+}
+@media (max-width: 640px) {
+  .s-rank__cab { padding: var(--space-3) var(--space-4); }
+  .s-rank__fila, .s-niveles .s-rank__fila { padding-left: var(--space-4); padding-right: var(--space-4); }
+  .s-fila { padding-left: var(--space-4); padding-right: var(--space-4); }
+  .s-contenido .s-tabla-card > .s-seccion__cab { padding: var(--space-3) var(--space-4); }
+  .s-subtabs { flex-wrap: nowrap; gap: 0; overflow-x: auto; scrollbar-width: none; }
+  .s-subtabs > * { flex: none; padding-left: var(--space-2); padding-right: var(--space-2); }
+  .s-contenido .s-tabla-card .s-tabla th:first-child, .s-contenido .s-tabla-card .s-tabla td:first-child { padding-left: var(--space-4); }
+}
+
   </style>
 </head>
 <body>
